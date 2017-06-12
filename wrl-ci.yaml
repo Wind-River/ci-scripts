@@ -1,0 +1,63 @@
+version: '3.1'
+services:
+  jenkins:
+    image: wr-docker-registry:5000/wrjenkins
+    environment:
+      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
+      JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
+    networks:
+      - jenkinsnet  
+    tmpfs:
+      - /tmp:exec
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      
+  rproxy:
+    image: blacklabelops/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - jenkins
+    environment:
+      SERVER1HTTPS_ENABLED: "true"
+      SERVER1HTTP_ENABLED: "false"
+      SERVER1SERVER_NAME: "localhost"
+      SERVER1REVERSE_PROXY_LOCATION1: "/"
+      SERVER1REVERSE_PROXY_PASS1: "http://jenkins:8080"
+      SERVER1PROXY_APPLICATION: "jenkins"
+      NGINX_REDIRECT_PORT80: "true"
+      SERVER1CERTIFICATE_DNAME: "/CN=WindRiver/OU=Linux/O=windriver.com/L=Alameda/C=US"
+    networks:
+      - jenkinsnet
+    tmpfs:
+      - /tmp
+    volumes:
+      - rproxy_nginx_config:/etc/nginx
+
+  client:
+    image: wr-docker-registry:5000/docker-jenkins-swarm-client
+    links:
+      - jenkins
+    environment:
+      COMMAND_OPTIONS: "-master http://jenkins:8080/ -disableSslVerification -labels 'docker' -executors 2"
+      SWARM_DELAYED_START: "15"
+    networks:
+      - jenkinsnet
+    tmpfs:
+      - /tmp
+    volumes:
+      # Allow jenkins agent to use host docker to run containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Required to mount workspace from swarm client into docker container
+      - jenkins_agent:/home/jenkins
+      - /etc/hostname:/etc/hostname
+
+volumes:
+  jenkins_home:
+  jenkins_agent:
+  rproxy_nginx_config:
+
+networks:
+  jenkinsnet:
+    driver: bridge    
