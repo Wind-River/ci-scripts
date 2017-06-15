@@ -39,7 +39,8 @@ wrl_clone_or_update()
 
     local REMOTE=
     local SETUP_REPO=
-    local WRLINUX_BRANCH=$BRANCH
+    local WRLINUX_BRANCH=
+    WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
     REMOTE="https://github.com/WindRiver-Labs/wrlinux-9"
     SETUP_REPO=wrlinux-9
 
