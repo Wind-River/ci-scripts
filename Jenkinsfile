@@ -9,7 +9,9 @@ node('docker') {
       docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
         withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "LOCATION=yow"]) {
           sh "${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
+        }
       }
+    }
   }
   stage('Build') {
     dir('ci-scripts') {
