@@ -23,22 +23,15 @@ def create_parser():
                     help='Jenkins Job name.')
 
     op.add_argument('--configs_file', dest='configs_file', required=True,
-                    help='Comma separated list of tests or test collections to submit.')
+                    help='Name of file that contains valid build configurations.')
 
     op.add_argument('--configs', dest='configs', required=True,
                     help='Comma separated list of builds as specified in config_file.'
                     'Use all to queue all the configs.')
 
     op.add_argument("--image", dest="image", required=False,
-                    default='ubuntu1404_64',
+                    default='ubuntu1604_64',
                     help="The Docker image used for the build. Default: ubuntu1404_64.")
-
-    op.add_argument("--location", dest="location", required=False,
-                    default='ala', choices=['ala', 'yow', 'pek', 'local'],
-                    help="Location to run builds. Default: ala")
-
-    op.add_argument("--wrlinux", dest="wrlinux", required=False,
-                    help="Location of source tree. Defaults to local cache on builder.")
 
     return op
 
@@ -52,19 +45,6 @@ def parse_args(args):
     opts = parser.parse_args(args)
     validate_args(opts)
     return opts
-
-
-RELEASE_BRANCH_MAP = {
-    'WRLinux-9-Base': 'WRLINUX_9_BASE',
-    'WRLinux-9-LTS': 'WRLINUX_9_LTS',
-    'WRLinux-9-LTS-CVE': 'WRLINUX_9_LTS_CVE',
-}
-
-BRANCH_WRLINUX_MAP = {
-    'WRLinux-9-Base': 'http://GITSERVER/release/WRL9/WRLinux-9-Base/wrlinux-9',
-    'WRLinux-9-LTS': 'http://GITSERVER/release/WRL9/WRLinux-9-LTS/wrlinux-9',
-    'WRLinux-9-LTS-CVE': 'http://GITSERVER/release/WRL9/WRLinux-9-LTS-CVE/wrlinux-9',
-}
 
 
 def main():
