@@ -45,7 +45,7 @@ wrl_clone_or_update()
     SETUP_REPO=wrlinux-9
 
     cd ${BASE}
-    if [ ! -d "${BASE}/wrlinux-$BRANCH" ]; then
+    if [ ! -f "${BASE}/wrlinux-$BRANCH/wrlinux-9/setup.sh" ]; then
         (
             mkdir "${BASE}/wrlinux-$BRANCH"
             cd "${BASE}/wrlinux-$BRANCH"
