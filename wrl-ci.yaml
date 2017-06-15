@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   jenkins:
-    image: wr-docker-registry:5000/wrjenkins
+    image: wr-docker-registry:5000/jenkins-master
     environment:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
@@ -36,7 +36,7 @@ services:
       - rproxy_nginx_config:/etc/nginx
 
   client:
-    image: wr-docker-registry:5000/docker-jenkins-swarm-client
+    image: wr-docker-registry:5000/jenkins-swarm-client
     links:
       - jenkins
     environment:
