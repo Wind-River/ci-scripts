@@ -1,16 +1,25 @@
 #!/usr/bin/env groovy
 
 node('docker') {
-  stage('Test') {
-    dir('wr-buildscripts') {
-      git(url:'git://ala-git.wrs.com/lpd-ops/wr-buildscripts.git', branch:'jenkins')
+  stage('Cache Sources') {
+    dir('ci-scripts') {
+      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:'master')
     }
     docker.withRegistry('http://wr-docker-registry:5000') {
       docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
-        withEnv(['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}", "LOCATION=yow"]) {
-          sh "${WORKSPACE}/wr-buildscripts/wrlinux_update.sh ${BRANCH}"
+        withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "LOCATION=yow"]) {
+          sh "${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
+      }
+  }
+  stage('Build') {
+    dir('ci-scripts') {
+      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:'master')
+    }
+    docker.withRegistry('http://wr-docker-registry:5000') {
+      docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
+        withEnv(['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]) {
           sh "mkdir -p ${WORKSPACE}/builds"
-          sh "${WORKSPACE}/wr-buildscripts/jenkins_build.sh"
+          sh "${WORKSPACE}/ci-scripts/jenkins_build.sh"
         }
       }
     }

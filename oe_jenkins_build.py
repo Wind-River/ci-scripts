@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import os
 import sys
+import ssl
 import yaml
 import jenkins
-import ssl
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def create_parser():
     """Parse command line args"""
@@ -19,7 +21,7 @@ def create_parser():
     op.add_argument('--jenkins', dest='jenkins', required=True,
                     help='Jenkins master endpoint.')
 
-    op.add_argument('--job', dest='job', required=True,
+    op.add_argument('--job', dest='job', required=False, default='WRLinux_Build',
                     help='Jenkins Job name.')
 
     op.add_argument('--configs_file', dest='configs_file', required=True,
@@ -53,6 +55,20 @@ def main():
 
     server = jenkins.Jenkins(opts.jenkins)
 
+    job_config = os.path.join('jobs', opts.job) + '.xml'
+    xml_config = jenkins.EMPTY_CONFIG_XML
+    if not os.path.exists(job_config):
+        print("Could not find matching Job definition for " + opts.job)
+    else:
+        with open(job_config) as job_config_file:
+            xml_config = job_config_file.read()
+
+    try:
+        server.get_job_config(opts.job)
+        server.reconfig_job(opts.job, xml_config)
+    except jenkins.NotFoundException:
+        server.create_job(opts.job, xml_config)
+
     with open(opts.configs_file) as configs_file:
         configs = yaml.load(configs_file)
         if configs is None:
@@ -79,6 +95,6 @@ def main():
 
                 print(output)
 
+
 if __name__ == "__main__":
     main()
-
