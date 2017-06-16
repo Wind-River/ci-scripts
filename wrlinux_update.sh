@@ -47,8 +47,9 @@ wrl_clone_or_update()
     cd ${BASE}
     if [ ! -f "${BASE}/wrlinux-$BRANCH/wrlinux-9/setup.sh" ]; then
         (
-            mkdir "${BASE}/wrlinux-$BRANCH"
+            mkdir -p "${BASE}/wrlinux-$BRANCH"
             cd "${BASE}/wrlinux-$BRANCH"
+            rm -rf wrlinux-9
             echo "Cloning wrlinux-9 with setup program on branch $WRLINUX_BRANCH from $REMOTE"
             git clone --branch "$WRLINUX_BRANCH" --single-branch "${REMOTE}"
             echo "Mirroring wrlinux source tree with setup program on branch $BRANCH"

@@ -60,8 +60,10 @@ TIME="/usr/bin/time $QUIET -f %e -o $BUILD/time.log"
 STATFILE=$BUILD/buildstats.log
 create_statfile "$STATFILE"
 
+WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
+
 # Make a clone of local mirror so setup will use local mirror
-wrlinux_setup_clone "$WRLINUX" "$BUILD" "$BRANCH" "$TOP"
+wrlinux_setup_clone "$WRLINUX" "$BUILD" "$WRLINUX_BRANCH" "$TOP"
 
 # Start the hang check by the build post process script
 touch "$BUILD/00-INPROGRESS"
