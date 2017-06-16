@@ -89,7 +89,7 @@ def main():
                                            'IMAGE': opts.image,
                                            'BRANCH': branch,
                                            'SETUP_ARGS': ' '.join(config['setup']),
-                                           'PREBUILD_ARGS': ' '.join(config['prebuild']),
+                                           'PREBUILD_CMD': ' '.join(config['prebuild']),
                                            'BUILD_CMD': ' '.join(config['build']),
                                           })
 
