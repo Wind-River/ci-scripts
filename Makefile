@@ -1,7 +1,6 @@
 SHELL = /bin/bash #requires bash
 VENV_NAME = jenkins_env
 VENV = $(HOME)/.virtualenvs/$(VENV_NAME)
-PEX = $(VENV)/bin/pex
 DEPS = $(wildcard *.py)
 PIP = $(HOME)/.local/bin/pip3
 VIRTUALENV = $(HOME)/.local/bin/virtualenv
@@ -22,7 +21,7 @@ $(VENV): $(VIRTUALENV) $(VENVWRAPPER)
 	source $(VENVWRAPPER); \
 	test -d $(VENV) || mkvirtualenv -p python3 $(VENV_NAME); \
 	touch $(VENV); \
-	$(VENV)/bin/pip3 install pylint nose flake8 pex; \
+	$(VENV)/bin/pip3 install pylint nose flake8; \
 	touch $(PEX); \
 	$(VENV)/bin/pip3 install python-jenkins PyYAML;
 
