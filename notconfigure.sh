@@ -24,6 +24,7 @@ TEST_IMAGE=no
 BB_NO_NETWORK=1
 PREMIRROR_PATH=
 KERNEL_AUTOREV=no
+DL_DIR=
 
 for i in "$@"
 do
@@ -46,6 +47,7 @@ do
         --no-network=*)         BB_NO_NETWORK="${i#*=}" ;;
         --premirror_path=*)     PREMIRROR_PATH="${i#*=}" ;;
         --kernel_autorev=*)     KERNEL_AUTOREV="${i#*=}" ;;
+        --dl_dir=*)             DL_DIR="${i#*=}" ;;
         *)                      ;;
     esac
     shift
@@ -214,6 +216,11 @@ process_package(){
         echo "SRCREV_meta_forcevariable_pn-linux-windriver = \"\${AUTOREV}\""
         echo "SRCREV_machine_forcevariable_pn-linux-windriver = \"\${AUTOREV}\""
     fi
+
+    if [ -n "$DL_DIR" ]; then
+        echo "DL_DIR = \"$DL_DIR\""
+    fi
+
 } >> "$LOCALCONF"
 
 if [ -n "$SYSTEM_INIT" ] && [ "$SYSTEM_INIT" == "sysvinit" ]; then
