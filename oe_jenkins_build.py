@@ -88,7 +88,7 @@ def main():
                                            'REGISTRY': opts.registry,
                                           })
 
-                print("Scheduled build " + next_build_number)
+                print("Scheduled build " + str(next_build_number))
                 if output:
                     print("Jenkins Output:" + output)
 

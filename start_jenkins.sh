@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 IFS=$'\n\t'
 
 # taken from http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
@@ -101,8 +101,8 @@ echo 'Successfully ran docker info'
 
 command -v docker-compose >/dev/null 2>&1 || { echo >&2 "Docker-compose is not installed. https://docs.docker.com/compose/install/  Aborting."; exit 1; }
 
-DCOMPOSE_VERSION=$(docker-compose --version | cut -d' ' -f 3)
-vercomp '1.13.0' "$DCOMPOSE_VERSION"
+DCOMPOSE_VERSION=$(docker-compose --version | cut -d' ' -f 3 | tr -d ',')
+vercomp '1.12.0' "$DCOMPOSE_VERSION"
 if [ $? != '2' ]; then
     echo >&2 "Require docker-compose version 1.13.0 or later. Aborting"
     exit 1
@@ -140,17 +140,16 @@ if [ $? != 0 ]; then
     export HOST=$HOSTIP
 fi
 
-FILES=(--file wrl-ci.yml "${FILES[@]}")
+FILES=(--file wrl-ci.yaml "${FILES[@]}")
 
 echo "Jenkins Master UI will be available at https://$HOSTIP"
-echo Starting Jenkins with: docker-compose "${FILES[*]}" up
+echo Starting Jenkins with: docker-compose ${FILES[*]} up
 
 sleep 1
-
-docker-compose "${FILES[@]}" up --abort-on-container-exit
+docker-compose ${FILES[*]} up --abort-on-container-exit
 
 if [ "$CLEANUP" == '1' ]; then
     echo "Cleaning up images and volumes"
-    docker-compose "${FILES[@]}" rm --force --all
+    docker-compose ${FILES[*]} rm --force --all
 fi
 
