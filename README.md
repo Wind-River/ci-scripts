@@ -24,8 +24,10 @@ In order for Jenkins Agent to start docker containers, the host system
 needs to allow a process with uid 1000 rw access to
 /var/run/docker.sock. This can be done by adding uid 1000 to the
 docker group. Currently if the host docker group has guid 995 to 999,
-this will enable access. Unfortunately if the docker group does not
-have guid in this range it will be necessary to run:
+this will enable access.
+
+If the host docker group does not have guid in this range it
+will be necessary to run:
 
     sudo chmod 666 /var/run/docker.sock
 
@@ -47,7 +49,8 @@ On the same or a different machine, clone this repository. To install
 the python-jenkins package locally run:
 
     make setup
-    ~/.virtualenvs/jenkins_env/bin/python3 ./oe_jenkins_build.py \
+    workon jenkins_env
+    ./oe_jenkins_build.py \
         --jenkins https://<jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
         --configs <config name from combos>
 
