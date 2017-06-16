@@ -35,23 +35,17 @@ def create_parser():
                     default='ubuntu1604_64',
                     help="The Docker image used for the build. Default: ubuntu1404_64.")
 
+    op.add_argument("--registry", dest="registry", required=False,
+                    default='windriver',
+                    help="The Docker registry to pull images from. Default: windriver.")
+
     return op
-
-
-def validate_args(opts):
-    """Validation of args"""
-
-
-def parse_args(args):
-    parser = create_parser()
-    opts = parser.parse_args(args)
-    validate_args(opts)
-    return opts
 
 
 def main():
     """Main"""
-    opts = parse_args(sys.argv[1:])
+    parser = create_parser()
+    opts = parser.parse_args(sys.argv[1:])
 
     server = jenkins.Jenkins(opts.jenkins)
 
@@ -91,9 +85,12 @@ def main():
                                            'SETUP_ARGS': ' '.join(config['setup']),
                                            'PREBUILD_CMD': ' '.join(config['prebuild']),
                                            'BUILD_CMD': ' '.join(config['build']),
+                                           'REGISTRY': opts.registry,
                                           })
 
-                print(output)
+                print("Scheduled build " + next_build_number)
+                if output:
+                    print("Jenkins Output:" + output)
 
 
 if __name__ == "__main__":

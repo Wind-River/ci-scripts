@@ -5,7 +5,7 @@ node('docker') {
     dir('ci-scripts') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:'master')
     }
-    docker.withRegistry('http://wr-docker-registry:5000') {
+    docker.withRegistry('http://${REGISTRY}') {
       docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
         withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "LOCATION=yow"]) {
           sh "${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
@@ -17,7 +17,7 @@ node('docker') {
     dir('ci-scripts') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:'master')
     }
-    docker.withRegistry('http://wr-docker-registry:5000') {
+    docker.withRegistry('http://${REGISTRY}') {
       docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
         withEnv(['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]) {
           sh "mkdir -p ${WORKSPACE}/builds"

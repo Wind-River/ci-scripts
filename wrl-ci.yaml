@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   jenkins:
-    image: wr-docker-registry:5000/jenkins-master
+    image: $REGISTRY/jenkins-master
     environment:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
@@ -36,7 +36,7 @@ services:
       - rproxy_nginx_config:/etc/nginx
 
   client:
-    image: wr-docker-registry:5000/jenkins-swarm-client
+    image: $REGISTRY/jenkins-swarm-client
     links:
       - jenkins
     environment:
@@ -52,6 +52,7 @@ services:
       # Required to mount workspace from swarm client into docker container
       - jenkins_agent:/home/jenkins
       - /etc/hostname:/etc/hostname
+      - /etc/localtime:/etc/localtime
 
 volumes:
   jenkins_home:

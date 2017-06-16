@@ -1,11 +1,61 @@
-CI Scripts
-===========
+# CI Scripts
 
 This repository contains scripts and Docker Compose files that form
 the Wind River Linux Continuous Integration Prototype.
 
-Contributing
-------------
+## Introduction
+
+The prototype has four components:
+
+1) Jenkins Master Docker image
+2) Jenkins Agent Docker image with Swarm plugin
+3) Ubuntu 16.04 image with all required host packages necessary to
+build Yocto.
+4) This repo with scripts to orchestrate all the components.
+
+## Getting Started
+
+### Requirements:
+
+docker-engine: >= 17.03
+docker-compose: >= 1.13.0
+
+In order for Jenkins Agent to start docker containers, the host system
+needs to allow a process with uid 1000 rw access to
+/var/run/docker.sock. This can be done by adding uid 1000 to the
+docker group. Currently if the host docker group has guid 995 to 999,
+this will enable access. Unfortunately if the docker group does not
+have guid in this range it will be necessary to run:
+
+    sudo chmod 666 /var/run/docker.sock
+
+To enable access.
+
+### Starting Jenkins
+
+To start Jenkins Master and Agent on a single system using
+docker-compose run:
+
+    ./start-jenkins.sh
+
+This will download the images from the Docker Cloud/Hub and start the
+images using docker-compose
+
+### Scheduling Builds
+
+On the same or a different machine, clone this repository. To install
+the python-jenkins package locally run:
+
+    make setup
+    ~/.virtualenvs/jenkins_env/bin/python3 ./oe_jenkins_build.py \
+        --jenkins https://<jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
+        --configs <config name from combos>
+
+This will contact the Jenkins Master and schedule a build on the
+Jenkins Agent.
+
+## Contributing
+
 Contributions submitted must be signed off under the terms of the Linux
 Foundation Developer's Certificate of Origin version 1.1. Please refer to:
    https://developercertificate.org
@@ -16,8 +66,7 @@ To submit a patch:
 - Optionally create a GitHub Issue describing the issue addressed by the patch
 
 
-License
--------
+# License
 
 MIT License
 

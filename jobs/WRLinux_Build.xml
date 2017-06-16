@@ -8,32 +8,37 @@
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>NAME</name>
-          <description></description>
+          <description>Name given to build</description>
           <defaultValue>unamed</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BRANCH</name>
-          <description></description>
-          <defaultValue>WRLINUX_9_BASE</defaultValue>
+          <description>Which release to build</description>
+          <defaultValue>WRLinux-9-Base</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>SETUP_ARGS</name>
-          <description></description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>IMAGE</name>
-          <description></description>
+          <description>List of args to pass to setup.sh</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PREBUILD_CMD</name>
-          <description></description>
+          <description>Command to be run before build commonly used to modify local.conf</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CMD</name>
-          <description></description>
+          <description>The full build command</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>IMAGE</name>
+          <description>The docker image to run the build inside</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY</name>
+          <description>Docker registry to pull images from</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
