@@ -49,14 +49,14 @@ setup: $(VENV) ## Install all python dependencies in jenkins_env virtualenv.
 
 $(PIP):
 	wget -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py; \
-	python3 /tmp/get-pip.py --user; \
+	python3 /tmp/get-pip.py --ignore-installed --user; \
 	rm -f /tmp/get-pip.py
 
 $(VIRTUALENV): $(PIP)
-	$(PIP) install --user --upgrade virtualenv
+	$(PIP) install --user --upgrade --ignore-installed virtualenv
 
 $(VENVWRAPPER): $(PIP)
-	$(PIP) install --user --upgrade virtualenvwrapper
+	$(PIP) install --user --upgrade --ignore-installed virtualenvwrapper
 
 clean: ## Delete virtualenv and all build directories
 	rm -rf $(VENV) build dist .check .tmp
