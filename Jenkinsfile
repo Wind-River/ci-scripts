@@ -1,6 +1,12 @@
 #!/usr/bin/env groovy
 
 node('docker') {
+  stage('Docker Run Check') {
+    dir('ci-scripts') {
+      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:'master')
+    }
+    sh "${WORKSPACE}/ci-scripts/docker_run_check.sh"
+  }
   stage('Cache Sources') {
     dir('ci-scripts') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:'master')

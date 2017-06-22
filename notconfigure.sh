@@ -209,16 +209,6 @@ process_package(){
         # If live image type is specified, testimage attempts to test the initramfs
         # which hangs and fails
         echo "IMAGE_FSTYPES_remove = \"live\""
-
-        # hack around missing iptables in container
-        if [ ! -f /sbin/iptables ]; then
-            {
-                echo '#!/bin/bash'
-                echo 'exit 0'
-            } > /tmp/iptables
-            chmod +x /tmp/iptables
-            sudo mv /tmp/iptables /sbin/iptables
-        fi
     fi
 
     if [ -n "$BB_NO_NETWORK" ]; then
