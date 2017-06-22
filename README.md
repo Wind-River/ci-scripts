@@ -26,12 +26,9 @@ needs to allow a process with uid 1000 rw access to
 docker group. Currently if the host docker group has guid 995 to 999,
 this will enable access.
 
-If the host docker group does not have guid in this range it
-will be necessary to run:
-
-    sudo chmod 666 /var/run/docker.sock
-
-To enable access.
+If the /var/run/docker.sock does not sufficient permissions, the swarm
+client image will attempt to enable world rw permissions on the socket
+before attempting the build.
 
 ### Starting Jenkins
 
@@ -41,7 +38,7 @@ docker-compose run:
     ./start-jenkins.sh
 
 This will download the images from the Docker Cloud/Hub and start the
-images using docker-compose
+images using docker-compose.
 
 ### Scheduling Builds
 
@@ -56,6 +53,30 @@ the python-jenkins package locally run:
 
 This will contact the Jenkins Master and schedule a build on the
 Jenkins Agent.
+
+The combos-WRLINUX_9_BASE.yaml file is a generated list of valid
+combinations of qemu bsps and configuration options.
+
+## Modifying docker images
+
+The CI prototype uses four images:
+
+- windriver/jenkins-master
+- windriver/jenkins-swarm-client
+- windriver/ubuntu1604_64
+- blacklabelops/nginx
+
+To test image modifications rebuild the container locally and run:
+
+    ./start-jenkins.sh --no-pull
+
+## TODO
+
+- Scripts to build Poky
+- Run post success and post fail scripts
+- Build notifications
+- Automated build of CI images
+- Developer build workflow
 
 ## Contributing
 
