@@ -35,7 +35,6 @@ services:
   rproxy:
     image: blacklabelops/nginx
     ports:
-      - "80:80"
       - "443:443"
     links:
       - jenkins
