@@ -17,14 +17,24 @@ build Yocto.
 
 ### Requirements:
 
-docker-engine: >= 17.03
-docker-compose: >= 1.13.0
+make
+python3: >= 3.3
 
-In order for Jenkins Agent to start docker containers, the host system
-needs to allow a process with uid 1000 rw access to
-/var/run/docker.sock. This can be done by adding uid 1000 to the
-docker group. Currently if the host docker group has guid 995 to 999,
-this will enable access.
+Docker CE: >= 17.03
+
+https://docs.docker.com/engine/installation/
+
+Docker Compose: >= 1.13.0
+
+https://docs.docker.com/compose/install/
+
+### Docker Socket permissions
+
+In order for Jenkins Agent to start docker containers without opening
+the socket to every user on the machine, the host system needs to
+allow a process with uid 1000 rw access to /var/run/docker.sock. This
+can be done by adding uid 1000 to the docker group. Currently if the
+host docker group has guid 995 to 999, this will enable access.
 
 If the /var/run/docker.sock does not sufficient permissions, the swarm
 client image will attempt to enable world rw permissions on the socket
@@ -46,8 +56,7 @@ On the same or a different machine, clone this repository. To install
 the python-jenkins package locally run:
 
     make setup
-    workon jenkins_env
-    ./oe_jenkins_build.py \
+    .venv/bin/python3 ./oe_jenkins_build.py \
         --jenkins https://<jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
         --configs <config name from combos>
 

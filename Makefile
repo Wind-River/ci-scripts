@@ -19,47 +19,30 @@
 # SOFTWARE.
 
 SHELL = /bin/bash #requires bash
-VENV_NAME = jenkins_env
-VENV = $(HOME)/.virtualenvs/$(VENV_NAME)
+VENV = $(PWD)/.venv
 DEPS = $(wildcard *.py)
-PIP = $(HOME)/.local/bin/pip3
-VIRTUALENV = $(HOME)/.local/bin/virtualenv
-VENVWRAPPER = $(HOME)/.local/bin/virtualenvwrapper.sh
+GET_PIP = $(VENV)/bin/get-pip.py
+PIP = $(VENV)/bin/pip3
 
 .PHONY: build image setup clean test help
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := help
 
 help:
 	@echo "Make options for jenkins ci development"
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-$(VENV): $(VIRTUALENV) $(VENVWRAPPER)
-	export VIRTUALENVWRAPPER_VIRTUALENV=$(VIRTUALENV); \
-	export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3; \
-	source $(VENVWRAPPER); \
-	test -d $(VENV) || mkvirtualenv -p python3 $(VENV_NAME); \
+# Use get-pip.py to avoid requiring installation of ensurepip package
+$(VENV):
+	type python3 >/dev/null 2>&1 || { echo >&2 "Python3 required. Aborting."; exit 1; }; \
+	test -d $(VENV) || python3 -m venv --without-pip $(VENV); \
 	touch $(VENV); \
-	$(VENV)/bin/pip3 install pylint nose flake8; \
-	touch $(PEX); \
-	$(VENV)/bin/pip3 install python-jenkins PyYAML;
+	wget -O $(GET_PIP) https://bootstrap.pypa.io/get-pip.py; \
+	$(VENV)/bin/python3 $(GET_PIP) --ignore-installed; \
+	$(PIP) install pylint flake8 python-jenkins PyYAML;
 
-setup: $(VENV) ## Install all python dependencies in jenkins_env virtualenv.
-
-$(PIP):
-	wget -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py; \
-	python3 /tmp/get-pip.py --ignore-installed --user; \
-	rm -f /tmp/get-pip.py
-
-$(VIRTUALENV): $(PIP)
-	$(PIP) install --user --upgrade --ignore-installed virtualenv
-
-$(VENVWRAPPER): $(PIP)
-	$(PIP) install --user --upgrade --ignore-installed virtualenvwrapper
+setup: $(VENV) ## Install all python dependencies in .venv
 
 clean: ## Delete virtualenv and all build directories
-	rm -rf $(VENV) build dist .check .tmp
-
-test: ## Run tests
-	$(VENV)/bin/python setup.py test
+	rm -rf $(VENV)
