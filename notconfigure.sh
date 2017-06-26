@@ -28,9 +28,9 @@ if [ ! -f "$LOCALCONF" ]; then
 fi
 
 RM_WORK=yes
-PKG_JOBS=8
-JOBS=8
-BOOTIMAGE=noimage
+PKG_JOBS=
+JOBS=
+BOOTIMAGE=
 BUILDSTATS=yes
 PATCHRESOLVE=
 BUILDTYPE=
@@ -43,8 +43,8 @@ ALLOW_BSP_PKGS=
 TEST_IMAGE=no
 BB_NO_NETWORK=
 PREMIRROR_PATH=
-KERNEL_AUTOREV=no
 DL_DIR=
+MACHINE=
 
 for i in "$@"
 do
@@ -66,8 +66,8 @@ do
         --test-image=*)         TEST_IMAGE="${i#*=}" ;;
         --no-network=*)         BB_NO_NETWORK="${i#*=}" ;;
         --premirror_path=*)     PREMIRROR_PATH="${i#*=}" ;;
-        --kernel_autorev=*)     KERNEL_AUTOREV="${i#*=}" ;;
         --dl_dir=*)             DL_DIR="${i#*=}" ;;
+        --machine=*)            MACHINE="${i#*=}" ;;
         *)                      ;;
     esac
     shift
@@ -221,14 +221,12 @@ process_package(){
         echo "BB_FETCH_PREMIRRORONLY = \"1\""
     fi
 
-    if [ "$KERNEL_AUTOREV" == "yes" ]; then
-        echo "SRCREV_pn-linux-windriver = \"\${AUTOREV}\""
-        echo "SRCREV_meta_forcevariable_pn-linux-windriver = \"\${AUTOREV}\""
-        echo "SRCREV_machine_forcevariable_pn-linux-windriver = \"\${AUTOREV}\""
-    fi
-
     if [ -n "$DL_DIR" ]; then
         echo "DL_DIR = \"$DL_DIR\""
+    fi
+
+    if [ -n "$MACHINE" ]; then
+        echo "MACHINE = \"$MACHINE\""
     fi
 
 } >> "$LOCALCONF"

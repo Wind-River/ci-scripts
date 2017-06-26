@@ -1,0 +1,11 @@
+- branch: pyro
+  build:
+  - bitbake
+  - core-image-minimal
+  name: pyro-minimal
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - poky_setup.sh
+  - --machine=qemux86-64

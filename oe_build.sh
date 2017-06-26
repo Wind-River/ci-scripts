@@ -67,9 +67,6 @@ do
 done
 
 HOME="$TOP"
-if [ -z "$WRLINUX" ]; then
-    WRLINUX="$TOP/wrlinux-$BRANCH/wrlinux-9"
-fi
 
 BUILD=
 create_build_dir
@@ -80,18 +77,26 @@ TIME="/usr/bin/time $QUIET -f %e -o $BUILD/time.log"
 STATFILE=$BUILD/buildstats.log
 create_statfile "$STATFILE"
 
-WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
-
-# Make a clone of local mirror so setup will use local mirror
-wrlinux_setup_clone "$WRLINUX" "$BUILD" "$WRLINUX_BRANCH" "$TOP"
-
 # Start the hang check by the build post process script
 touch "$BUILD/00-INPROGRESS"
 
+# if setup_args starts with -- add the setup command
+if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
+    if [ -z "$WRLINUX" ]; then
+        WRLINUX="$TOP/wrlinux-$BRANCH/wrlinux-9"
+    fi
+
+    WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
+
+    # Make a clone of local mirror so setup will use local mirror
+    wrlinux_setup_clone "$WRLINUX" "$BUILD" "$WRLINUX_BRANCH" "$TOP"
+
+    SETUP_ARGS=("$BUILD/${WRLINUX:(-9)}/setup.sh" "${SETUP_ARGS[@]}")
+fi
+
 # run the setup tool
-SETUP_ARGS=("${SETUP_ARGS[@]}")
-log "setup.sh ${SETUP_ARGS[*]}" 2>&1 | tee "$BUILD/00-wrsetup.log"
-$TIME "$BUILD/${WRLINUX:(-9)}/setup.sh" "${SETUP_ARGS[@]}" >> "$BUILD/00-wrsetup.log" 2>&1
+log "${SETUP_ARGS[*]}" 2>&1 | tee "$BUILD/00-wrsetup.log"
+$TIME  "${SETUP_ARGS[@]}" >> "$BUILD/00-wrsetup.log" 2>&1
 RET=$?
 log_stats "Setup" "$BUILD"
 echo "Setup: ${SETUP_ARGS[*]}" >> "$STATFILE"

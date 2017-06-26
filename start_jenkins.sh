@@ -170,7 +170,6 @@ sleep 1
 docker-compose ${FILES[*]} up --abort-on-container-exit
 
 if [ "$CLEANUP" == '1' ]; then
-    echo "Cleaning up images and volumes"
-    docker-compose ${FILES[*]} rm --force --all
+    echo "Cleaning up stopped containers"
+    docker-compose ${FILES[*]} rm --force
 fi
-
