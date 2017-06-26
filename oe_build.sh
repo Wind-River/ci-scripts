@@ -67,6 +67,7 @@ do
 done
 
 HOME="$TOP"
+export PATH="$TOP/ci-scripts/:$PATH"
 
 BUILD=
 create_build_dir
