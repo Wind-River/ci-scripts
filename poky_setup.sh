@@ -20,11 +20,12 @@ do
 done
 
 git clone --branch "$BRANCH" --single-branch git://git.yoctoproject.org/poky
-cd poky || exit 1
+mv poky/* .
 
 BUILDTOOLS=$(curl -s -L https://raw.githubusercontent.com/WindRiver-Labs/wrlinux-9/WRLINUX_9_BASE/data/environment.d/04_wrl_buildtools.sh | grep BUILDTOOLS_REMOTE: | cut -d'-' -f 2- | cut -d'}' -f 1)
 
-BUILDTOOLS_REMOTE="https://github.com/WindRiver-Labs/$BUILDTOOLS"
+#BUILDTOOLS_REMOTE="https://github.com/WindRiver-Labs/$BUILDTOOLS"
+BUILDTOOLS_REMOTE="$TOP/wrlinux-WRLINUX_9_BASE/$BUILDTOOLS"
 
 git clone "$BUILDTOOLS_REMOTE" buildtools
 
