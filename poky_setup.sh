@@ -5,6 +5,7 @@ env
 
 source "$(dirname "$0")"/common.sh
 
+TOP=/home/wrlbuild
 BRANCH=pyro
 SDKARCH=${SDKARCH:-$(uname -m)}
 
@@ -13,6 +14,7 @@ for i in "$@"
 do
     echo "Arg: $i"
     case $i in
+        --top=*)                TOP=${i#*=} ;;
         --branch=*)             BRANCH=${i#*=} ;;
         *)                      ;;
     esac
