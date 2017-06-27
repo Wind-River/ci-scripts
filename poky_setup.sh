@@ -5,7 +5,6 @@ env
 
 source "$(dirname "$0")"/common.sh
 
-TOP=/home/wrlbuild
 BRANCH=pyro
 SDKARCH=${SDKARCH:-$(uname -m)}
 
@@ -14,7 +13,6 @@ for i in "$@"
 do
     echo "Arg: $i"
     case $i in
-        --top=*)                TOP=${i#*=} ;;
         --branch=*)             BRANCH=${i#*=} ;;
         *)                      ;;
     esac
@@ -26,8 +24,10 @@ mv poky/* .
 
 BUILDTOOLS=$(curl -s -L https://raw.githubusercontent.com/WindRiver-Labs/wrlinux-9/WRLINUX_9_BASE/data/environment.d/04_wrl_buildtools.sh | grep BUILDTOOLS_REMOTE: | cut -d'-' -f 2- | cut -d'}' -f 1)
 
-#BUILDTOOLS_REMOTE="https://github.com/WindRiver-Labs/$BUILDTOOLS"
-BUILDTOOLS_REMOTE="$TOP/wrlinux-WRLINUX_9_BASE/$BUILDTOOLS"
+BUILDTOOLS_REMOTE="$WORKSPACE/wrlinux-WRLinux-9-Base/$BUILDTOOLS.git"
+if [ ! -d "$BUILDTOOLS_REMOTE" ]; then
+    BUILDTOOLS_REMOTE="https://github.com/WindRiver-Labs/$BUILDTOOLS"
+fi
 
 git clone "$BUILDTOOLS_REMOTE" buildtools
 
