@@ -108,7 +108,7 @@ if [ "$RET" != 0 ]; then
     echo "Status: FAILED" >> "$STATFILE"
 else
     # Use the buildtools, setup env, run prebuild script and do build
-    . ./environment-setup-x86_64-wrlinuxsdk-linux
+    . ./environment-setup-x86_64-wrlinuxsdk-linux > "$BUILD/00-prebuild.log" 2>&1
     . ./oe-init-build-env "$BUILD_NAME" > "$BUILD/00-prebuild.log" 2>&1
 
     # Run prebuild command which may modify files like local.conf

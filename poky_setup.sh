@@ -21,6 +21,7 @@ done
 
 git clone --branch "$BRANCH" --single-branch git://git.yoctoproject.org/poky
 mv poky/* .
+mv poky/.templateconf .
 
 BUILDTOOLS=$(curl -s -L https://raw.githubusercontent.com/WindRiver-Labs/wrlinux-9/WRLINUX_9_BASE/data/environment.d/04_wrl_buildtools.sh | grep BUILDTOOLS_REMOTE: | cut -d'-' -f 2- | cut -d'}' -f 1)
 
