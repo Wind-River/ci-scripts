@@ -102,14 +102,18 @@ main()
 
     local BRANCH=
     for BRANCH in $BRANCHES; do
-        echo "Starting update for $BRANCH by trying to take lock"
-        local LOCKFILE="${BASE}/.update-${BRANCH}.lck"
-        exec 8>"$LOCKFILE"
-        flock --exclusive 8
-        echo "Lock for $BRANCH aquired"
-        wrl_clone_or_update "$BRANCH"
-        flock --unlock 8
-        echo "Completed update of $BRANCH and releasing lock"
+        case "$BRANCH" in
+            WRLinux-9*)
+                echo "Starting update for $BRANCH by trying to take lock"
+                local LOCKFILE="${BASE}/.update-${BRANCH}.lck"
+                exec 8>"$LOCKFILE"
+                flock --exclusive 8
+                echo "Lock for $BRANCH aquired"
+                wrl_clone_or_update "$BRANCH"
+                flock --unlock 8
+                echo "Completed update of $BRANCH and releasing lock"
+                ;;
+        esac
     done
 
     echo "Finished update"
