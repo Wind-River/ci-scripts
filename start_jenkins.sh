@@ -171,5 +171,5 @@ docker-compose ${FILES[*]} up --abort-on-container-exit
 
 if [ "$CLEANUP" == '1' ]; then
     echo "Cleaning up stopped containers"
-    docker-compose ${FILES[*]} rm --force
+    docker-compose ${FILES[*]} rm --force -v
 fi
