@@ -44,6 +44,9 @@ def create_parser():
     op.add_argument('--job', dest='job', required=False, default='WRLinux_Build',
                     help='Jenkins Job name.')
 
+    op.add_argument('--ci_branch', dest='ci_branch', required=False, default='master',
+                    help='The branch to use for the ci-scripts repo. Used for local modifications. Default master.')
+
     op.add_argument('--configs_file', dest='configs_file', required=True,
                     help='Name of file that contains valid build configurations.')
 
@@ -53,11 +56,30 @@ def create_parser():
 
     op.add_argument("--image", dest="image", required=False,
                     default='ubuntu1604_64',
-                    help="The Docker image used for the build. Default: ubuntu1404_64.")
+                    help="The Docker image used for the build. Default: ubuntu1604_64.")
 
     op.add_argument("--registry", dest="registry", required=False,
                     default='windriver',
                     help="The Docker registry to pull images from. Default: windriver.")
+
+    op.add_argument("--post_process_image", dest="post_process_image", required=False,
+                    default='ubuntu1604_64',
+                    help="The Docker image used for the post process stage. Default: ubuntu1604_64.")
+
+    op.add_argument("--postprocess_args", dest="postprocess_args", required=False,
+                    default='',
+                    help="A comma separated list of args in form KEY=VAL that will be"
+                    "injected into post process script environment.")
+
+    op.add_argument("--post_success", dest="post_success", required=False,
+                    default='cleanup',
+                    help="A comma separated list of scripts in the scripts/ directory"
+                    "to be run after a successful build. Default: cleanup.")
+
+    op.add_argument("--post_fail", dest="post_fail", required=False,
+                    default='cleanup',
+                    help="A comma separated list of scripts in the scripts/ directory"
+                    "to be run after a failed build. Default: cleanup,send_email.")
 
     return op
 
@@ -76,6 +98,13 @@ def main():
     else:
         with open(job_config) as job_config_file:
             xml_config = job_config_file.read()
+            if opts.ci_branch != 'master':
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(xml_config)
+                branches = root.find('definition').find('scm').find('branches')
+                branch = branches.find('hudson.plugins.git.BranchSpec').find('name')
+                branch.text = '*/' + opts.ci_branch
+                xml_config = ET.tostring(root)
 
     try:
         server.get_job_config(opts.job)
@@ -100,12 +129,17 @@ def main():
 
                 output = server.build_job(opts.job,
                                           {'NAME': config['name'],
+                                           'CI_BRANCH': opts.ci_branch,
                                            'IMAGE': opts.image,
                                            'BRANCH': branch,
                                            'SETUP_ARGS': ' '.join(config['setup']),
                                            'PREBUILD_CMD': ' '.join(config['prebuild']),
                                            'BUILD_CMD': ' '.join(config['build']),
                                            'REGISTRY': opts.registry,
+                                           'POST_PROCESS_IMAGE': opts.post_process_image,
+                                           'POSTPROCESS_ARGS': opts.postprocess_args,
+                                           'POST_SUCCESS': opts.post_success,
+                                           'POST_FAIL': opts.post_fail,
                                           })
 
                 print("Scheduled build " + str(next_build_number))

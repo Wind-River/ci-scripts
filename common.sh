@@ -266,6 +266,7 @@ function generate_failmail
     local BUILD_NAME=$2
     local FAIL="$1/$2"
     local MFILE=$BUILD/mail.txt
+    local LOGLINES=150
 
     local PKG=$(fail_pkg "$FAIL")
     local PKG_LOG=$(fail_log "$FAIL")
@@ -615,17 +616,6 @@ function vercomp {
     return 0
 }
 
-function ice_check {
-    local BUILD=$1
-    if [ -f "$BUILD/00-wrbuild.log" ]; then
-        grep -qF -e 'Segmentation fault' -e 'internal compiler error:' "$BUILD/00-wrbuild.log" 2>/dev/null
-        if [ $? = 0 ]; then
-            return 1
-        fi
-    fi
-    return 0
-}
-
 # Build information is passed between scripts using the buildstats.log
 # file. This function hides the call to awk
 function get_stat() {
@@ -684,75 +674,12 @@ prepare_rsync() {
     find "$EXPORT_DIR" -name "*dtb" \
          -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
-    if [ "$RSYNC_RPMS" == "yes" ]; then
-        # Create the repodata
-        local ARCH=
-        for ARCH in bitbake_build/tmp/deploy/rpm/*; do
-            make bbc BBC="../layers/oe-core/scripts/oe-setup-rpmrepo tmp/deploy/rpm/$(basename "$ARCH")" &> /dev/null
-        done
-
-        # "Copy" the RPMS
-        mkdir -p "$RSYNC_SOURCE_DIR/feed"
-        ln -sfrL bitbake_build/tmp/deploy/rpm/* "$RSYNC_SOURCE_DIR/feed/."
-
-        # generate feed setup script which make test setup easier
-        local WORK_DIR=$(find bitbake_build/tmp/work -maxdepth 2 -type d -name 'wrlinux-image*' | tail -1)
-
-        # find the smart repo priorities from the log.do_rootfs file
-        local ROOTFS_LOG=$(find "$WORK_DIR" -type f -name 'log.do_rootfs*' | tail -1)
-
-        if [ -f "$ROOTFS_LOG" ]; then
-            # create a script to be added to the feeds for adding channels
-            local FEED_SETUP="$RSYNC_SOURCE_DIR/feed/feed_setup.sh"
-            {
-                # delete everything up to the l in channel, then extract and print the bsp and priority
-                local REPOS=$(grep -i "adding smart channel" "$ROOTFS_LOG" | sed -e 's/[^l]*l \([a-z0-9_]*\) (\([0-9]*\))/\1 \2/' )
-                while read -r name pri; do
-                    echo "smart channel -y --add $name name=$name type=rpm-md priority=$pri baseurl=\$BASEURL/$name"
-                done <<< "$REPOS"
-                echo "smart channel --show"
-                echo "smart update"
-            } > "$FEED_SETUP"
-        fi
-    fi
-
     if [ "$RSYNC_SSTATE" == "yes" ]; then
         mkdir -p "$RSYNC_SOURCE_DIR/sstate"
         # Skip the native sstate because it is already built and distributed
         find bitbake_build/sstate-cache/ -maxdepth 1 -mindepth 1 -type d \
              -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
     fi
-
-    # Setup configuration for post process script
-    cat >> "$BUILD/rsync.conf" <<EOF
-SRC_DIR="$RSYNC_SOURCE_DIR"
-RSYNC_DEST_HOSTNAME="$RSYNC_SERVER"
-RSYNC_DEST_DIR="$RSYNC_DEST_DIR"
-RSYNC_OPTIONS=(-aL --chown=1000:100)
-BUILD_NAME="$BUILD_NAME"
-EOF
-}
-
-prepare_tests() {
-    local RSYNC_SOURCE_DIR="$BUILD/rsync/$BUILD_NAME"
-
-    local KERNEL=$(find "$RSYNC_SOURCE_DIR" -name '*bzImage*' -print0 | xargs -0 -r basename)
-    local DTB=$(find "$RSYNC_SOURCE_DIR" -name '*dtb' -print0 | xargs -0 -r basename)
-    local ROOTFS=$(find "$RSYNC_SOURCE_DIR" -name '*ext[34].bz2' -print0 | xargs -0 -r basename)
-    cat >> "$BUILD/tests.conf" <<EOF
-TEST_SERVER="$TEST_SERVER"
-TESTS="$TESTS"
-LAVA_USER="$LAVA_USER"
-LAVA_TOKEN="$LAVA_TOKEN"
-KERNEL="$KERNEL"
-DTB="$DTB"
-ROOTFS="$ROOTFS"
-EOF
-}
-
-get_local_git_server() {
-    git --git-dir="$HOME/wrlinux-WRLINUX_9_BASE/wrlinux-x/.git" remote -v | \
-        head -n 1 | /usr/bin/cut -d'/' -f 3
 }
 
 create_statfile() {

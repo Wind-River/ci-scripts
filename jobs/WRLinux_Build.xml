@@ -17,6 +17,11 @@
           <defaultValue>WRLinux-9-Base</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>CI_BRANCH</name>
+          <description>Branch of the ci-scripts repository to use</description>
+          <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>SETUP_ARGS</name>
           <description>List of args to pass to setup.sh</description>
           <defaultValue></defaultValue>
@@ -39,6 +44,26 @@
         <hudson.model.StringParameterDefinition>
           <name>REGISTRY</name>
           <description>Docker registry to pull images from</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_PROCESS_IMAGE</name>
+          <description>The docker image to run the build post process steps</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POSTPROCESS_ARGS</name>
+          <description>Comma separated list of form KEY=VAL which will be injected into post process script environment</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_SUCCESS</name>
+          <description>Comma separated list of scripts from scripts dir to run after successful build</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_FAIL</name>
+          <description>Comma separated list of scripts from scripts dir to run after failed build</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
