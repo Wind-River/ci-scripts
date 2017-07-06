@@ -47,6 +47,8 @@ services:
       SERVER1PROXY_APPLICATION: "jenkins"
       NGINX_REDIRECT_PORT80: "true"
       SERVER1CERTIFICATE_DNAME: "/CN=WindRiver/OU=Linux/O=windriver.com/L=Alameda/C=US"
+      DISABLE_ACCESS_LOG: "true"
+      LOG_LEVEL: "warn"
     networks:
       - jenkinsnet
     tmpfs:
