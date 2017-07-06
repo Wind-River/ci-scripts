@@ -80,6 +80,9 @@ def create_parser():
                     default='cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a failed build. Default: cleanup,send_email.")
+    op.add_argument("--network", dest="network", required=False,
+                    default='bridge', choices=['bridge', 'none'],
+                    help="The network switch indicating internet access")
 
     return op
 
@@ -140,6 +143,7 @@ def main():
                                            'POSTPROCESS_ARGS': opts.postprocess_args,
                                            'POST_SUCCESS': opts.post_success,
                                            'POST_FAIL': opts.post_fail,
+                                           'NETWORK': opts.network,
                                           })
 
                 print("Scheduled build " + str(next_build_number))

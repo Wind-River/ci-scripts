@@ -44,7 +44,7 @@ node('docker') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
     }
     docker.withRegistry('http://${REGISTRY}') {
-      docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
+      docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 --network ${NETWORK}') {
         withEnv(['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]) {
           sh "mkdir -p ${WORKSPACE}/builds"
           sh "${WORKSPACE}/ci-scripts/jenkins_build.sh"
