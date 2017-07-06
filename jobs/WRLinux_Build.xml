@@ -47,7 +47,7 @@
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>POST_PROCESS_IMAGE</name>
+          <name>POSTPROCESS_IMAGE</name>
           <description>The docker image to run the build post process steps</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
