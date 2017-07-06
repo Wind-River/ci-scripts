@@ -62,7 +62,7 @@ def create_parser():
                     default='windriver',
                     help="The Docker registry to pull images from. Default: windriver.")
 
-    op.add_argument("--post_process_image", dest="post_process_image", required=False,
+    op.add_argument("--postprocess_image", dest="post_process_image", required=False,
                     default='ubuntu1604_64',
                     help="The Docker image used for the post process stage. Default: ubuntu1604_64.")
 
@@ -104,7 +104,7 @@ def main():
                 branches = root.find('definition').find('scm').find('branches')
                 branch = branches.find('hudson.plugins.git.BranchSpec').find('name')
                 branch.text = '*/' + opts.ci_branch
-                xml_config = ET.tostring(root)
+                xml_config = ET.tostring(root, encoding="unicode")
 
     try:
         server.get_job_config(opts.job)
@@ -136,7 +136,7 @@ def main():
                                            'PREBUILD_CMD': ' '.join(config['prebuild']),
                                            'BUILD_CMD': ' '.join(config['build']),
                                            'REGISTRY': opts.registry,
-                                           'POST_PROCESS_IMAGE': opts.post_process_image,
+                                           'POSTPROCESS_IMAGE': opts.post_process_image,
                                            'POSTPROCESS_ARGS': opts.postprocess_args,
                                            'POST_SUCCESS': opts.post_success,
                                            'POST_FAIL': opts.post_fail,
