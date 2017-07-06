@@ -60,7 +60,7 @@ node('docker') {
     docker.withRegistry('http://${REGISTRY}') {
       def postprocess_args = "${POSTPROCESS_ARGS}".tokenize(',')
       docker.image("${POSTPROCESS_IMAGE}").inside('-v /etc/localtime:/etc/localtime:ro -u 1000') {
-        withEnv([postprocess_args) {
+        withEnv([postprocess_args]) {
           sh "${WORKSPACE}/ci-scripts/build_postprocess.sh"
         }
       }
