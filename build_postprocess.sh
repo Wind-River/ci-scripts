@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# needed for setup_post_scripts
+source "$(dirname "$0")"/common.sh
+
 run_post_scripts()
 {
     local BUILD="$1"
