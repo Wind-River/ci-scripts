@@ -38,6 +38,9 @@ main()
     local BUILD="$WORKSPACE/builds/builds-$BUILD_ID"
     cd "$BUILD" || exit 1
 
+    setup_post_scripts "$WORKSPACE/ci-scripts" "post-success.d" "$POST_SUCCESS" "$BUILD"
+    setup_post_scripts "$WORKSPACE/ci-scripts" "post-fail.d" "$POST_FAIL" "$BUILD"
+
     if [ -f "00-PASS" ]; then
         run_post_scripts "$BUILD" "post-success.d"
     elif [ -f "00-FAIL" ]; then

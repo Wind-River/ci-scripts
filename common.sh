@@ -563,13 +563,14 @@ function setup_post_scripts {
     local POST_SCRIPTS="$3"
     local BUILD="$4"
     local SCRIPT=
+    local COUNTER_STR=
 
     mkdir -p "${BUILD}/${POST_DIR}"
 
     COUNTER=0
     set -f; IFS=,
     for SCRIPT in $POST_SCRIPTS; do
-        local COUNTER_STR=$(printf "%02d" "$COUNTER")
+        COUNTER_STR=$(printf "%02d" "$COUNTER")
         local SCRIPT_FULLPATH="$TOP/wr-buildscripts/scripts/${SCRIPT}.sh"
         if [ -f "$SCRIPT_FULLPATH" ]; then
             ln -s "$SCRIPT_FULLPATH" "${BUILD}/${POST_DIR}/${COUNTER_STR}-$SCRIPT"
