@@ -20,8 +20,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# needed for setup_post_scripts
-source "$(dirname "$0")"/common.sh
+
+function setup_post_scripts {
+    local POST_DIR="$1"
+    local POST_SCRIPTS="$2"
+    local BUILD="$3"
+    local SCRIPT=
+    local COUNTER_STR=
+
+    mkdir -p "${BUILD}/${POST_DIR}"
+
+    COUNTER=0
+    set -f; IFS=,
+    for SCRIPT in $POST_SCRIPTS; do
+        COUNTER_STR=$(printf "%02d" "$COUNTER")
+        local SCRIPT_FULLPATH="$WORKSPACE/ci-scripts/scripts/${SCRIPT}.sh"
+        if [ -f "$SCRIPT_FULLPATH" ]; then
+            ln -s "$SCRIPT_FULLPATH" "${BUILD}/${POST_DIR}/${COUNTER_STR}-$SCRIPT"
+        fi
+        COUNTER=$((COUNTER + 1))
+    done
+    set +f; unset IFS
+}
 
 run_post_scripts()
 {
@@ -41,8 +61,8 @@ main()
     local BUILD="$WORKSPACE/builds/builds-$BUILD_ID"
     cd "$BUILD" || exit 1
 
-    setup_post_scripts "$WORKSPACE/ci-scripts" "post-success.d" "$POST_SUCCESS" "$BUILD"
-    setup_post_scripts "$WORKSPACE/ci-scripts" "post-fail.d" "$POST_FAIL" "$BUILD"
+    setup_post_scripts "post-success.d" "$POST_SUCCESS" "$BUILD"
+    setup_post_scripts "post-fail.d" "$POST_FAIL" "$BUILD"
 
     if [ -f "00-PASS" ]; then
         run_post_scripts "$BUILD" "post-success.d"

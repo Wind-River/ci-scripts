@@ -557,29 +557,6 @@ function trigger_postprocess {
     fi
 }
 
-function setup_post_scripts {
-    local TOP="$1"
-    local POST_DIR="$2"
-    local POST_SCRIPTS="$3"
-    local BUILD="$4"
-    local SCRIPT=
-    local COUNTER_STR=
-
-    mkdir -p "${BUILD}/${POST_DIR}"
-
-    COUNTER=0
-    set -f; IFS=,
-    for SCRIPT in $POST_SCRIPTS; do
-        COUNTER_STR=$(printf "%02d" "$COUNTER")
-        local SCRIPT_FULLPATH="$TOP/wr-buildscripts/scripts/${SCRIPT}.sh"
-        if [ -f "$SCRIPT_FULLPATH" ]; then
-            ln -s "$SCRIPT_FULLPATH" "${BUILD}/${POST_DIR}/${COUNTER_STR}-$SCRIPT"
-        fi
-        COUNTER=$((COUNTER + 1))
-    done
-    set +f; unset IFS
-}
-
 function get_container_id {
     # Retrieve the docker container id from within the container
     local CONTAINERID=$(grep 'docker' /proc/self/cgroup | sed 's/^.*\///' | tail -n1)
