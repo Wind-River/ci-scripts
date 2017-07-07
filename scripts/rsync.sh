@@ -72,6 +72,6 @@ post_rsync() {
     touch "$STAMP"
 }
 
-post_rsync "$@" &>> "$(basename "$0").log"
+post_rsync "$@"
 
 exit 0

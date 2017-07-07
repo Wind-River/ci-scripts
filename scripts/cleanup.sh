@@ -20,21 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-env
-
 cleanup() {
     local BUILD="$1"
-    local TOP="$2"
 
     if [ -z "$NAME" ]; then
         echo "Error: Build NAME is not defined!"
         exit 1
     fi
 
-    echo "Removing build directory"
-    $TIME rm -rf "$BUILD/$NAME"
+    echo "Removing build directory $BUILD/$NAME"
+    # fail if $BUILD is empty SC2115
+    rm -rf "${BUILD:?}/$NAME"
 }
 
-cleanup "$@" &>> "$(basename "$0").log"
+cleanup "$@"
 
 exit 0

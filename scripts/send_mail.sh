@@ -64,6 +64,6 @@ send_mail()
     fi
 }
 
-send_mail "$@" &>> "$(basename "$0").log"
+send_mail "$@"
 
 exit 0
