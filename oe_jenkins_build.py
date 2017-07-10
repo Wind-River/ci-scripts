@@ -33,19 +33,20 @@ if hasattr(ssl, '_create_unverified_context'):
 def create_parser():
     """Parse command line args"""
     from argparse import ArgumentParser
+    from argparse import RawTextHelpFormatter
 
     descr = '''Trigger build on Jenkins using a configuration from yaml files'''
 
-    op = ArgumentParser(description=descr)
+    op = ArgumentParser(description=descr,formatter_class=RawTextHelpFormatter)
 
     op.add_argument('--jenkins', dest='jenkins', required=True,
                     help='Jenkins master endpoint.')
 
     op.add_argument('--job', dest='job', required=False, default='WRLinux_Build',
-                    help='Jenkins Job name.')
+                    help='Jenkins Job name. \nDefault WRLinux_Build')
 
     op.add_argument('--ci_branch', dest='ci_branch', required=False, default='master',
-                    help='The branch to use for the ci-scripts repo. Used for local modifications. Default master.')
+                    help='The branch to use for the ci-scripts repo. Used for local modifications.\nDefault master.')
 
     op.add_argument('--configs_file', dest='configs_file', required=True,
                     help='Name of file that contains valid build configurations.')
@@ -56,15 +57,15 @@ def create_parser():
 
     op.add_argument("--image", dest="image", required=False,
                     default='ubuntu1604_64',
-                    help="The Docker image used for the build. Default: ubuntu1604_64.")
+                    help="The Docker image used for the build. \nDefault: ubuntu1604_64.")
 
     op.add_argument("--registry", dest="registry", required=False,
                     default='windriver',
-                    help="The Docker registry to pull images from. Default: windriver.")
+                    help="The Docker registry to pull images from. \nDefault: windriver.")
 
     op.add_argument("--postprocess_image", dest="post_process_image", required=False,
                     default='ubuntu1604_64',
-                    help="The Docker image used for the post process stage. Default: ubuntu1604_64.")
+                    help="The Docker image used for the post process stage. \nDefault: ubuntu1604_64.")
 
     op.add_argument("--postprocess_args", dest="postprocess_args", required=False,
                     default='',
@@ -74,15 +75,17 @@ def create_parser():
     op.add_argument("--post_success", dest="post_success", required=False,
                     default='cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
-                    "to be run after a successful build. Default: cleanup.")
+                    "to be run after a successful build. \nDefault: cleanup.")
 
     op.add_argument("--post_fail", dest="post_fail", required=False,
                     default='cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
-                    "to be run after a failed build. Default: cleanup,send_email.")
+                    "to be run after a failed build. \nDefault: cleanup,send_email.")
     op.add_argument("--network", dest="network", required=False,
                     default='bridge', choices=['bridge', 'none'],
-                    help="The network switch indicating internet access")
+                    help="The network switch for network access.\n"
+                     "Only two options allowed: bridge (with network access) and none (without network). \n"
+                     "Default: bridge.")
 
     return op
 

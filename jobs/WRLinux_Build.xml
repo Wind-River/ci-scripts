@@ -68,7 +68,7 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
 	        <name>NETWORK</name>
-          <description>The switch for internet access</description>
+          <description>The switch for network access</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
