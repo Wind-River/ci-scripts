@@ -1,18 +1,18 @@
-# Ubuntu 16.04 Docker Image for Post Build Actions
+# Ubuntu 16.04 WRLinux Builder Docker Image
 
 This repository contains Dockerfile and scripts used to build the
-Ubuntu 16.04 postbuild docker image hosted on Docker Hub. This
+Ubuntu 16.04 WRLinux builder docker image hosted on Docker Hub. This
 image is part of the Wind River Linux Continuous Integration Project.
 
 ## Building the image
 
-To build the image windriver/postbuild run:
+To build the image windriver/ubuntu1604_64 run:
 
-    make postbuild
+    make ubuntu1604_64
 
 To build the image with a different registry and tag run:
 
-    make postbuild TAG=test REGISTRY=internal:5000
+    make ubuntu1604_64 TAG=test REGISTRY=internal:5000
 
 ## Contributing
 

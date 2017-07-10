@@ -1,18 +1,18 @@
-# Ubuntu 16.04 Docker Image for Post Build Actions
+# Jenkins Master Docker Image
 
-This repository contains Dockerfile and scripts used to build the
-Ubuntu 16.04 postbuild docker image hosted on Docker Hub. This
-image is part of the Wind River Linux Continuous Integration Project.
+This repository contains Dockerfile and scripts used to build the Jenkins 
+Master docker image hosted on Docker Hub. This image is part of the Wind
+River Linux Continuous Integration Project.
 
 ## Building the image
 
-To build the image windriver/postbuild run:
+To build the image windriver/jenkins-master run:
 
-    make postbuild
+    make jenkins-master
 
 To build the image with a different registry and tag run:
 
-    make postbuild TAG=test REGISTRY=internal:5000
+    make jenkin-master TAG=test REGISTRY=internal:5000
 
 ## Contributing
 

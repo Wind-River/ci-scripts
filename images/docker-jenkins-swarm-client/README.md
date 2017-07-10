@@ -1,20 +1,20 @@
-# Ubuntu 16.04 Docker Image for Post Build Actions
+# Jenkins Swarm Agent Docker Image
 
 This repository contains Dockerfile and scripts used to build the
-Ubuntu 16.04 postbuild docker image hosted on Docker Hub. This
-image is part of the Wind River Linux Continuous Integration Project.
+Jenkins Swarm Agent docker image hosted on Docker Hub. This image is
+part of the Wind River Linux Continuous Integration Project.
 
 ## Building the image
 
-To build the image windriver/postbuild run:
+To build the image windriver/jenkins-swarm-client run:
 
-    make postbuild
+    make jenkins-swarm-client
 
 To build the image with a different registry and tag run:
 
-    make postbuild TAG=test REGISTRY=internal:5000
+    make jenkin-swarm-client TAG=test REGISTRY=internal:5000
 
-## Contributing
+# Contributing
 
 Contributions submitted must be signed off under the terms of the Linux
 Foundation Developer's Certificate of Origin version 1.1. Please refer to:
