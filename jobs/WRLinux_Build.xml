@@ -24,32 +24,32 @@
         <hudson.model.StringParameterDefinition>
           <name>SETUP_ARGS</name>
           <description>List of args to pass to setup.sh</description>
-          <defaultValue></defaultValue>
+          <defaultValue>--distro=wrlinux --machine=qemux86-64</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PREBUILD_CMD</name>
           <description>Command to be run before build commonly used to modify local.conf</description>
-          <defaultValue></defaultValue>
+          <defaultValue>notconfigure.sh</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CMD</name>
           <description>The full build command</description>
-          <defaultValue></defaultValue>
+          <defaultValue>bitbake wrlinux-image-glibc-core</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>IMAGE</name>
           <description>The docker image to run the build inside</description>
-          <defaultValue></defaultValue>
+          <defaultValue>ubuntu1604_64</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>REGISTRY</name>
           <description>Docker registry to pull images from</description>
-          <defaultValue></defaultValue>
+          <defaultValue>windriver</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>POSTPROCESS_IMAGE</name>
           <description>The docker image to run the build post process steps</description>
-          <defaultValue></defaultValue>
+          <defaultValue>postbuild</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>POSTPROCESS_ARGS</name>
@@ -59,17 +59,17 @@
         <hudson.model.StringParameterDefinition>
           <name>POST_SUCCESS</name>
           <description>Comma separated list of scripts from scripts dir to run after successful build</description>
-          <defaultValue></defaultValue>
+          <defaultValue>cleanup</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>POST_FAIL</name>
           <description>Comma separated list of scripts from scripts dir to run after failed build</description>
-          <defaultValue></defaultValue>
+          <defaultValue>cleanup,send_email</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
 	        <name>NETWORK</name>
           <description>The switch for network access</description>
-          <defaultValue></defaultValue>
+          <defaultValue>bridge</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
