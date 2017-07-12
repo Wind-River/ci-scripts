@@ -54,11 +54,12 @@ services:
     tmpfs:
       - /tmp
     volumes:
+      # Volume avoids recreating certs on every run
       - rproxy_nginx_config:/etc/nginx
 
   client:
     image: $REGISTRY/jenkins-swarm-client
-    links:
+    depends_on:
       - jenkins
     environment:
       COMMAND_OPTIONS: "-master http://jenkins:8080/ -disableSslVerification -labels 'docker' -executors 2"
@@ -74,6 +75,22 @@ services:
       - jenkins_agent:/home/jenkins
       - /etc/hostname:/etc/hostname
       - /etc/localtime:/etc/localtime
+
+  consul:
+    hostname: consul
+    image: consul:latest
+    ports:
+      - "8500:8500"
+    command: "agent -server -ui -bootstrap-expect=1 -client=0.0.0.0"
+
+  registrator:
+    image: gliderlabs/registrator:latest
+    command: consul://consul:8500
+    depends_on:
+      - consul
+    volumes:
+      # Allow jenkins agent to use host docker to run containers
+      - /var/run/docker.sock:/tmp/docker.sock
 
 volumes:
   jenkins_home:
