@@ -61,6 +61,7 @@ do
         --skip-cleanup=*)       SKIP_CLEANUP=${i#*=} ;;
         --wrlinux=*)            WRLINUX=${i#*=} ;;
         --fail_repo=*)          FAIL_REPO=${i#*=} ;; # override default in configs.sh
+        --toaster=*)            TOASTER=${i#*=} ;;
         *)                      ;;
     esac
     shift
@@ -117,6 +118,11 @@ else
     $TIME "$TOP/ci-scripts/${PREBUILD_CMD[0]}" "${PREBUILD_CMD[@]:1}" >> "$BUILD/00-prebuild.log" 2>&1
     log_stats "Prebuild" "$BUILD"
     echo "Prebuild: ${PREBUILD_CMD[*]}" >> "$STATFILE"
+
+    # Source toaster start script to prepare Toaster GUI
+    if [ "$TOASTER" == "enable" ]; then
+        source toaster start webport=0.0.0.0:8800 >> "$BUILD/00-prebuild.log" 2>&1
+    fi
 
     echo "Build: ${BUILD_CMD[*]}" >> "$STATFILE"
     log "${BUILD_CMD[*]}" 2>&1 | tee "$BUILD/00-wrbuild.log"

@@ -26,6 +26,7 @@ import ssl
 import yaml
 import jenkins
 
+
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -37,7 +38,7 @@ def create_parser():
 
     descr = '''Trigger build on Jenkins using a configuration from yaml files'''
 
-    op = ArgumentParser(description=descr,formatter_class=RawTextHelpFormatter)
+    op = ArgumentParser(description=descr, formatter_class=RawTextHelpFormatter)
 
     op.add_argument('--jenkins', dest='jenkins', required=True,
                     help='Jenkins master endpoint.')
@@ -46,7 +47,8 @@ def create_parser():
                     help='Jenkins Job name. \nDefault WRLinux_Build')
 
     op.add_argument('--ci_branch', dest='ci_branch', required=False, default='master',
-                    help='The branch to use for the ci-scripts repo. Used for local modifications.\nDefault master.')
+                    help='The branch to use for the ci-scripts repo. Used for local modifications.\n"
+                    "Default master.')
 
     op.add_argument('--configs_file', dest='configs_file', required=True,
                     help='Name of file that contains valid build configurations.')
@@ -81,12 +83,18 @@ def create_parser():
                     default='cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a failed build. \nDefault: cleanup,send_email.")
+
     op.add_argument("--network", dest="network", required=False,
                     default='bridge', choices=['bridge', 'none'],
                     help="The network switch for network access.\n"
-                     "Only two options allowed: bridge (with network access) and none (without network). \n"
-                     "Default: bridge.")
+                    "Only two options allowed: bridge (with network access) and none (without network). \n"
+                    "Default: bridge.")
 
+    op.add_argument("--toaster", dest="toaster", required=False,
+                    default='enable', choices=['enable', 'disable'],
+                    help="The switch for using toaster in build.\n"
+                    "Only two options allowed: enable (with toaster) and disable (without toaster). \n"
+                    "Default: enable.")
     return op
 
 
@@ -94,6 +102,10 @@ def main():
     """Main"""
     parser = create_parser()
     opts = parser.parse_args(sys.argv[1:])
+    if opts.network == "none" and opts.toaster == "enable":
+        print("Cannot enable Toaster if network is disabled."
+              "Either enable network access or disable Toaster.")
+        sys.exit(1)
 
     server = jenkins.Jenkins(opts.jenkins)
 
@@ -147,6 +159,7 @@ def main():
                                            'POST_SUCCESS': opts.post_success,
                                            'POST_FAIL': opts.post_fail,
                                            'NETWORK': opts.network,
+                                           'TOASTER': opts.toaster,
                                           })
 
                 print("Scheduled build " + str(next_build_number))

@@ -67,9 +67,14 @@
           <defaultValue>cleanup,send_email</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-	        <name>NETWORK</name>
+          <name>NETWORK</name>
           <description>The switch for network access</description>
           <defaultValue>bridge</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TOASTER</name>
+          <description>The switch for using Toaster for build</description>
+          <defaultValue>enable</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>

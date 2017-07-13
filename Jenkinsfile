@@ -43,8 +43,14 @@ node('docker') {
     dir('ci-scripts') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
     }
+
+    def docker_params = "--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 --network ${NETWORK}"
+    if (params.TOASTER == "enable") {
+      docker_params = docker_params + " --expose=8800 -P"
+    }
+
     docker.withRegistry('http://${REGISTRY}') {
-      docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 --network ${NETWORK}') {
+      docker.image("${IMAGE}").inside(docker_params) {
         withEnv(['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]) {
           sh "mkdir -p ${WORKSPACE}/builds"
           sh "${WORKSPACE}/ci-scripts/jenkins_build.sh"
