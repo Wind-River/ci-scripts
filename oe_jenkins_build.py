@@ -47,8 +47,8 @@ def create_parser():
                     help='Jenkins Job name. \nDefault WRLinux_Build')
 
     op.add_argument('--ci_branch', dest='ci_branch', required=False, default='master',
-                    help='The branch to use for the ci-scripts repo. Used for local modifications.\n"
-                    "Default master.')
+                    help='The branch to use for the ci-scripts repo. Used for local modifications.\n'
+                    'Default master.')
 
     op.add_argument('--configs_file', dest='configs_file', required=True,
                     help='Name of file that contains valid build configurations.')
@@ -66,8 +66,9 @@ def create_parser():
                     help="The Docker registry to pull images from. \nDefault: windriver.")
 
     op.add_argument("--postprocess_image", dest="post_process_image", required=False,
-                    default='ubuntu1604_64',
-                    help="The Docker image used for the post process stage. \nDefault: ubuntu1604_64.")
+                    default='postbuild',
+                    help="The Docker image used for the post process stage. \n"
+                    "Default: postbuild.")
 
     op.add_argument("--postprocess_args", dest="postprocess_args", required=False,
                     default='',
