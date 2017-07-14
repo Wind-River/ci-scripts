@@ -44,9 +44,9 @@ node('docker') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
     }
 
-    def docker_params = "--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 --network ${NETWORK}"
+    def docker_params = "--name build-${BUILD_ID} --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 --network ${NETWORK}"
     if (params.TOASTER == "enable") {
-      docker_params = docker_params + " --expose=8800 -P"
+      docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster"'
     }
 
     docker.withRegistry('http://${REGISTRY}') {
