@@ -1,0 +1,10 @@
+*.pyc
+.#*
+*.swp
+*.elc
+.check
+.pex/*
+dist/*
+toaster_aggregator.egg-info/*
+build/*
+.venv/*
