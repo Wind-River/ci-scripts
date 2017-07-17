@@ -21,6 +21,12 @@
 // SOFTWARE.
 
 node('docker') {
+
+  // Node name is from docker swarm is hostname + dash + random string. Remove random part of recover hostname
+  def hostname = "${NODE_NAME}"
+  hostname = hostname[0..-10]
+  def common_docker_params = "--name build-${BUILD_ID} --hostname ${hostname} --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000"
+
   stage('Docker Run Check') {
     dir('ci-scripts') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
@@ -32,7 +38,7 @@ node('docker') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
     }
     docker.withRegistry('http://${REGISTRY}') {
-      docker.image("${IMAGE}").inside('--tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000') {
+      docker.image("${IMAGE}").inside(common_docker_params) {
         withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "LOCATION=yow"]) {
           sh "${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
         }
@@ -44,7 +50,7 @@ node('docker') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
     }
 
-    def docker_params = "--name build-${BUILD_ID} --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 --network ${NETWORK}"
+    def docker_params = common_docker_params
     if (params.TOASTER == "enable") {
       docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster"'
     }
@@ -65,7 +71,7 @@ node('docker') {
     }
     docker.withRegistry('http://${REGISTRY}') {
       def postprocess_args = "${POSTPROCESS_ARGS}".tokenize(',')
-      docker.image("${POSTPROCESS_IMAGE}").inside('-v /etc/localtime:/etc/localtime:ro -u 1000') {
+      docker.image("${IMAGE}").inside(common_docker_params) {
         withEnv(postprocess_args) {
           sh "${WORKSPACE}/ci-scripts/build_postprocess.sh"
         }

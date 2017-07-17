@@ -65,6 +65,8 @@ Usage $0 [--registry] [--file] [--rm] [--with-lava]
 
   --rm: Delete containers and volumes when script exits
 
+  --no-rm: Do not delete containers and unnamed volumes when script exits
+
   --jenkins-tag: Set the tag for the jenkins-master and jenkins-swarm-client images.
     Defaults to latest
 
@@ -77,7 +79,7 @@ EOF
     exit 1
 }
 
-CLEANUP=0
+CLEANUP=1
 PULL_IMAGES=1
 export JENKINS_TAG=latest
 export BUILDER_TAG=latest
@@ -90,6 +92,7 @@ while [ "$#" -gt 0 ]; do
         --registry)       REGISTRY="$2"; shift 2;;
         --file)           FILES=("${FILES[@]}" --file $2); shift 2;;
         --rm)             CLEANUP=1; shift 1;;
+        --no-rm)          CLEANUP=0; shift 1;;
         --jenkins-tag=*)  JENKINS_TAG="${1#*=}"; shift 1;;
         --builder-tag=*)  BUILDER_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;

@@ -44,5 +44,10 @@ $(VENV):
 
 setup: $(VENV) ## Install all python dependencies in .venv
 
-clean: ## Delete virtualenv and all build directories
+volume_clean: ## Delete named docker volumes
+	docker volume rm ciscripts_jenkins_agent; \
+	docker volume rm ciscripts_jenkins_home; \
+	docker volume rm ciscripts_rproxy_nginx_config
+
+clean: volume_clean ## Delete virtualenv and all build directories
 	rm -rf $(VENV)

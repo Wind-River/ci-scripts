@@ -26,18 +26,19 @@ services:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
     networks:
-      - jenkinsnet  
+      - jenkinsnet
     tmpfs:
       - /tmp:exec
     volumes:
       - jenkins_home:/var/jenkins_home
-      
+
   rproxy:
     image: blacklabelops/nginx
     ports:
       - "443:443"
     links:
       - jenkins
+      - toaster_aggregator
     environment:
       SERVER1HTTPS_ENABLED: "true"
       SERVER1HTTP_ENABLED: "false"
@@ -45,6 +46,8 @@ services:
       SERVER1REVERSE_PROXY_LOCATION1: "/"
       SERVER1REVERSE_PROXY_PASS1: "http://jenkins:8080"
       SERVER1PROXY_APPLICATION: "jenkins"
+      SERVER1REVERSE_PROXY_LOCATION2: "/toaster_aggregator"
+      SERVER1REVERSE_PROXY_PASS2: "http://toaster_aggregator:6543"
       NGINX_REDIRECT_PORT80: "true"
       SERVER1CERTIFICATE_DNAME: "/CN=WindRiver/OU=Linux/O=windriver.com/L=Alameda/C=US"
       DISABLE_ACCESS_LOG: "true"
@@ -77,20 +80,31 @@ services:
       - /etc/localtime:/etc/localtime
 
   consul:
-    hostname: consul
     image: consul:latest
     ports:
       - "8500:8500"
+    networks:
+      - jenkinsnet
     command: "agent -server -ui -bootstrap-expect=1 -client=0.0.0.0"
 
   registrator:
     image: gliderlabs/registrator:latest
-    command: consul://consul:8500
+    command: consul://localhost:8500
     depends_on:
       - consul
+    network_mode: "host"
     volumes:
       # Allow jenkins agent to use host docker to run containers
       - /var/run/docker.sock:/tmp/docker.sock
+
+  toaster_aggregator:
+    image: $REGISTRY/toaster_aggregator
+    depends_on:
+      - consul
+    links:
+      - consul
+    networks:
+      - jenkinsnet
 
 volumes:
   jenkins_home:
@@ -99,4 +113,4 @@ volumes:
 
 networks:
   jenkinsnet:
-    driver: bridge    
+    driver: bridge
