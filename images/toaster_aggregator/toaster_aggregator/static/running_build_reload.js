@@ -37,7 +37,7 @@ $(document).ready(function() {
  
     setInterval( function () {
         buildTable.ajax.reload( null, false ); // user paging is not reset on reload
-    }, 60000 );
+    }, 15000 );
 
 } );
 
