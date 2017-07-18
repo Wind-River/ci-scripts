@@ -81,21 +81,23 @@ services:
 
   consul:
     image: consul:latest
-    ports:
-      - "8500:8500"
     networks:
       - jenkinsnet
     command: "agent -server -ui -bootstrap-expect=1 -client=0.0.0.0"
 
   registrator:
     image: gliderlabs/registrator:latest
-    command: consul://localhost:8500
+    command: -ip=$HOSTIP consul://consul:8500
+    networks:
+      - jenkinsnet
     depends_on:
       - consul
-    network_mode: "host"
+    links:
+      - consul
     volumes:
       # Allow jenkins agent to use host docker to run containers
       - /var/run/docker.sock:/tmp/docker.sock
+      - /etc/hostname:/etc/hostname
 
   toaster_aggregator:
     image: $REGISTRY/toaster_aggregator

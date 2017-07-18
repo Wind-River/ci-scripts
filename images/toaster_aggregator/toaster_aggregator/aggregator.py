@@ -62,12 +62,14 @@ def aggregate_toaster_builds():
         with LOCK:
             AGG_QUERY_SUCCESS = False
         restart_analysis_timer()
+        log.debug("Connection to %s failed", CONSUL)
         return
 
     if request.status_code != 200:
         with LOCK:
             AGG_QUERY_SUCCESS = False
         restart_analysis_timer()
+        log.debug("Request to %s failed", CONSUL)
         return
 
     running_builds = []
@@ -78,7 +80,7 @@ def aggregate_toaster_builds():
             build = {}
             build['name'] = info[1]
             build['progress'] = '0'
-            build['link'] = "<a href=http://%s:%s>Toaster</a>" % (info[0], str(model['Port']))
+            build['link'] = "<a href=http://%s:%s>Toaster</a>" % (model['Address'], str(model['Port']))
             running_builds.append(build)
 
     sorted_builds = {'data': sorted(running_builds, key=lambda build: build['progress'])}
