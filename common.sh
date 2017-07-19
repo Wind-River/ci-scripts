@@ -442,20 +442,6 @@ function generate_mail() {
     fi
 }
 
-function use_native_sstate() {
-    #add prebuilt native sstate to wrlinux prebuilts if available
-    local ARCH=$1
-    local BRANCH=$2
-    local BUILD=$3
-    local TOP=$4
-    local NATIVE_SSTATE="$TOP/host-tools-$ARCH-$BRANCH.tar.gz"
-    if [ -f "$NATIVE_SSTATE" ]; then
-        log "Extracting host-tools for $BRANCH on $ARCH to wr-prebuilts"
-        rm -rf "$BUILD/wrlinux-x/layers/wr-prebuilts/host-tools-x86_64"
-        tar xzf "$NATIVE_SSTATE" --directory "$BUILD/wrlinux-x/layers/wr-prebuilts/"
-    fi
-}
-
 function setup_use_native_sstate() {
     local ARCH=$1
     local BRANCH=$2
@@ -470,28 +456,6 @@ function setup_use_native_sstate() {
     fi
 }
 
-function hard_link_wrlinux_copy() {
-    local WRLINUX=$1
-    local BUILD=$2
-    local BRANCH=$3
-    local TOP=$4
-    local DEST=$5
-    if [ -z "$DEST" ]; then
-        DEST=wrlinux-x
-    fi
-    local TIME=(/usr/bin/time -f %e -o $BUILD/time.log)
-    local HARD_LINK_CP=(cp --recursive --no-dereference --preserve=all --link)
-    #make a recursive hardlinked copy due to disabled network
-    log "Create hard linked wrlinux clone"
-    local LOCKFILE="${TOP}/.update-${BRANCH}.lck"
-    exec 8>"$LOCKFILE"
-    flock --exclusive 8
-    "${TIME[@]}" "${HARD_LINK_CP[@]}" "$WRLINUX" "$DEST"
-    log_stats "Clone" "$BUILD"
-    flock --unlock 8
-    log "Finished creating hard linked wrlinux clone"
-}
-
 function wrlinux_setup_clone() {
     local WRLINUX=$1
     local BUILD=$2
@@ -500,46 +464,6 @@ function wrlinux_setup_clone() {
     # clone the setup program from the local mirror
     git clone --single-branch --branch "$BRANCH" "$WRLINUX" 2>&1
     log "Finished clone of wrlinux setup repository"
-}
-
-
-function update_wrlinux() {
-    local BUILD=$1
-    local TIME="/usr/bin/time -f %e -o $BUILD/time.log"
-    #Update to latest
-    log "Updating wrlinux"
-    cd "$BUILD/wrlinux-x/"
-
-    #assumes $HOME/.gitconfig has suppresscc and wrgit.username
-    $TIME "$WRGIT" pull >> "$BUILD/wrgit_pull.log" 2>&1
-    log_stats "Pull" "$BUILD"
-}
-
-function wait_for_initial_clone {
-    local TOP=$1
-    local WRLINUX=$2
-    local START=$(date +%s)
-    local TWO_HOURS=7200 #2 * 60 * 60 seconds
-    local CLONE_LOCK="${TOP}/.wrlinux_clone_in_progress"
-    while [ ! -d "$WRLINUX" ] || [ -f "$CLONE_LOCK" ]
-    do
-        echo "Waiting for initial clone of wrlinux-x"
-        sleep 60
-        local NOW=$(date +%s)
-        local TIME_WAITING=$((NOW - START))
-        if [ "$TIME_WAITING" -gt "$TWO_HOURS" ]; then
-            echo "Wrlinux clone taking too long!"
-            exit 1
-        fi
-    done
-
-    #wrlinux-x and bin should have been cloned by now
-    local WRGIT=$TOP/bin/wrgit
-    if [ ! -f "$WRGIT" ]; then
-        echo "$WRGIT not found. TOP was set to $TOP. Is that correct?"
-        exit 1
-    fi
-
 }
 
 function trigger_postprocess {
@@ -627,37 +551,6 @@ function add_cgroup_stats() {
 die() {
     echo >&2 "ERROR: $*"
     exit 1
-}
-
-# setup the rsync dir and symlink files into rsync dir to prepare post process
-# script that will do actual rsync
-prepare_rsync() {
-    # The directory that will be rsync'd elsewhere
-    local RSYNC_SOURCE_DIR="$BUILD/rsync/$BUILD_NAME"
-    mkdir -p "$RSYNC_SOURCE_DIR"
-
-    # "Copy" kernel to prepare for rsync
-    ln -sfrL export/*bzImage* "$RSYNC_SOURCE_DIR/."
-
-    # compress the ext3/ext4 images which have lots of empty space
-    local EXPORT_DIR=$(readlink -f export)
-    find "$EXPORT_DIR" -type l -name "*ext[34]" \
-         -exec /bin/bash -c "bzip2 -ck \"{}\" > \"{}\".bz2" \;
-
-    # "Copy" compressed images to rsync dir
-    find "$EXPORT_DIR" -name "*ext[34].bz2" \
-         -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
-
-    # "Copy" dtb file (arm only) to rsync dir
-    find "$EXPORT_DIR" -name "*dtb" \
-         -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
-
-    if [ "$RSYNC_SSTATE" == "yes" ]; then
-        mkdir -p "$RSYNC_SOURCE_DIR/sstate"
-        # Skip the native sstate because it is already built and distributed
-        find bitbake_build/sstate-cache/ -maxdepth 1 -mindepth 1 -type d \
-             -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
-    fi
 }
 
 create_statfile() {
