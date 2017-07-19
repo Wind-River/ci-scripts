@@ -50,7 +50,15 @@ docker-compose run:
 This will download the images from the Docker Cloud/Hub and start the
 images using docker-compose.
 
-### Scheduling Builds
+The jenkins web UI is accessible at https://localhost/. If attempting
+to access the web UI from a different machine, replace localhost with
+the name or IP of the server where the repository was cloned to.
+
+The Jenkins interface is behind an nginx reverse proxy which uses a
+self signed certificate to provide TLS. Bypassing the insecure web
+page warning from the browser will be necessary.
+
+### Scheduling WRLinux Builds
 
 On the same or a different machine, clone this repository. To install
 the python-jenkins package locally run:
@@ -66,14 +74,79 @@ Jenkins Agent.
 The combos-WRLINUX_9_BASE.yaml file is a generated list of valid
 combinations of qemu bsps and configuration options.
 
+### Scheduling Poky Builds
+
+An example config is provided to demonstrate building Poky locally:
+
+    .venv/bin/python3 ./oe_jenkins_build.py --jenkins <jenkins> \
+       --configs_file combos-pyro.yaml --configs=pyro-minimal
+
+To reuse the ubuntu1604_64 image, the poky build uses the WRLinux
+buildtools from Github.
+
+### Toaster Integration
+
+All builds enable toaster by default and the prototype uses
+Registrator and Consul to discover toaster instances. The toaster
+aggregator webapp provides an overview of running toaster instances
+and the current progress of each as well as links to the individual
+toaster instances.
+
+The toaster aggregator web UI is available at
+https://localhost/toaster_aggregator
+
+### Post build operations
+
+The conventional way to add post build operations on Jenkins Pipeline
+projects is to add stages to the pipeline. Each pipeline stage would
+also require more build parameters be added to the job
+configuration. Each additional post build step would require
+significant changes and would not compose well.
+
+The post build operations can be run in a different container than the
+build to avoid having to add tools like rsync to the build
+container. This also allows the build to run without network
+access. To select a different post build image:
+
+    .venv/bin/python3 ./oe_jenkins_build.py \
+        --jenkins https://<jenkins> --postprocess_image <image>
+
+The prototype contains a generic post build step that does not require
+modifications to job config or Jenkinsfile. The post build scripts are
+located in the scripts directory and can be selected to run using the
+command line:
+
+    .venv/bin/python3 ./oe_jenkins_build.py \
+        --jenkins https://<jenkins> --post_success=rsync,cleanup \
+        --post_fail=send_email,cleanup
+
+This would run the scripts/rsync.sh and scripts/cleanup.sh scripts
+after a successful build and scripts/send_email.sh and
+scripts/cleanup.sh after a failed build.
+
+To pass parameters to the post build scripts use:
+
+    .venv/bin/python3 ./oe_jenkins_build.py \
+        --jenkins https://<jenkins> --postprocess_args FOO1=bar,FOO2=baz
+
+The prototype will take the parameters, split them and inject them
+into the postbuild environment.
+
+To add post build steps, add a script to the scripts directory and add
+the script name to the --post_success and/or --post_fail and add any
+required parameters to --postprocess_args.
+
 ## Modifying docker images
 
-The CI prototype uses four images:
+The CI prototype uses the following images:
 
 - windriver/jenkins-master
 - windriver/jenkins-swarm-client
 - windriver/ubuntu1604_64
+- windriver/toaster_aggregator
 - blacklabelops/nginx
+- gliderlabs/registrator
+- consul
 
 To test image modifications rebuild the container locally and run:
 
@@ -81,8 +154,6 @@ To test image modifications rebuild the container locally and run:
 
 ## TODO
 
-- Scripts to build Poky
-- Run post success and post fail scripts
 - Build notifications
 - Automated build of CI images
 - Developer build workflow
