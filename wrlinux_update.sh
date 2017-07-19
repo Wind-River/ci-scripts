@@ -21,7 +21,8 @@
 # SOFTWARE.
 
 if [ -z "$BASE" ]; then
-    BASE=/home/wrlbuild
+    echo "BASE is not set. Do not know where to clone wrlinux. Aborting"
+    exit 1
 fi
 
 call_setup_with_timeout()
@@ -57,27 +58,29 @@ wrl_clone_or_update()
 {
     local BRANCH=$1
 
-    local REMOTE=
+    local REMOTE=$2
     local SETUP_REPO=
     local WRLINUX_BRANCH=
     WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
-    REMOTE="https://github.com/WindRiver-Labs/wrlinux-9"
     SETUP_REPO=wrlinux-9
+    if [ "${REMOTE:0:6}" == 'git://' ]; then
+        SETUP_REPO=wrlinux-x
+    fi
 
     cd ${BASE}
-    if [ ! -f "${BASE}/wrlinux-$BRANCH/wrlinux-9/setup.sh" ]; then
+    if [ ! -f "${BASE}/wrlinux-${BRANCH}/${SETUP_REPO}/setup.sh" ]; then
         (
             mkdir -p "${BASE}/wrlinux-$BRANCH"
             cd "${BASE}/wrlinux-$BRANCH"
-            rm -rf wrlinux-9
-            echo "Cloning wrlinux-9 with setup program on branch $WRLINUX_BRANCH from $REMOTE"
+            rm -rf "$SETUP_REPO"
+            echo "Cloning $SETUP_REPO with setup program on branch $WRLINUX_BRANCH from $REMOTE"
             git clone --branch "$WRLINUX_BRANCH" --single-branch "${REMOTE}"
             echo "Mirroring wrlinux source tree with setup program on branch $BRANCH"
             call_setup_with_timeout "$SETUP_REPO" 60m
         )
     else
         (
-            echo "Updating wrlinux-x on branch $WRLINUX_BRANCH"
+            echo "Updating $SETUP_REPO on branch $WRLINUX_BRANCH"
             cd "${BASE}/wrlinux-${BRANCH}/${SETUP_REPO}"
             git fetch --quiet
             git reset --hard "origin/$WRLINUX_BRANCH"
@@ -91,31 +94,52 @@ wrl_clone_or_update()
     fi
 }
 
+lock_and_update()
+{
+    local BRANCH=$1
+    local REMOTE=$2
+    echo "Starting update for $BRANCH by trying to take lock"
+    local LOCKFILE="${BASE}/.update-${BRANCH}.lck"
+    exec 8>"$LOCKFILE"
+    flock --exclusive 8
+    echo "Lock for $BRANCH aquired"
+    wrl_clone_or_update "$BRANCH" "$REMOTE"
+    flock --unlock 8
+    echo "Completed update of $BRANCH and releasing lock"
+}
+
 main()
 {
     echo "*************"
     echo "Starting wrlinux mirror updates"
 
-    cd $BASE || exit 1
+    cd "$BASE" || exit 1
 
     local BRANCHES=$*
 
     local BRANCH=
     for BRANCH in $BRANCHES; do
         case "$BRANCH" in
-            WRLinux-9*)
-                echo "Starting update for $BRANCH by trying to take lock"
-                local LOCKFILE="${BASE}/.update-${BRANCH}.lck"
-                exec 8>"$LOCKFILE"
-                flock --exclusive 8
-                echo "Lock for $BRANCH aquired"
-                wrl_clone_or_update "$BRANCH"
-                flock --unlock 8
-                echo "Completed update of $BRANCH and releasing lock"
+            WRLinux-9-Base*)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE='https://github.com/WindRiver-Labs/wrlinux-9'
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
+                ;;
+            WRLinux-9-LTS*)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE='https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-9'
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
+                ;;
+            WRLINUX_9*)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE='git://ala-git.wrs.com/wrlinux-x'
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
                 ;;
         esac
     done
-
     echo "Finished update"
 }
 

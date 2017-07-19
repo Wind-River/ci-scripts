@@ -94,8 +94,17 @@ def create_parser():
     op.add_argument("--toaster", dest="toaster", required=False,
                     default='enable', choices=['enable', 'disable'],
                     help="The switch for using toaster in build.\n"
-                    "Only two options allowed: enable (with toaster) and disable (without toaster). \n"
+                    "Only two options allowed: enable (with toaster) and disable (without toaster).\n"
                     "Default: enable.")
+
+    op.add_argument("--branch", dest="branch", required=False,
+                    default='',
+                    help="Override the branch defined in the combos file.")
+
+    op.add_argument("--remote", dest="remote", required=False,
+                    default='',
+                    help="Specify a remote for the wrlinux_update.sh script to clone or update from.")
+
     return op
 
 
@@ -108,7 +117,11 @@ def main():
               "Either enable network access or disable Toaster.")
         sys.exit(1)
 
-    server = jenkins.Jenkins(opts.jenkins)
+    try:
+        server = jenkins.Jenkins(opts.jenkins)
+    except jenkins.JenkinsException:
+        print("Connection to Jenkins server %s failed." % opts.jenkins)
+        sys.exit(1)
 
     job_config = os.path.join('jobs', opts.job) + '.xml'
     xml_config = jenkins.EMPTY_CONFIG_XML
@@ -143,6 +156,8 @@ def main():
                 print("Generating command for config %s" % config['name'])
 
                 branch = config.get('branch', "WRLINUX_9_BASE")
+                if opts.branch:
+                    branch = opts.branch
 
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
 
@@ -151,6 +166,7 @@ def main():
                                            'CI_BRANCH': opts.ci_branch,
                                            'IMAGE': opts.image,
                                            'BRANCH': branch,
+                                           'REMOTE': opts.remote,
                                            'SETUP_ARGS': ' '.join(config['setup']),
                                            'PREBUILD_CMD': ' '.join(config['prebuild']),
                                            'BUILD_CMD': ' '.join(config['build']),

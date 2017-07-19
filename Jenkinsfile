@@ -39,7 +39,7 @@ node('docker') {
     }
     docker.withRegistry('http://${REGISTRY}') {
       docker.image("${IMAGE}").inside(common_docker_params) {
-        withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "LOCATION=yow"]) {
+        withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]) {
           sh "${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
         }
       }

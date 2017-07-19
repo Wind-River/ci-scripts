@@ -76,6 +76,11 @@
           <description>The switch for using Toaster for build</description>
           <defaultValue>enable</defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REMOTE</name>
+          <description>Specify a remote for wrlinux_update.sh script to clone or update from</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>

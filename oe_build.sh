@@ -87,6 +87,13 @@ if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
     if [ -z "$WRLINUX" ]; then
         WRLINUX="$TOP/wrlinux-$BRANCH/wrlinux-9"
     fi
+    if [ ! -d "$WRLINUX" ]; then
+        WRLINUX="$TOP/wrlinux-$BRANCH/wrlinux-x"
+    fi
+    if [ ! -d "$WRLINUX" ]; then
+        echo "Local clone of WRLinux at $TOP/wrlinux-$BRANCH not found!"
+        exit 1
+    fi
 
     WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
 
