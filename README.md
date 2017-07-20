@@ -169,6 +169,28 @@ To submit a patch:
 - Open a Pull Request on the GitHub project
 - Optionally create a GitHub Issue describing the issue addressed by the patch
 
+# Docker Images
+
+This repository contains only the Dockerfiles used to generate the
+images. The images are assembled and hosted by Docker on the Docker
+Cloud/Hub.
+
+The images contain Open Source software as distributed by the
+following projects.
+
+- Ubuntu Linux: https://www.ubuntu.com/
+- Alpine Linux: https://www.alpinelinux.org/
+- Jenkins: https://jenkins.io/
+- Jenkins Plugins: https://plugins.jenkins.io/
+- Docker: https://www.docker.com/
+
+# Included Third Party Components
+
+## MIT License
+
+- jQuery Compat JavaScript Library v3.0.0-pre 81b6e46522d8c680f6c38d5e95c732b2b47130b9
+- Skeleton V2.0.4
+- DataTables 1.10.13
 
 # License
 
