@@ -47,44 +47,58 @@ AGG_THREAD = threading.Thread()
 QUERY_INTERVAL = 15
 AGG_QUERY_SUCCESS = False
 PREFIX = '/'
-CONSUL = 'http://consul:8500/v1'
+CONSUL = ''
 RUNNING_BUILDS = []
 NUM_RUNNING_BUILDS = 0
 
 
 def aggregate_toaster_builds():
-    """Analyze build stats and generate json for API"""
-    global AGG_QUERY_SUCCESS
+    """Analyze build stats and generate building progress data from Toaster API.
 
-    try:
-        request = requests.get(CONSUL + '/v1/agent/services')
-    except requests.ConnectionError:
-        with LOCK:
-            AGG_QUERY_SUCCESS = False
-        restart_analysis_timer()
-        log.debug("Connection to %s failed", CONSUL)
-        return
+    Query to CONSUL/v1/health/service/toaster, return JSON:
+        Field "Checks" contains health state of Toaster service, can only start to query Toaster when status is "passing"
+        Field "Service" contains Toaster ip address and port
 
-    if request.status_code != 200:
-        with LOCK:
-            AGG_QUERY_SUCCESS = False
-        restart_analysis_timer()
-        log.debug("Request to %s failed", CONSUL)
+    Query to Toaster-Address:Port/toastergui/api/building if Toaster service is health, return JSON:
+        Field "task" contains building progess in the format of "finished-tasks:total tasks"
+
+    """
+    health_check_request = start_request(CONSUL + '/v1/health/service/toaster', 'CONSUL')
+    if health_check_request is None:
         return
 
     running_builds = []
-    services = request.json()
-    for service_name, model in services.items():
-        if model.get('Service') == 'toaster':
-            info = service_name.split(':')
-            build = {}
-            build['name'] = info[1]
-            build['progress'] = '0'
-            build['link'] = "<a href=http://%s:%s>Toaster</a>" % (model['Address'], str(model['Port']))
-            running_builds.append(build)
+    health_states = health_check_request.json()
+    for state in health_states:
+        check_info = state["Checks"]
+        service_info = state["Service"]
+        build = {}
+        build['id'] = service_info["ID"]
+        build['progress'] = "Pre-Build"
+        build['name'] = build['id'].split(':')[1]
+        build['link'] = "Not Started"
+        for check in check_info:
+            checkid = "service:" + build['id']
+            # If Toaster service is healthy, query it for build information
+            if check["CheckID"] == checkid and check["Status"] == "passing":
+                build['link'] = "<a href=http://%s:%s>Toaster</a>" \
+                                % (service_info['Address'], str(service_info['Port']))
+                toaster_endpoint_building = "http://%s:%s/toastergui/api/building" \
+                                            % (service_info['Address'], str(service_info['Port']))
+                toaster_request = start_request(toaster_endpoint_building, 'Toaster')
+                if toaster_request is None:
+                    break
+                toaster_data = toaster_request.json().get('building')
+                if toaster_data is not None and isinstance(toaster_data, list) and toaster_data:
+                    progress_data = toaster_data[0].get('task')
+                    if progress_data is not None and len(progress_data.split(':')) > 1 and float(progress_data.split(':')[1]) > 0:
+                        build['progress'] = "{:.0%}".format(float(progress_data.split(':')[0]) / float(progress_data.split(':')[1]))
+
+        running_builds.append(build)
 
     sorted_builds = {'data': sorted(running_builds, key=lambda build: build['progress'])}
 
+    global AGG_QUERY_SUCCESS
     global RUNNING_BUILDS
     global NUM_RUNNING_BUILDS
     with LOCK:
@@ -96,7 +110,30 @@ def aggregate_toaster_builds():
     restart_analysis_timer()
 
 
+def start_request(endpoint, request_type):
+    """Make query to API endpoints and call restarter in case of any failure."""
+    global AGG_QUERY_SUCCESS
+    try:
+        request = requests.get(endpoint)
+    except requests.ConnectionError:
+        with LOCK:
+            AGG_QUERY_SUCCESS = False
+        restart_analysis_timer()
+        log.debug("Connection to %s failed, tried to connect to a %s endpoint", endpoint, request_type)
+        return None
+
+    if request.status_code != 200:
+        with LOCK:
+            AGG_QUERY_SUCCESS = False
+        restart_analysis_timer()
+        log.debug("Request to %s failed, tried to connect to a %s endpoint", endpoint, request_type)
+        return None
+
+    return request
+
+
 def restart_analysis_timer():
+    """Restarter for aggregator_toaster_builds"""
     global AGG_THREAD
     AGG_THREAD = threading.Timer(QUERY_INTERVAL, aggregate_toaster_builds)
     AGG_THREAD.daemon = True
@@ -117,7 +154,7 @@ def running_builds_json(_):
 
 
 def health(_):
-    # Return service unavailable until query from Redis is complete
+    """ Return service unavailable until query from Redis is complete """
     if not AGG_QUERY_SUCCESS:
         return HTTPServiceUnavailable()
     return HTTPOk()
@@ -144,7 +181,7 @@ def main(global_config, **settings):
     PREFIX = settings.get('prefix', '/')
 
     global CONSUL
-    CONSUL = settings.get('consul', 'http://consul:8500/v1')
+    CONSUL = settings.get('consul', 'http://consul:8500')
 
     def interrupt():
         log.debug("Cancelling Aggregator Thread Timer")

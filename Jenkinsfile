@@ -52,7 +52,7 @@ node('docker') {
 
     def docker_params = common_docker_params
     if (params.TOASTER == "enable") {
-      docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster"'
+      docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster" -e "SERVICE_CHECK_HTTP=/health"'
     }
 
     docker.withRegistry('http://${REGISTRY}') {
