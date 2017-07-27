@@ -18,15 +18,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM alpine:3.5
+FROM alpine:3.6 as builder
+
+RUN apk add --update --no-cache python3 make bash openssl ca-certificates && \
+    addgroup -g 1000 toaster && \
+    adduser -h /home/toaster -u 1000 -G toaster -s /bin/bash -D toaster
+
+COPY Makefile MANIFEST.in setup.py /home/toaster/
+
+COPY toaster_aggregator /home/toaster/toaster_aggregator
+
+COPY docker-production.ini /home/toaster/dist/
+
+RUN chown -R toaster:toaster /home/toaster
+
+USER toaster
+
+RUN cd /home/toaster/ && make dist/toaster_aggregator
+
+FROM alpine:3.6
 
 RUN apk add --update --no-cache python3 tini && \
     rm -rf /usr/lib/python*/ensurepip && \
-    adduser -h /home/toaster -u 1000 -s /bin/ash -D toaster
+    addgroup -g 1000 toaster && \
+    adduser -h /home/toaster -u 1000 -G toaster -s /bin/ash -D toaster
 
 EXPOSE 6543
 
-COPY [ "dist/toaster_aggregator", "docker-production.ini", "/usr/local/bin/"]
+COPY --from=builder /home/toaster/dist/ /usr/local/bin/
 
 USER toaster
 

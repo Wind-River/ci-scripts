@@ -36,14 +36,15 @@ help:
 
 $(PEX): $(VENV)
 
-toaster_aggregator: dist/toaster_aggregator
+toaster_aggregator: ## Use multi-stage docker build to build pex and final toaster aggregator image
 ifndef TAG
 	$(eval TAG=latest)
 endif
 ifndef REGISTRY
 	$(eval REGISTRY=windriver)
 endif
-	docker build --rm=true --pull -t $(REGISTRY)/$@:$(TAG) -f Dockerfile .
+	docker pull alpine:3.6 # bug in multi-stage does not allow docker build --pull
+	docker build --rm=true -t $(REGISTRY)/$@:$(TAG) -f Dockerfile .
 
 image: toaster_aggregator ## Build a pex file and docker image of the toaster aggregator app
 
