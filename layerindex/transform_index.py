@@ -113,17 +113,23 @@ def create_parser():
 
     op = ArgumentParser(description=descr, formatter_class=RawTextHelpFormatter)
 
-    op.add_argument('--base_url', dest='base_url', required=True,
+    op.add_argument('--base_url', dest='base_url', required=False,
                     help='Base URL to use for Layerindex transform.')
 
     op.add_argument('--branch', dest='branch', required=True,
                     help='Branch to use from LayerIndex.')
 
+    op.add_argument('--input', dest='input', required=True,
+                    choices=['restapi-web', 'restapi-files'],
+                    help='Format of the LayerIndex input.')
+
     op.add_argument('--output', dest='output', required=True,
                     help='Which directory to place the transformed output into.')
 
-    op.add_argument('--mirror_index', dest='mirror_index', required=True,
-                    help='Where to find the mirror-index files to be transformed.')
+    op.add_argument('--source', dest='source', required=True,
+                    help='Where to get the LayerIndex source. If input format is restapi-web,\n'
+                    'then source is http link to a LayerIndex instance. If the input format is\n'
+                    'restapi-files, then source is a local directory.')
 
     op.add_argument("--output_format", dest="output_format", required=False,
                     default='django', choices=['django', 'restapi'],
@@ -137,21 +143,23 @@ opts = parser.parse_args(sys.argv[1:])
 
 # We load from git.wrs.com and transform to msp-git.wrs.com
 # Adjusting both the git URL and the webgit URL
-REPLACE = [
-            ('git://git.wrs.com/', '#BASE_URL#'),
-            ('http://git.wrs.com/cgit/', '#BASE_WEB#'),
-            ('#BASE_URL#', opts.base_url),
-            ('#BASE_WEB#', opts.base_url),
-          ]
+REPLACE = []
+if opts.base_url:
+    REPLACE = [
+        ('git://git.wrs.com/', '#BASE_URL#'),
+        ('http://git.wrs.com/cgit/', '#BASE_WEB#'),
+        ('#BASE_URL#', opts.base_url),
+        ('#BASE_WEB#', opts.base_url),
+    ]
 
 # Note the branch can be hard coded.  This is required only when you want
 # to limit the branch from a restapi-web import.  (This does not do anything
 # on other input formats.)
 INDEXES = [
     {
-        'DESCRIPTION': 'Wind River Developer Layer Index',
-        'TYPE': 'restapi-files',
-        'URL': 'http://layers.wrs.com/layerindex/api/',
+        'DESCRIPTION': 'import',
+        'TYPE': opts.input,
+        'URL': opts.source,
         'CACHE': None,
         'BRANCH': opts.branch,
     },
@@ -161,9 +169,13 @@ OUTPUT = opts.output
 OUTPUT_FMT = opts.output_format
 SPLIT = False
 
+MIRROR_INDEX = None
+if opts.input == 'restapi-files':
+    MIRROR_INDEX = opts.source
+
 from layer_index import Layer_Index
 
-index = Layer_Index(INDEXES, base_branch=None, replace=REPLACE, mirror=opts.mirror_index)
+index = Layer_Index(INDEXES, base_branch=None, replace=REPLACE, mirror=MIRROR_INDEX)
 
 for lindex in index.index:
     # remove invalid layer dependencies
