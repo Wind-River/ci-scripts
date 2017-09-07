@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM jenkins:2.60.1-alpine
+FROM jenkins/jenkins:lts-alpine
 
 # Increase timeout to try and avoid plugin download errors
 ENV CURL_CONNECTION_TIMEOUT 60
