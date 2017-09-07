@@ -25,6 +25,7 @@ services:
     environment:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
+      JENKINS_UI_URL: "https://$HOST"
     networks:
       - jenkinsnet
     tmpfs:
