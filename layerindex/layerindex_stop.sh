@@ -25,5 +25,6 @@ if [ -n "$BUILD_ID" ]; then
 fi
 
 # stop and clean up containers and volumes
-docker-compose down -v
-
+docker-compose stop
+docker-compose rm -v -f
+docker-compose down

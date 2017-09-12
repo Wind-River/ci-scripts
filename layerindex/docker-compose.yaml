@@ -21,8 +21,8 @@
 version: '3.1'
 services:
   layerindex:
-#    ports:
-#      - '5000:5000'
+    # ports:
+    #   - '5000:5000'
     image: windriver/layerindex
     depends_on:
       - mariadb
@@ -30,13 +30,22 @@ services:
       - /tmp:exec
     volumes:
       - $PWD/settings.py:/opt/layerindex/settings.py
+      - $PWD/settings.py:/opt/layerindex/layerindex/settings.py
+      - layer_cache:/opt/layers
 
   mariadb:
     image: mariadb
+    # Enable UTF-8 for tables
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
     environment:
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_DATABASE: 'layerindex'
       MYSQL_USER: 'oelayer'
       MYSQL_PASSWORD: 'oelayer'
+      LANG: 'en_US.UTF-8'
+      LC_ALL: 'en_US.UTF-8'
     tmpfs:
       - /tmp:exec
+
+volumes:
+  layer_cache:

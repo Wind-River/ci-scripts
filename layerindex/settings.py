@@ -202,12 +202,13 @@ DEFAULT_FROM_EMAIL = 'noreply@example.com'
 LOGIN_REDIRECT_URL = '/layerindex'
 
 # Full path to directory where layers should be fetched into by the update script
-LAYER_FETCH_DIR = ""
+LAYER_FETCH_DIR = "/opt/layers"
 
 # Base temporary directory in which to create a directory in which to run BitBake
 TEMP_BASE_DIR = "/tmp"
 
 # Fetch URL of the BitBake repository for the update script
+# BITBAKE_REPO_URL = "https://github.com/WindRiver-Labs/bitbake.git"
 BITBAKE_REPO_URL = "git://git.openembedded.org/bitbake"
 
 # Core layer to be used by the update script for basic BitBake configuration

@@ -40,7 +40,7 @@ if [ -n "$BUILD_ID" ]; then
 fi
 
 TYPE=restapi-web
-BASE_URL=https://github.com/WindRiver-Labs/wrlinux-9.git
+BASE_URL=https://github.com/WindRiver-Labs/
 BRANCH=WRLINUX_9_BASE
 OUTPUT=/opt/layerindex
 SOURCE=
@@ -54,6 +54,7 @@ do
         --branch=*) BRANCH=${i#*=} ;;
         --output=*) OUTPUT=${i#*=} ;;
         --source=*) SOURCE=${i#*=} ;;
+        --base_url=*) BASE_URL=${i#*=} ;;
         *)          ;;
     esac
     shift
@@ -107,7 +108,23 @@ echo
 echo "Transforming database"
 docker-compose exec layerindex /bin/bash -c "cd /opt/wrlinux-9/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
 
-# import initial layerindex state. Hack to remove unicode chars that cause import failure
+# import initial layerindex state.
 echo
 echo "Importing transformed database"
-docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex; sed -i 's/\\\\u0092s//g' import.json; sed -i 's/\\\\u0096//g' import.json; python3 manage.py loaddata import.json"
+docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py loaddata import.json"
+
+# setup django command directory
+docker-compose exec layerindex /bin/bash -c 'cd /opt/layerindex/layerindex; mkdir -p management; touch management/__init__.py; mkdir -p management/commands; touch management/commands/__init__.py'
+
+# add commands to layerindex
+docker cp commands/*.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/layerindex/management/commands
+
+# fetch oe-core because many layers depend on it
+docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$BRANCH -l openembedded-core"
+
+# show available commands
+#docker-compose exec layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py'
+
+#docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py layer_update --name meta-intel --branch $BRANCH --vcs_url https://github.com/kscherer/meta-intel --actual_branch test"
+
+#docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$BRANCH -l meta-intel --fullreload"
