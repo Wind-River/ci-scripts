@@ -21,16 +21,16 @@
 version: '3.1'
 services:
   layerindex:
+    command: ["/usr/local/bin/gunicorn", "wsgi:application", "--workers=2", "--bind=0.0.0.0:5000", "--chdir=/opt/layerindex"]
     # ports:
     #   - '5000:5000'
     image: windriver/layerindex
+    hostname: layerindex
     depends_on:
       - mariadb
     tmpfs:
       - /tmp:exec
     volumes:
-      - $PWD/settings.py:/opt/layerindex/settings.py
-      - $PWD/settings.py:/opt/layerindex/layerindex/settings.py
       - layer_cache:/opt/layers
 
   mariadb:
