@@ -44,23 +44,22 @@ RUN addgroup -g 1000 jenkins && addgroup -g 997 docker && addgroup -g 996 docker
     && adduser -u 1000 -G jenkins -D -s /sbin/nologin jenkins \
     && adduser jenkins docker2 && adduser jenkins docker3 && adduser jenkins docker4 \
     && adduser jenkins ping && adduser jenkins jenkins \
-    && apk --update --no-cache add tini openjdk8-jre python git openssh openssl bash sudo \
+    && apk --update --no-cache add tini openjdk8-jre python git openssh openssl bash sudo py-pip \
+    && pip install docker-compose \
     && echo "jenkins ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-ENV "SWARM_CLIENT_VERSION=3.4" \
-    "SWARM_SHA=ef74404b14710491ca7e416bb9bed29f7f5236db" \
-    "SWARM_HOME=/home/jenkins" \
-    "SWARM_DELAYED_START=" \ 
-    "COMMAND_OPTIONS=" \
-    "USER_NAME_SECRET=" \
-    "PASSWORD_SECRET="
+ENV SWARM_CLIENT_VERSION="3.4" \
+    SWARM_SHA="ef74404b14710491ca7e416bb9bed29f7f5236db" \
+    SWARM_HOME="/home/jenkins" \
+    SWARM_DELAYED_START="" \
+    COMMAND_OPTIONS="" \
+    USER_NAME_SECRET="" \
+    PASSWORD_SECRET=""
 
 # note busybox sha1sum requires two spaces between SHA and filename
 RUN wget -q https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/${SWARM_CLIENT_VERSION}/swarm-client-${SWARM_CLIENT_VERSION}.jar -P /usr/bin/ \
    && mv /usr/bin/swarm-client-*.jar /usr/bin/swarm-client.jar \
    && echo "$SWARM_SHA  /usr/bin/swarm-client.jar" | sha1sum -c - \
-   && wget -q -O /usr/bin/docker-compose https://github.com/docker/compose/releases/download/1.13.0/docker-compose-Linux-x86_64 \
-   && chmod +x /usr/bin/docker-compose \
    && mkdir -p "${SWARM_HOME}/workspace" && chown -R jenkins:jenkins "$SWARM_HOME"
 
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
