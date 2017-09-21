@@ -174,6 +174,7 @@ def main():
                 if opts.branch:
                     branch = opts.branch
 
+                devbuild_args = ""
                 if opts.devbuild_layer_name:
                     devbuild_args = "DEVBUILD_LAYER_NAME=" + opts.devbuild_layer_name
                     devbuild_args += ",DEVBUILD_BRANCH=" + branch
