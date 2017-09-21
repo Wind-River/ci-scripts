@@ -83,6 +83,8 @@ CLEANUP=1
 PULL_IMAGES=1
 export JENKINS_TAG=latest
 export BUILDER_TAG=latest
+export TOASTER_TAG=latest
+export POSTBUILD_TAG=latest
 export REGISTRY=
 declare -a FILES=
 
@@ -95,6 +97,8 @@ while [ "$#" -gt 0 ]; do
         --no-rm)          CLEANUP=0; shift 1;;
         --jenkins-tag=*)  JENKINS_TAG="${1#*=}"; shift 1;;
         --builder-tag=*)  BUILDER_TAG="${1#*=}"; shift 1;;
+        --toaster-tag=*)  TOASTER_TAG="${1#*=}"; shift 1;;
+        --postbuild-tag=*) POSTBUILD_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;
         *)            usage ;;
     esac
@@ -141,10 +145,15 @@ fi
 echo "Using registry $REGISTRY."
 
 if [ "$PULL_IMAGES" == '1' ]; then
-    echo "Pull jenkins-master, jenkins-swarm-client and ubuntu1604_64 images"
+    echo "Pull latest docker images from Docker Hub"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-master:${JENKINS_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-swarm-client:${JENKINS_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/ubuntu1604_64:${BUILDER_TAG}"
+    ${DOCKER_CMD[*]} pull "${REGISTRY}/postbuild:${POSTBUILD_TAG}"
+    ${DOCKER_CMD[*]} pull "${REGISTRY}/toaster_aggregator:${TOASTER_TAG}"
+    ${DOCKER_CMD[*]} pull consul
+    ${DOCKER_CMD[*]} pull blacklabelops/nginx
+    ${DOCKER_CMD[*]} pull gliderlabs/registrator
 fi
 
 get_primary_ip_address() {
