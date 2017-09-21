@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-
+// -*- mode: groovy; tab-width: 2; groovy-indent-offset: 2 -*-
 // Copyright (c) 2017 Wind River Systems Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,7 +25,7 @@ node('docker') {
   // Node name is from docker swarm is hostname + dash + random string. Remove random part of recover hostname
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
-  def common_docker_params = "--name build-${BUILD_ID} --hostname ${hostname} --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000"
+  def common_docker_params = "--name build-${BUILD_ID} --hostname ${hostname} -t --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000"
 
   stage('Docker Run Check') {
     dir('ci-scripts') {
@@ -45,35 +45,79 @@ node('docker') {
       }
     }
   }
-  stage('Build') {
-    dir('ci-scripts') {
-      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+
+  try {
+    stage('Layerindex Setup') {
+      // if devbuilds are enabled, start build in same network as layerindex
+      if (params.DEVBUILD_ARGS != "") {
+        dir('ci-scripts') {
+          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+        }
+        devbuild_args = "${DEVBUILD_ARGS}".tokenize(',')
+        withEnv(devbuild_args) {
+          dir('ci-scripts/layerindex') {
+            sh "./layerindex_start.sh"
+            sh "./layerindex_layer_update.sh"
+          }
+        }
+      }
+      else {
+        println("Not starting local LayerIndex")
+      }
     }
 
-    def docker_params = common_docker_params
-    if (params.TOASTER == "enable") {
-      docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster" -e "SERVICE_CHECK_HTTP=/health"'
-    }
+    stage('Build') {
+      dir('ci-scripts') {
+        git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+      }
 
-    docker.withRegistry('http://${REGISTRY}') {
-      docker.image("${IMAGE}").inside(docker_params) {
-        withEnv(['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]) {
-          sh "mkdir -p ${WORKSPACE}/builds"
-          sh "${WORKSPACE}/ci-scripts/jenkins_build.sh"
+      def docker_params = common_docker_params
+      if (params.TOASTER == "enable") {
+        docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster" -e "SERVICE_CHECK_HTTP=/health"'
+      }
+
+      def env_args = ['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]
+
+      if (params.DEVBUILD_ARGS != "") {
+        devbuild_args = "${DEVBUILD_ARGS}".tokenize(',')
+        docker_params = docker_params + ' --network=build${BUILD_ID}_default'
+        env_args = env_args + devbuild_args
+      }
+      docker.withRegistry('http://${REGISTRY}') {
+        docker.image("${IMAGE}").inside(docker_params) {
+          withEnv(env_args) {
+            sh "mkdir -p ${WORKSPACE}/builds"
+            sh "${WORKSPACE}/ci-scripts/jenkins_build.sh"
+          }
         }
       }
     }
   }
-
-  stage('Post Process') {
-    dir('ci-scripts') {
-      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+  finally {
+    stage('Layerindex Cleanup') {
+      if (params.DEVBUILD_ARGS != "") {
+        dir('ci-scripts') {
+          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+        }
+        dir('ci-scripts/layerindex') {
+          sh "./layerindex_stop.sh"
+        }
+      }
+      else {
+        println("No LayerIndex Cleanup necessary")
+      }
     }
-    docker.withRegistry('http://${REGISTRY}') {
-      def postprocess_args = "${POSTPROCESS_ARGS}".tokenize(',')
-      docker.image("${IMAGE}").inside(common_docker_params) {
-        withEnv(postprocess_args) {
-          sh "${WORKSPACE}/ci-scripts/build_postprocess.sh"
+
+    stage('Post Process') {
+      dir('ci-scripts') {
+        git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+      }
+      docker.withRegistry('http://${REGISTRY}') {
+        def postprocess_args = "${POSTPROCESS_ARGS}".tokenize(',')
+        docker.image("${POSTPROCESS_IMAGE}").inside(common_docker_params) {
+          withEnv(postprocess_args) {
+            sh "${WORKSPACE}/ci-scripts/build_postprocess.sh"
+          }
         }
       }
     }

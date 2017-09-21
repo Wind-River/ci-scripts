@@ -11,7 +11,7 @@ class Command(BaseCommand):
         parser.add_argument('--branch', action='store', dest='branch',
                             required=True, help='The LayerIndex branch this layer will be stored with.')
         parser.add_argument('--actual_branch', action='store', dest='actual_branch',
-                            required=True, help='The actual branch to use for the repository')
+                            required=False, help='The actual branch to use for the repository')
         parser.add_argument('--name', action='store', dest='name',
                             required=True, help='The name of the Layer')
         parser.add_argument('--vcs_url', action='store', dest='vcs_url',
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         layerItem.save()
 
         layerBranch, created = LayerBranch.objects.get_or_create(layer=layerItem, branch=branch)
-        layerBranch.actual_branch = options['actual_branch']
+        layerBranch.actual_branch = options.get('actual_branch', options['branch'])
         vcs_subdir = options.get('vcs_subdir')
         if vcs_subdir:
             layerBranch.vcs_subdir = vcs_subdir

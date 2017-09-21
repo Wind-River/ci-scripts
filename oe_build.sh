@@ -23,9 +23,6 @@
 #make sure current dir is same as location of script
 cd "$(dirname "$0")"
 
-# print all env variables from mesos or local environment
-env
-
 source common.sh
 
 TOP=/home/wrlbuild
@@ -152,3 +149,5 @@ fi
 trigger_postprocess "$STATFILE"
 
 log "Done build"
+
+exit "$RET"

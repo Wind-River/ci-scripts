@@ -25,7 +25,7 @@
 #
 # To populate it with entries from a running layerindex like layers.openembedded.org:
 #
-# ./layerindex_start.sh --input=restapi-web --branch=pyro \
+# ./layerindex_start.sh --input=restapi-web --branch=master \
 #          --source=https://layers.openembedded.org/layerindex/api/
 #
 # To populate it with a cached mirror-index:
@@ -41,9 +41,12 @@ fi
 
 TYPE=restapi-web
 BASE_URL=https://github.com/WindRiver-Labs/
-BRANCH=WRLINUX_9_BASE
 OUTPUT=/opt/layerindex
-SOURCE=
+SOURCE=https://layers.openembedded.org/layerindex/api/
+
+if [ -z "$BRANCH" ]; then
+    BRANCH=WRLINUX_9_BASE
+fi
 
 echo "Command: $0"
 for i in "$@"
@@ -82,10 +85,10 @@ for i in {10..1};do echo -n "$i." && sleep 1; done; echo
 # Initialize the db without an admin user
 echo
 echo "Initializing database"
-docker-compose exec layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py syncdb --noinput'
+docker-compose exec -T layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py syncdb --noinput'
 
 # clone repos that will be used to generate initial layerindex state
-docker-compose exec layerindex /bin/bash -c 'cd /opt/; git clone --depth=1 https://github.com/WindRiver-Labs/wrlinux-9.git'
+docker-compose exec -T layerindex /bin/bash -c 'cd /opt/; git clone --depth=1 https://github.com/WindRiver-Labs/wrlinux-9.git'
 
 # copy script that transforms mirror-index into django format
 docker cp ./transform_index.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/wrlinux-9/bin
@@ -95,7 +98,7 @@ declare -a TRANSFORM_CMD
 if [ "$TYPE" == 'restapi-files' ]; then
     echo
     echo "Cloning Mirror-index"
-    docker-compose exec layerindex /bin/bash -c "cd /opt/; git clone --depth=1 $SOURCE restapi-files"
+    docker-compose exec -T layerindex /bin/bash -c "cd /opt/; git clone --depth=1 $SOURCE restapi-files"
     TRANSFORM_CMD=(--base_url "$BASE_URL")
 
     SOURCE=/opt/restapi-files
@@ -106,25 +109,21 @@ TRANSFORM_CMD+=(--input "$TYPE" --branch "$BRANCH" --output "$OUTPUT" --source "
 # transform mirror-index to django format
 echo
 echo "Transforming database"
-docker-compose exec layerindex /bin/bash -c "cd /opt/wrlinux-9/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
+docker-compose exec -T layerindex /bin/bash -c "cd /opt/wrlinux-9/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
 
 # import initial layerindex state.
 echo
 echo "Importing transformed database"
-docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py loaddata import.json"
+docker-compose exec -T layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py loaddata import.json"
 
 # setup django command directory
-docker-compose exec layerindex /bin/bash -c 'cd /opt/layerindex/layerindex; mkdir -p management; touch management/__init__.py; mkdir -p management/commands; touch management/commands/__init__.py'
+docker-compose exec -T layerindex /bin/bash -c 'cd /opt/layerindex/layerindex; mkdir -p management; touch management/__init__.py; mkdir -p management/commands; touch management/commands/__init__.py'
 
 # add commands to layerindex
 docker cp commands/*.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/layerindex/management/commands
 
 # fetch oe-core because many layers depend on it
-docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$BRANCH -l openembedded-core"
+docker-compose exec -T layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$BRANCH -l openembedded-core"
 
 # show available commands
-#docker-compose exec layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py'
-
-#docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py layer_update --name meta-intel --branch $BRANCH --vcs_url https://github.com/kscherer/meta-intel --actual_branch test"
-
-#docker-compose exec layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$BRANCH -l meta-intel --fullreload"
+#docker-compose exec -T layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py'

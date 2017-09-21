@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-env
-
 "$WORKSPACE"/ci-scripts/oe_build.sh \
     --top="$WORKSPACE" --name="$NAME" --branch="$BRANCH" \
     --host="$NODE_NAME" --setup_args="$SETUP_ARGS" --prebuild_cmd="$PREBUILD_CMD" \

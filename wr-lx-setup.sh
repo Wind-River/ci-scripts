@@ -20,25 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-source "$(dirname "$0")"/common.sh
-
-BRANCH=pyro
+if [ -z "$BRANCH" ]; then
+    BRANCH=master
+fi
 SDKARCH=${SDKARCH:-$(uname -m)}
+WR_LX_SETUP=git://github.com/Wind-River/wr-lx-setup.git
 
-echo "Command: $0"
-for i in "$@"
-do
-    echo "Arg: $i"
-    case $i in
-        --branch=*)             BRANCH=${i#*=} ;;
-        *)                      ;;
-    esac
-    shift
-done
-
-git clone --branch "$BRANCH" --single-branch git://git.yoctoproject.org/poky
-mv poky/* .
-mv poky/.templateconf .
+git clone --single-branch --branch "$BRANCH" "$WR_LX_SETUP" setup 2>&1
 
 BUILDTOOLS=$(curl -s -L https://raw.githubusercontent.com/WindRiver-Labs/wrlinux-9/WRLINUX_9_BASE/data/environment.d/04_wrl_buildtools.sh | grep BUILDTOOLS_REMOTE: | cut -d'-' -f 2- | cut -d'}' -f 1)
 
@@ -65,3 +53,13 @@ if [ -z "${ENVIRON}" ]; then
 	exit 1
 fi
 ln -sf "$ENVIRON" .
+. "./$ENVIRON"
+
+# When doing devbuilds, setup needs to use the local layerindex
+if [ -n "$DEVBUILD_ARGS" ]; then
+    sed -i "s#http://layers.openembedded.org/layerindex/api/#http://layerindex:5000/layerindex/api/#" setup/bin/settings.py
+fi
+
+# drop first param which is name of this script
+shift
+./setup/setup.sh "$@"

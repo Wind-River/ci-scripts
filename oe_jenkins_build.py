@@ -105,6 +105,20 @@ def create_parser():
                     default='',
                     help="Specify a remote for the wrlinux_update.sh script to clone or update from.")
 
+    op.add_argument("--devbuild_layer_name", dest="devbuild_layer_name", required=False,
+                    default='',
+                    help="Specify a layer name to be modified as part of a Devbuild.")
+
+    op.add_argument("--devbuild_layer_vcs_url", dest="devbuild_layer_vcs_url", required=False,
+                    default='',
+                    help="Specify the layer vcs_url to used with a Devbuild."
+                    "If not specified the vcs_url will not be changed.")
+
+    op.add_argument("--devbuild_layer_actual_branch", dest="devbuild_layer_actual_branch", required=False,
+                    default='',
+                    help="Specify the branch to be used with on the modified layer for a Devbuild."
+                    "Defaults to branch used for build")
+
     return op
 
 
@@ -112,6 +126,7 @@ def main():
     """Main"""
     parser = create_parser()
     opts = parser.parse_args(sys.argv[1:])
+
     if opts.network == "none" and opts.toaster == "enable":
         print("Cannot enable Toaster if network is disabled."
               "Either enable network access or disable Toaster.")
@@ -159,6 +174,15 @@ def main():
                 if opts.branch:
                     branch = opts.branch
 
+                if opts.devbuild_layer_name:
+                    devbuild_args = "DEVBUILD_LAYER_NAME=" + opts.devbuild_layer_name
+                    devbuild_args += ",DEVBUILD_BRANCH=" + branch
+                    devbuild_args += ",DEVBUILD_LAYER_VCS_URL=" + opts.devbuild_layer_vcs_url
+
+                    if not opts.devbuild_layer_actual_branch:
+                        opts.devbuild_layer_actual_branch = branch
+                    devbuild_args += ",DEVBUILD_LAYER_ACTUAL_BRANCH=" + opts.devbuild_layer_actual_branch
+
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
 
                 output = server.build_job(opts.job,
@@ -177,6 +201,7 @@ def main():
                                            'POST_FAIL': opts.post_fail,
                                            'NETWORK': opts.network,
                                            'TOASTER': opts.toaster,
+                                           'DEVBUILD_ARGS': devbuild_args,
                                           })
 
                 print("Scheduled build " + str(next_build_number))

@@ -81,6 +81,11 @@
           <description>Specify a remote for wrlinux_update.sh script to clone or update from</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DEVBUILD_ARGS</name>
+          <description>Comma separated list of env vars used to setup devbuilds</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
