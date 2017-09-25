@@ -21,32 +21,32 @@
 version: '3.1'
 services:
   jenkins:
-    image: $REGISTRY/jenkins-master
+    image: $REGISTRY/jenkins-master:$JENKINS_MASTER_TAG
     environment:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
       JENKINS_UI_URL: "https://$HOST"
+    links:
+      - rproxy
     networks:
-      - jenkinsnet
+      - ci_net
     tmpfs:
       - /tmp:exec
     volumes:
       - jenkins_home:/var/jenkins_home
 
   rproxy:
-    image: blacklabelops/nginx
+    image: blacklabelops/nginx:$RPROXY_TAG
     ports:
       - "443:443"
-    links:
-      - jenkins
-      - toaster_aggregator
     environment:
       SERVER1HTTPS_ENABLED: "true"
       SERVER1HTTP_ENABLED: "false"
       SERVER1SERVER_NAME: "localhost"
+      # Jenkins at root path so it can be accessed by workers path
       SERVER1REVERSE_PROXY_LOCATION1: "/"
       SERVER1REVERSE_PROXY_PASS1: "http://jenkins:8080"
-      SERVER1PROXY_APPLICATION: "jenkins"
+      SERVER1REVERSE_PROXY_APPLICATION1: "jenkins"
       SERVER1REVERSE_PROXY_LOCATION2: "/toaster_aggregator"
       SERVER1REVERSE_PROXY_PASS2: "http://toaster_aggregator:6543"
       NGINX_REDIRECT_PORT80: "true"
@@ -54,7 +54,7 @@ services:
       DISABLE_ACCESS_LOG: "true"
       LOG_LEVEL: "warn"
     networks:
-      - jenkinsnet
+      - ci_net
     tmpfs:
       - /tmp
     volumes:
@@ -62,14 +62,14 @@ services:
       - rproxy_nginx_config:/etc/nginx
 
   client:
-    image: $REGISTRY/jenkins-swarm-client
+    image: $REGISTRY/jenkins-swarm-client:$JENKINS_AGENT_TAG
     depends_on:
       - jenkins
     environment:
       COMMAND_OPTIONS: "-master http://jenkins:8080/ -disableSslVerification -labels 'docker' -executors 2"
       SWARM_DELAYED_START: "15"
     networks:
-      - jenkinsnet
+      - ci_net
     tmpfs:
       - /tmp
     volumes:
@@ -81,16 +81,16 @@ services:
       - /etc/localtime:/etc/localtime
 
   consul:
-    image: consul:latest
+    image: consul:$CONSUL_TAG
     networks:
-      - jenkinsnet
+      - ci_net
     command: "agent -server -ui -bootstrap-expect=1 -client=0.0.0.0"
 
   registrator:
     image: gliderlabs/registrator:latest
     command: -ip=$HOSTIP consul://consul:8500
     networks:
-      - jenkinsnet
+      - ci_net
     depends_on:
       - consul
     links:
@@ -105,9 +105,10 @@ services:
     depends_on:
       - consul
     links:
+      - rproxy
       - consul
     networks:
-      - jenkinsnet
+      - ci_net
 
 volumes:
   jenkins_home:
@@ -115,5 +116,5 @@ volumes:
   rproxy_nginx_config:
 
 networks:
-  jenkinsnet:
+  ci_net:
     driver: bridge

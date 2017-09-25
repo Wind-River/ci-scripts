@@ -1,0 +1,58 @@
+# Copyright (c) 2017 Wind River Systems Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+version: '3.1'
+services:
+  artifactory:
+    image: ${ARTIFACTORY_IMAGE:-docker.bintray.io/jfrog/artifactory-oss}:${ARTIFACTORY_TAG:-latest}
+    links:
+      - rproxy
+    networks:
+      - ci_net
+    volumes:
+      - artifactory_data:/var/opt/jfrog/artifactory
+
+  # Support standalone artifactory or add env vars to
+  # existing reverse proxy
+  rproxy:
+    environment:
+      # artifactory is special because it already assumes a subpath
+      # but it still requires some special headers to work properly
+      # double $$ is necessary to avoid interpolation by docker-compose
+      SERVER1REVERSE_PROXY_LOCATION3: "/artifactory/"
+      SERVER1REVERSE_PROXY_PASS3: "http://artifactory:8081/"
+      SERVER1REVERSE_PROXY_APPLICATION3: "custom"
+      SERVER1REVERSE_PROXY_HEADER3FIELD1: 'X-Forwarded-Host $$host'
+      SERVER1REVERSE_PROXY_HEADER3FIELD2: 'X-Forwarded-Server $$host'
+      SERVER1REVERSE_PROXY_HEADER3FIELD3: 'X-Forwarded-For $$proxy_add_x_forwarded_for'
+      SERVER1REVERSE_PROXY_HEADER3FIELD4: 'X-Artifactory-Override-Base-Url $$scheme://$$host:$$server_port/artifactory'
+      SERVER1REVERSE_PROXY_HEADER3FIELD5: 'X-Forwarded-Port $$server_port'
+      SERVER1REVERSE_PROXY_HEADER3FIELD6: 'Host $$http_host'
+      SERVER1REVERSE_PROXY_HEADER3FIELD7: 'X-Forwarded-Proto $$scheme'
+      SERVER1REVERSE_PROXY_DIRECTIVE3FIELD1: 'proxy_read_timeout 900'
+      SERVER1REVERSE_PROXY_DIRECTIVE3FIELD2: 'proxy_pass_header   Server'
+      SERVER1REVERSE_PROXY_DIRECTIVE3FIELD3: 'proxy_cookie_path ~*^/.* /'
+
+volumes:
+  artifactory_data:
+      
+networks:
+  ci_net:
+    driver: bridge

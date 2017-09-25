@@ -192,6 +192,17 @@ Current Limitations:
 
 [1]: https://github.com/Wind-River/wr-lx-setup
 
+### Artifactory
+
+We are exploring using Artifactory to store and serve build
+artifacts. To enable integration of Artifactory into the reverse proxy
+run:
+
+    ./start-jenkins.sh --with-artifactory
+
+This is completely optional. A future version of the CI project may
+contain a simple WebDav server to store and serve build artifacts.
+
 ## Modifying docker images
 
 The CI prototype uses the following images:

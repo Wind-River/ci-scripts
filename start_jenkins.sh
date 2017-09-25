@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 set -uo pipefail
-IFS=$'\n\t'
 
 # taken from http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
 function vercomp {
@@ -54,24 +53,56 @@ function vercomp {
     return 0
 }
 
+export JENKINS_MASTER_TAG=latest
+export JENKINS_AGENT_TAG=latest
+export RPROXY_TAG=latest
+export BUILDER_TAG=latest
+export TOASTER_TAG=latest
+export POSTBUILD_TAG=latest
+export ARTIFACTORY_IMAGE=docker.bintray.io/jfrog/artifactory-oss
+export ARTIFACTORY_TAG=5.4.6
+export CONSUL_TAG=0.9.0
+# Default to using Docker Hub
+export REGISTRY=windriver
+
 usage() {
     cat <<EOF
 Usage $0 [--registry] [--file] [--rm] [--with-lava]
   --registry=(ala|yow|pek)-lpdfs01: Docker registry to download images from.
      Will attempt to locate closest registry if not provided.
 
-  --file <compose yaml>: Extra compose yaml file(s) to extend wraxl_test.yml
+  --file <compose yaml>: Extra compose yaml file(s) to extend wrl-ci.yaml
      Accepts multiple --file parameters
 
   --rm: Delete containers and volumes when script exits
 
   --no-rm: Do not delete containers and unnamed volumes when script exits
 
-  --jenkins-tag: Set the tag for the jenkins-master and jenkins-swarm-client images.
+  --jenkins-master-tag: Set the tag for the jenkins-master image
+    Defaults to latest
+
+  --jenkins-agent-tag: Set the tag for the jenkins-swarm-client image.
     Defaults to latest
 
   --builder-tag: Set the tag for the ubuntu1604_64 builder image
     Defaults to latest
+
+  --consul-tag: Set the tag for the consul image
+    Defaults to 0.9.0
+
+  --postbuild-tag: Set the tag for the postbuild image
+    Defaults to latest
+
+  --with-artifactory: Enable an instance of artifactory inside the CI system
+
+  --artifactory-image: Set the image name for the artifactory image used.
+    Defaults to $ARTIFACTORY_IMAGE
+
+  --artifactory-tag: Set the tag for the artifactory image.
+    Defaults to $ARTIFACTORY_TAG
+
+  --registry: Set the location of the CI docker images.
+    Defaults to windriver organization on Docker Hub/Cloud.
 
   --no-pull: Do not attempt to pull images from Registry. Useful when testing
      new versions of the images.
@@ -81,12 +112,10 @@ EOF
 
 CLEANUP=1
 PULL_IMAGES=1
-export JENKINS_TAG=latest
-export BUILDER_TAG=latest
-export TOASTER_TAG=latest
-export POSTBUILD_TAG=latest
-export REGISTRY=
-declare -a FILES=
+ARTIFACTORY=0
+
+declare -a FILES
+FILES=(--file wrl-ci.yaml)
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -95,11 +124,16 @@ while [ "$#" -gt 0 ]; do
         --file)           FILES=("${FILES[@]}" --file $2); shift 2;;
         --rm)             CLEANUP=1; shift 1;;
         --no-rm)          CLEANUP=0; shift 1;;
-        --jenkins-tag=*)  JENKINS_TAG="${1#*=}"; shift 1;;
+        --jenkins-master-tag=*) JENKINS_MASTER_TAG="${1#*=}"; shift 1;;
+        --jenkins-agent-tag=*)  JENKINS_AGENT_TAG="${1#*=}"; shift 1;;
         --builder-tag=*)  BUILDER_TAG="${1#*=}"; shift 1;;
         --toaster-tag=*)  TOASTER_TAG="${1#*=}"; shift 1;;
         --postbuild-tag=*) POSTBUILD_TAG="${1#*=}"; shift 1;;
+        --consul-tag=*)   CONSUL_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;
+        --with-artifactory)  ARTIFACTORY=1; shift 1;;
+        --artifactory-image=*) ARTIFACTORY_IMAGE="${1#*=}"; shift 1;;
+        --artifactory-tag=*)   ARTIFACTORY_TAG="${1#*=}"; shift 1;;
         *)            usage ;;
     esac
 done
@@ -138,10 +172,6 @@ fi
 
 echo "Docker Compose is present and is version $DCOMPOSE_VERSION"
 
-# Default to using Docker Hub
-if [ -z "$REGISTRY" ]; then
-    REGISTRY=windriver
-fi
 echo "Using registry $REGISTRY."
 
 if [ "$PULL_IMAGES" == '1' ]; then
@@ -151,9 +181,12 @@ if [ "$PULL_IMAGES" == '1' ]; then
     ${DOCKER_CMD[*]} pull "${REGISTRY}/ubuntu1604_64:${BUILDER_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/postbuild:${POSTBUILD_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/toaster_aggregator:${TOASTER_TAG}"
-    ${DOCKER_CMD[*]} pull consul
-    ${DOCKER_CMD[*]} pull blacklabelops/nginx
-    ${DOCKER_CMD[*]} pull gliderlabs/registrator
+    ${DOCKER_CMD[*]} pull "consul:${CONSUL_TAG}"
+    ${DOCKER_CMD[*]} pull "blacklabelops/nginx:${RPROXY_TAG}"
+    ${DOCKER_CMD[*]} pull gliderlabs/registrator:latest
+    if [ "$ARTIFACTORY" == "1" ]; then
+        ${DOCKER_CMD[*]} pull "${ARTIFACTORY_IMAGE}:${ARTIFACTORY_TAG}"
+    fi
 fi
 
 get_primary_ip_address() {
@@ -173,15 +206,17 @@ if [ $? != 0 ]; then
     export HOST=$HOSTIP
 fi
 
-FILES=(--file wrl-ci.yaml "${FILES[@]}")
+if [ "$ARTIFACTORY" == "1" ]; then
+    FILES=("${FILES[@]}" --file artifactory.yaml)
+fi
 
 echo "Jenkins Master UI will be available at https://$HOSTIP"
-echo Starting Jenkins with: docker-compose ${FILES[*]} up
+echo "Starting CI with: docker-compose ${FILES[*]} up"
 
 sleep 1
-docker-compose ${FILES[*]} up --abort-on-container-exit
+docker-compose "${FILES[@]}" up --abort-on-container-exit
 
 if [ "$CLEANUP" == '1' ]; then
     echo "Cleaning up stopped containers"
-    docker-compose ${FILES[*]} rm --force -v
+    docker-compose "${FILES[@]}" rm --force -v
 fi
