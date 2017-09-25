@@ -136,6 +136,62 @@ To add post build steps, add a script to the scripts directory and add
 the script name to the --post_success and/or --post_fail and add any
 required parameters to --postprocess_args.
 
+### Developer Builds
+
+An ideal Continuous Integration workflow supports the testing of
+patches before they are committed to the "trunk" branches. The
+standard git workflow is to use topic branches and have the CI system
+run tests against the topic branch.
+
+Yocto projects contain a hierarchy of git repositories and there isn't
+a standardized way to create a project area. The wr-lx-setup [1]
+attempts to standardize creation of Yocto projects using the
+Layerindex as a source of available layers and locations. This
+simplifies and standardizes the setup of Yocto projects, but it adds
+the Layerindex as a component required by the CI workflow.
+
+The prototype supports creation of a temporary per build Layerindex
+and modifying the attributes of a layer in the temporary
+Layerindex. This enables a developer to create a topic branch on a
+layer git repository and run builds and tests using this branch.
+
+An example workflow:
+
+    .venv/bin/python3 ./oe_jenkins_build.py \
+        --jenkins https://<jenkins --configs_file combos-master.yaml
+        --configs master-minimal --devbuild_layer_name openembedded-core \
+        --devbuild_layer_vcs_url git://github.com/kscherer/openembedded-core.git \
+        --devbuild_actual_branch devbuild
+
+The sequence of events is:
+
+1. Temporary Layerindex is created and retrieves master branch info
+   from official layers.openembedded.org Layerindex.
+2. The vcs_url and actual_branch for the openembedded-core layer in
+   temp layerindex is changed and the temp layerindex runs update.py
+   to parse this layer. If the update fails, the build also
+   fails. This provides a mechanism to test the addition of new
+   layers.
+3. The wr-lx-setup.sh program is run using the temp layerindex as its
+   source and creates a build area using the openembedded layer as
+   defined in the supplied vcs_url.
+4. After setup is complete, the normal build process continues.
+5. After build is complete, the temp layerindex is shutdown and
+   cleaned up.
+
+Current Limitations:
+
+1. The Layerindex assumes that bitbake and openembedded-core
+   repositories are located on the same git server at the same path.
+2. Only changing a single layer is currently supported. There is no
+   technical reason why multiple layers could not be changed.
+3. For efficiency reasons, the layerindex cache is a shared local
+   docker volume and this could cause the update to fail due to a
+   timeout if multiple developer builds on the same machine attempt to
+   update there own temp layerindex at the same time.
+
+[1]: https://github.com/Wind-River/wr-lx-setup
+
 ## Modifying docker images
 
 The CI prototype uses the following images:
@@ -147,6 +203,7 @@ The CI prototype uses the following images:
 - blacklabelops/nginx
 - gliderlabs/registrator
 - consul
+- windriver/layerindex
 
 To test image modifications rebuild the container locally and run:
 
@@ -155,8 +212,6 @@ To test image modifications rebuild the container locally and run:
 ## TODO
 
 - Build notifications
-- Automated build of CI images
-- Developer build workflow
 
 ## Contributing
 
