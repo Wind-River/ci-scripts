@@ -176,8 +176,8 @@ echo "Using registry $REGISTRY."
 
 if [ "$PULL_IMAGES" == '1' ]; then
     echo "Pull latest docker images from Docker Hub"
-    ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-master:${JENKINS_TAG}"
-    ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-swarm-client:${JENKINS_TAG}"
+    ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-master:${JENKINS_MASTER_TAG}"
+    ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-swarm-client:${JENKINS_MASTER_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/ubuntu1604_64:${BUILDER_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/postbuild:${POSTBUILD_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/toaster_aggregator:${TOASTER_TAG}"
