@@ -27,4 +27,4 @@ fi
 # stop and clean up containers and volumes
 docker-compose stop
 docker-compose rm -v -f
-docker-compose down
+docker-compose down -v
