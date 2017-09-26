@@ -36,7 +36,7 @@ services:
       - jenkins_home:/var/jenkins_home
 
   rproxy:
-    image: blacklabelops/nginx:$RPROXY_TAG
+    image: blacklabelops/nginx:${RPROXY_TAG:-latest}
     ports:
       - "443:443"
     environment:
@@ -59,7 +59,7 @@ services:
       - /tmp
     volumes:
       # Volume avoids recreating certs on every run
-      - rproxy_nginx_config:/etc/nginx
+      - rproxy_nginx_config:/etc/nginx/keys
 
   client:
     image: $REGISTRY/jenkins-swarm-client:$JENKINS_AGENT_TAG
