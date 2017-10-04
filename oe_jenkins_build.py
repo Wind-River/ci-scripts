@@ -119,6 +119,10 @@ def create_parser():
                     help="Specify the branch to be used with on the modified layer for a Devbuild."
                     "Defaults to branch used for build")
 
+    op.add_argument("--devbuild_layer_vcs_subdir", dest="devbuild_layer_vcs_subdir", required=False,
+                    default='',
+                    help="Specify the subdir of a repository in which to find the layer.")
+
     return op
 
 
@@ -183,6 +187,10 @@ def main():
                     if not opts.devbuild_layer_actual_branch:
                         opts.devbuild_layer_actual_branch = branch
                     devbuild_args += ",DEVBUILD_LAYER_ACTUAL_BRANCH=" + opts.devbuild_layer_actual_branch
+
+                    if not opts.devbuild_layer_vcs_subdir:
+                        devbuild_args += ",DEVBUILD_LAYER_VCS_SUBDIR=" + opts.devbuild_layer_vcs_subdir
+
 
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
 

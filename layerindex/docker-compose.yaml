@@ -27,6 +27,7 @@ services:
       CELERY_NUM_WORKERS: 1
     # ports:
     #   - '5000:5000'
+    hostname: layerindex
     image: windriver/layerindex
     depends_on:
       - mariadb

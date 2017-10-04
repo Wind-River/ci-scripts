@@ -217,6 +217,17 @@ CORE_LAYER_NAME = "openembedded-core"
 # Update records older than this number of days will be deleted every update
 UPDATE_PURGE_DAYS = 30
 
+# Remove layer dependencies that are not specified in conf/layer.conf
+REMOVE_LAYER_DEPENDENCIES = False
+
+# Always use https:// for review URLs in emails (since it may be redirected to
+# the login page)
+FORCE_REVIEW_HTTPS = False
+
 # Settings for layer submission feature
 SUBMIT_EMAIL_FROM = 'noreply@example.com'
 SUBMIT_EMAIL_SUBJECT = 'OE Layerindex layer submission'
+
+# RabbitMQ settings
+RABBIT_BROKER = 'amqp://'
+RABBIT_BACKEND = 'rpc://'
