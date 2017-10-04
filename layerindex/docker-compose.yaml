@@ -21,17 +21,17 @@
 version: '3.1'
 services:
   layerindex:
-    command: ["/usr/local/bin/gunicorn", "wsgi:application", "--workers=2", "--bind=0.0.0.0:5000", "--chdir=/opt/layerindex"]
+    environment:
+      GUNICORN_NUM_WORKERS: '1'
+      GUNICORN_BIND: '0.0.0.0:5000'
+      CELERY_NUM_WORKERS: 1
     # ports:
     #   - '5000:5000'
     image: windriver/layerindex
-    hostname: layerindex
     depends_on:
       - mariadb
     tmpfs:
       - /tmp:exec
-    volumes:
-      - layer_cache:/opt/layers
 
   mariadb:
     image: mariadb
@@ -46,6 +46,3 @@ services:
       LC_ALL: 'en_US.UTF-8'
     tmpfs:
       - /tmp:exec
-
-volumes:
-  layer_cache:

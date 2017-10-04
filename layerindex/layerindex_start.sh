@@ -80,12 +80,18 @@ docker-compose up -d
 # hack to wait for db to come online
 echo
 echo "Waiting for database to come online"
-for i in {10..1};do echo -n "$i." && sleep 1; done; echo
+for i in {11..1};do echo -n "$i." && sleep 1; done; echo
+
+# override settings.py and tell gunicorn to reload
+docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/
+docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/layerindex
+PID=$(docker-compose exec -T layerindex /bin/bash -c 'cat /opt/layerindex/gunicorn.pid')
+docker-compose exec -T layerindex /bin/bash -c "kill -HUP $PID"
 
 # Initialize the db without an admin user
 echo
 echo "Initializing database"
-docker-compose exec -T layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py syncdb --noinput'
+docker-compose exec -T layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py migrate'
 
 # clone repos that will be used to generate initial layerindex state
 docker-compose exec -T layerindex /bin/bash -c 'cd /opt/; git clone --depth=1 https://github.com/WindRiver-Labs/wrlinux-9.git'
