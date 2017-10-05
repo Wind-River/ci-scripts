@@ -185,23 +185,18 @@ Current Limitations:
    repositories are located on the same git server at the same path.
 2. Only changing a single layer is currently supported. There is no
    technical reason why multiple layers could not be changed.
-3. For efficiency reasons, the layerindex cache is a shared local
-   docker volume and this could cause the update to fail due to a
-   timeout if multiple developer builds on the same machine attempt to
-   update there own temp layerindex at the same time.
+3. Only tested with http://layers.openembedded.org
 
 [1]: https://github.com/Wind-River/wr-lx-setup
 
-### Artifactory
+### Rsync server
 
-We are exploring using Artifactory to store and serve build
-artifacts. To enable integration of Artifactory into the reverse proxy
-run:
-
-    ./start-jenkins.sh --with-artifactory
-
-This is completely optional. A future version of the CI project may
-contain a simple WebDav server to store and serve build artifacts.
+To support collection of build artifact results from a build cluster,
+an rsync server has been integrated. The runs beside the reverse proxy
+service and accepts files without authentication. The postbuild image
+now runs in the same network as the rsync server and can use the
+postbuild rsync script to copy files to this server or any external
+server.
 
 ## Modifying docker images
 

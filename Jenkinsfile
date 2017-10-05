@@ -114,7 +114,9 @@ node('docker') {
       }
       docker.withRegistry('http://${REGISTRY}') {
         def postprocess_args = "${POSTPROCESS_ARGS}".tokenize(',')
-        docker.image("${POSTPROCESS_IMAGE}").inside(common_docker_params) {
+        // hard code network so postbuild container can access internal rsyncd server using DNS
+        def docker_params = common_docker_params + ' --network ciscripts_ci_net'
+        docker.image("${POSTPROCESS_IMAGE}").inside(docker_params) {
           withEnv(postprocess_args) {
             sh "${WORKSPACE}/ci-scripts/build_postprocess.sh"
           }

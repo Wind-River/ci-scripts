@@ -22,41 +22,38 @@
 
 post_rsync() {
     local BUILD="$1"
-    local TOP="$2"
 
     command -v bzip2 >/dev/null 2>&1 || { echo >&2 "bzip2 required. Aborting."; exit 0; }
     command -v rsync >/dev/null 2>&1 || { echo >&2 "rsync required. Aborting."; exit 0; }
 
-    if [ -z "$NAME" ] || [ -z "$RSYNC_SERVER" ] || [ -z "$RSYNC_DEST_DIR" ]; then
-        echo "Error: Rsync post process script requires NAME, RSYNC_SERVER and RSYNC_DEST_DIR defined!"
+    if [ -z "$NAME" ] || [ -z "$RSYNC_DEST_DIR" ]; then
+        echo "Error: Rsync post process script requires NAME and RSYNC_DEST_DIR defined!"
         exit 0
+    fi
+
+    # Use internal rsync server if one has not been specified
+    if [ -z "$RSYNC_SERVER" ]; then
+        RSYNC_SERVER=rsync
     fi
 
     # The directory that will be rsync'd elsewhere
     local RSYNC_SOURCE_DIR="$BUILD/rsync/$NAME"
     mkdir -p "$RSYNC_SOURCE_DIR"
 
-    # "Copy" kernel to prepare for rsync
-    ln -sfrL export/*bzImage* "$RSYNC_SOURCE_DIR/."
-
     # compress the ext3/ext4 images which have lots of empty space
     local EXPORT_DIR=
-    EXPORT_DIR=$(readlink -f export)
-    find "$EXPORT_DIR" -type l -name "*ext[34]" \
-         -exec /bin/bash -c "bzip2 -ck \"{}\" > \"{}\".bz2" \;
+    EXPORT_DIR=$(readlink -f "${NAME}/tmp/deploy/images")
+    find "$EXPORT_DIR" -type f -name "*ext[34]" \
+         -exec /bin/bash -c "bzip2 '{}'" \;
 
-    # "Copy" compressed images to rsync dir
-    find "$EXPORT_DIR" -name "*ext[34].bz2" \
-         -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
-
-    # "Copy" dtb file (arm only) to rsync dir
-    find "$EXPORT_DIR" -name "*dtb" \
+    # "Copy" all image files to rsync dir
+    find "$EXPORT_DIR" -type f \
          -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
     if [ "$RSYNC_SSTATE" == "yes" ]; then
         mkdir -p "$RSYNC_SOURCE_DIR/sstate"
         # Skip the native sstate because it is already built and distributed
-        find bitbake_build/sstate-cache/ -maxdepth 1 -mindepth 1 -type d \
+        find "$NAME/sstate-cache/" -maxdepth 1 -mindepth 1 -type d \
              -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
     fi
 

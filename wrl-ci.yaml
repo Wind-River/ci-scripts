@@ -49,6 +49,10 @@ services:
       SERVER1REVERSE_PROXY_APPLICATION1: "jenkins"
       SERVER1REVERSE_PROXY_LOCATION2: "/toaster_aggregator"
       SERVER1REVERSE_PROXY_PASS2: "http://toaster_aggregator:6543"
+      SERVER1REVERSE_PROXY_LOCATION3: "/builds/"
+      SERVER1REVERSE_PROXY_APPLICATION3: "custom"
+      SERVER1REVERSE_PROXY_DIRECTIVE3FIELD1: 'alias /var/lib/nginx/html/builds/'
+      SERVER1REVERSE_PROXY_DIRECTIVE3FIELD2: 'autoindex on'
       NGINX_REDIRECT_PORT80: "true"
       SERVER1CERTIFICATE_DNAME: "/CN=WindRiver/OU=Linux/O=windriver.com/L=Alameda/C=US"
       DISABLE_ACCESS_LOG: "true"
@@ -60,6 +64,7 @@ services:
     volumes:
       # Volume avoids recreating certs on every run
       - rproxy_nginx_config:/etc/nginx/keys
+      - rsync_builds:/var/lib/nginx/html/builds/:ro
 
   client:
     image: $REGISTRY/jenkins-swarm-client:$JENKINS_AGENT_TAG
@@ -110,10 +115,20 @@ services:
     networks:
       - ci_net
 
+  rsync:
+    image: $REGISTRY/rsync
+    links:
+      - rproxy
+    networks:
+      - ci_net
+    volumes:
+      - rsync_builds:/builds
+
 volumes:
   jenkins_home:
   jenkins_agent:
   rproxy_nginx_config:
+  rsync_builds:
 
 networks:
   ci_net:
