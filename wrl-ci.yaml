@@ -23,7 +23,7 @@ services:
   jenkins:
     image: $REGISTRY/jenkins-master:$JENKINS_MASTER_TAG
     environment:
-      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
+      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Dhudson.slaves.WorkspaceList=_'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
       JENKINS_UI_URL: "https://$HOST"
     links:
