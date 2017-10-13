@@ -50,9 +50,10 @@ docker-compose run:
 This will download the images from the Docker Cloud/Hub and start the
 images using docker-compose.
 
-The jenkins web UI is accessible at https://localhost/. If attempting
-to access the web UI from a different machine, replace localhost with
-the name or IP of the server where the repository was cloned to.
+The jenkins web UI is accessible at https://localhost/jenkins. If
+attempting to access the web UI from a different machine, replace
+localhost with the name or IP of the server where the repository was
+cloned to.
 
 The Jenkins interface is behind an nginx reverse proxy which uses a
 self signed certificate to provide TLS. Bypassing the insecure web
@@ -65,7 +66,7 @@ the python-jenkins package locally run:
 
     make setup
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins https://<jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
+        --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
         --configs <config name from combos>
 
 This will contact the Jenkins Master and schedule a build on the
@@ -109,7 +110,7 @@ container. This also allows the build to run without network
 access. To select a different post build image:
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins https://<jenkins> --postprocess_image <image>
+        --jenkins <jenkins> --postprocess_image <image>
 
 The prototype contains a generic post build step that does not require
 modifications to job config or Jenkinsfile. The post build scripts are
@@ -117,7 +118,7 @@ located in the scripts directory and can be selected to run using the
 command line:
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins https://<jenkins> --post_success=rsync,cleanup \
+        --jenkins <jenkins> --post_success=rsync,cleanup \
         --post_fail=send_email,cleanup
 
 This would run the scripts/rsync.sh and scripts/cleanup.sh scripts
@@ -127,7 +128,7 @@ scripts/cleanup.sh after a failed build.
 To pass parameters to the post build scripts use:
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins https://<jenkins> --postprocess_args FOO1=bar,FOO2=baz
+        --jenkins <jenkins> --postprocess_args FOO1=bar,FOO2=baz
 
 The prototype will take the parameters, split them and inject them
 into the postbuild environment.
@@ -159,7 +160,7 @@ layer git repository and run builds and tests using this branch.
 An example workflow:
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins https://<jenkins --configs_file combos-master.yaml
+        --jenkins <jenkins> --configs_file combos-master.yaml
         --configs master-minimal --devbuild_layer_name openembedded-core \
         --devbuild_layer_vcs_url git://github.com/kscherer/openembedded-core.git \
         --devbuild_actual_branch devbuild
@@ -200,7 +201,7 @@ postbuild rsync script to copy files to this server or any external
 server.
 
 The contents of the rsync server are available over HTTPS through the
-reverse proxy at `https://<jenkins>/builds/`
+reverse proxy at `https://<jenkins>/builds`
 
 ### Multi-Host Builds
 
@@ -232,8 +233,6 @@ Limitations:
    control.
 2. No scaling tests have been performed, although I expect this setup
    to work well for a 2-10 machine cluster.
-3. The local volumes are not shared when switching between using
-   docker-compose and docker swarm.
 
 For more information on managing a Docker Swarm, consult
 the [Docker Swarm Documentation][2]

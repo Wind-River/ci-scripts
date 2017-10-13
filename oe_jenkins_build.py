@@ -136,10 +136,20 @@ def main():
               "Either enable network access or disable Toaster.")
         sys.exit(1)
 
+    jenkins_url = opts.jenkins
+    if jenkins_url.startswith('http://'):
+        jenkins_url.replace('http://', 'https://')
+
+    if not jenkins_url.startswith('https://'):
+        jenkins_url = 'https://' + jenkins_url
+
+    if not jenkins_url.endswith('/jenkins'):
+        jenkins_url = jenkins_url + '/jenkins'
+
     try:
-        server = jenkins.Jenkins(opts.jenkins)
+        server = jenkins.Jenkins(jenkins_url)
     except jenkins.JenkinsException:
-        print("Connection to Jenkins server %s failed." % opts.jenkins)
+        print("Connection to Jenkins server %s failed." % jenkins_url)
         sys.exit(1)
 
     job_config = os.path.join('jobs', opts.job) + '.xml'
