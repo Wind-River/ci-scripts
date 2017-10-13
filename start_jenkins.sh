@@ -215,7 +215,13 @@ fi
 docker inspect rsync_net &> /dev/null
 if [ $? == 0 ]; then
     echo "Removing rsync_net which was not properly cleaned up"
-    docker network rm rsync_net &> /dev/null
+    docker network remove rsync_net &> /dev/null
+fi
+
+docker inspect ci_net &> /dev/null
+if [ $? == 0 ]; then
+    echo "Removing ci_net which was not properly cleaned up"
+    docker network remove ci_net &> /dev/null
 fi
 
 sleep 1
@@ -237,6 +243,8 @@ if [ "$SWARM" == "0" ]; then
     echo "Creating rsync network"
     docker network create --attachable --driver bridge rsync_net
 
+    # match the docker stack volume and network prefix
+    export COMPOSE_PROJECT_NAME=ci
     export NETWORK_TYPE=bridge
     echo "Starting CI with: docker-compose ${FILES[*]} up"
     docker-compose "${FILES[@]}" up --abort-on-container-exit
@@ -245,6 +253,7 @@ if [ "$SWARM" == "0" ]; then
         echo "Cleaning up stopped containers"
         docker-compose "${FILES[@]}" rm --force -v
     fi
+    docker network remove ci_net
     docker network remove rsync_net
 else
     export NETWORK_TYPE=overlay
