@@ -24,9 +24,7 @@ FROM jenkins/jenkins:lts-alpine
 ENV CURL_CONNECTION_TIMEOUT 60
 
 # split the plugin installation into multiple stages to reduce chance of download failure
-RUN /usr/local/bin/install-plugins.sh git workflow-aggregator docker-workflow swarm
-
-RUN /usr/local/bin/install-plugins.sh artifactory jira timestamper greenballs
+RUN /usr/local/bin/install-plugins.sh git workflow-aggregator docker-workflow swarm greenballs
 
 # init script written in groovy to setup Jenkins on startup
 COPY init_scripts/ /usr/share/jenkins/ref/init.groovy.d/
