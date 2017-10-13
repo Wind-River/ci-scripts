@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM docker:17.05
+FROM docker:stable
 
 ARG "version=0.1.0-dev"
 ARG "build_date=unknown"
