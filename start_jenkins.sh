@@ -61,7 +61,7 @@ export TOASTER_TAG=latest
 export POSTBUILD_TAG=latest
 export ARTIFACTORY_IMAGE=docker.bintray.io/jfrog/artifactory-oss
 export ARTIFACTORY_TAG=5.4.6
-export CONSUL_TAG=0.9.0
+export CONSUL_TAG=0.9.3
 # Default to using Docker Hub
 export REGISTRY=windriver
 
@@ -113,6 +113,7 @@ EOF
 CLEANUP=1
 PULL_IMAGES=1
 ARTIFACTORY=0
+SWARM=0
 
 declare -a FILES
 FILES=(--file wrl-ci.yaml)
@@ -134,6 +135,7 @@ while [ "$#" -gt 0 ]; do
         --with-artifactory)  ARTIFACTORY=1; shift 1;;
         --artifactory-image=*) ARTIFACTORY_IMAGE="${1#*=}"; shift 1;;
         --artifactory-tag=*)   ARTIFACTORY_TAG="${1#*=}"; shift 1;;
+        --swarm)          SWARM=1; shift 1;;
         *)            usage ;;
     esac
 done
@@ -210,13 +212,71 @@ if [ "$ARTIFACTORY" == "1" ]; then
     FILES=("${FILES[@]}" --file artifactory.yaml)
 fi
 
-echo "Jenkins Master UI will be available at https://$HOSTIP"
-echo "Starting CI with: docker-compose ${FILES[*]} up"
+docker inspect rsync_net &> /dev/null
+if [ $? == 0 ]; then
+    echo "Removing rsync_net which was not properly cleaned up"
+    docker network rm rsync_net &> /dev/null
+fi
 
 sleep 1
-docker-compose "${FILES[@]}" up --abort-on-container-exit
 
-if [ "$CLEANUP" == '1' ]; then
-    echo "Cleaning up stopped containers"
-    docker-compose "${FILES[@]}" rm --force -v
+function docker_stack_cleanup {
+    echo "Removing ci stack"
+    docker stack remove ci
+
+    echo "Waiting for services to be removed before final cleanup"
+    for i in {5..1};do echo -n "$i." && sleep 1; done; echo
+    docker network remove rsync_net &> /dev/null
+    docker node update --label-rm type "$HOSTNAME" &> /dev/null
+    echo "Cleanup complete"
+    exit 0
+}
+
+echo "Jenkins Master UI will be available at https://$HOSTIP"
+if [ "$SWARM" == "0" ]; then
+    echo "Creating rsync network"
+    docker network create --attachable --driver bridge rsync_net
+
+    export NETWORK_TYPE=bridge
+    echo "Starting CI with: docker-compose ${FILES[*]} up"
+    docker-compose "${FILES[@]}" up --abort-on-container-exit
+
+    if [ "$CLEANUP" == '1' ]; then
+        echo "Cleaning up stopped containers"
+        docker-compose "${FILES[@]}" rm --force -v
+    fi
+    docker network remove rsync_net
+else
+    export NETWORK_TYPE=overlay
+
+    docker node ls &> /dev/null
+    if [ "$?" != "0" ]; then
+        echo "This Docker engine is not in swarm mode or is not a swarm manager."
+        echo "This script requires that the host be a Docker Swarm manager."
+        echo 'Use "docker swarm init" or "docker swarm join" to connect this node to swarm and try again.'
+        exit 1
+    fi
+
+    NUM_NODES=$(docker node ls -q | wc -l)
+    if [ "$NUM_NODES" -le "1" ]; then
+        echo "WARNING: No worker nodes detected. No builds will be scheduled until worker nodes join the swarm cluster"
+    fi
+
+    echo "Using Docker Swarm with the following nodes"
+    docker node ls
+
+    echo "Marking this node as master node"
+    docker node update --label-add type=master "$HOSTNAME"
+
+    echo "Creating rsync network"
+    docker network create --attachable --driver overlay rsync_net
+
+    docker stack deploy --compose-file wrl-ci.yaml ci
+
+    trap docker_stack_cleanup EXIT
+
+    echo
+    echo "CI Stack started. Waiting for Ctrl-C"
+    sleep infinity
 fi
+exit 0

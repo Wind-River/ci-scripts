@@ -45,7 +45,7 @@ before attempting the build.
 To start Jenkins Master and Agent on a single system using
 docker-compose run:
 
-    ./start-jenkins.sh
+    ./start_jenkins.sh
 
 This will download the images from the Docker Cloud/Hub and start the
 images using docker-compose.
@@ -139,9 +139,10 @@ required parameters to --postprocess_args.
 ### Developer Builds
 
 An ideal Continuous Integration workflow supports the testing of
-patches before they are committed to the "trunk" branches. The
-standard git workflow is to use topic branches and have the CI system
-run tests against the topic branch.
+patches before they are committed to the "trunk" branches. Also known
+as pre-merge testing or pull request testing. The standard git
+workflow is to use topic branches and have the CI system run tests
+against the topic branch.
 
 Yocto projects contain a hierarchy of git repositories and there isn't
 a standardized way to create a project area. The wr-lx-setup [1]
@@ -198,6 +199,47 @@ now runs in the same network as the rsync server and can use the
 postbuild rsync script to copy files to this server or any external
 server.
 
+The contents of the rsync server are available over HTTPS through the
+reverse proxy at `https://<jenkins>/builds/`
+
+### Multi-Host Builds
+
+The CI prototype supports distributing builds onto multiple machines
+using Docker Swarm.
+
+    ./start_jenkins.sh --swarm
+
+The machine where the `start_jenkins.sh` script is run must be a
+Docker swarm manager node. It will be labelled the "master" node and
+no builds will be scheduled on this node.
+
+Using Docker Swarm requires some manual setup on each machine that
+will be part of the cluster. Each node needs Docker 17.03+
+installed. On the node that will be master run:
+
+    docker swarm init
+
+and note the provided command line with join token. On the worker nodes
+run the provided command which will have the following form:
+
+    docker swarm join --token <token> <manager_IP>:2377
+
+Limitations:
+
+1. Each worker node will start one Jenkins worker with 2
+   executors. I will investigate using Docker labels to set Jenkins
+   Node labels to control number of executors and job scheduling
+   control.
+2. No scaling tests have been performed, although I expect this setup
+   to work well for a 2-10 machine cluster.
+3. The local volumes are not shared when switching between using
+   docker-compose and docker swarm.
+
+For more information on managing a Docker Swarm, consult
+the [Docker Swarm Documentation][2]
+
+[2]: https://docs.docker.com/engine/swarm/
+
 ## Modifying docker images
 
 The CI prototype uses the following images:
@@ -213,7 +255,7 @@ The CI prototype uses the following images:
 
 To test image modifications rebuild the container locally and run:
 
-    ./start-jenkins.sh --no-pull
+    ./start_jenkins.sh --no-pull
 
 ## TODO
 

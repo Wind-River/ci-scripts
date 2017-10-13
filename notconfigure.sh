@@ -45,6 +45,7 @@ BB_NO_NETWORK=
 PREMIRROR_PATH=
 DL_DIR=
 MACHINE=
+SHARED_SSTATE_DIR=no
 
 for i in "$@"
 do
@@ -68,6 +69,7 @@ do
         --premirror_path=*)     PREMIRROR_PATH="${i#*=}" ;;
         --dl_dir=*)             DL_DIR="${i#*=}" ;;
         --machine=*)            MACHINE="${i#*=}" ;;
+        --enable-shared-sstate=*) SHARED_SSTATE_DIR="${i#*=}" ;;
         *)                      ;;
     esac
     shift
@@ -229,6 +231,9 @@ process_package(){
         echo "MACHINE = \"$MACHINE\""
     fi
 
+    if [ "$SHARED_SSTATE_DIR" == "yes" ]; then
+        echo "SSTATE_DIR = \"$WORKSPACE/../sstate_cache/\""
+    fi
 } >> "$LOCALCONF"
 
 if [ -n "$SYSTEM_INIT" ] && [ "$SYSTEM_INIT" == "sysvinit" ]; then

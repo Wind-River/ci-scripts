@@ -18,25 +18,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-version: '3.1'
+version: '3.2'
 services:
   jenkins:
-    image: $REGISTRY/jenkins-master:$JENKINS_MASTER_TAG
+    image: ${REGISTRY:-windriver}/jenkins-master:${JENKINS_MASTER_TAG:-latest}
     environment:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Dhudson.slaves.WorkspaceList=_'
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0'
       JENKINS_UI_URL: "https://$HOST"
-    links:
-      - rproxy
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.type == master"
     networks:
-      - ci_net
-    tmpfs:
-      - /tmp:exec
+      - net
     volumes:
       - jenkins_home:/var/jenkins_home
+      - type: tmpfs
+        target: /tmp
 
   rproxy:
     image: blacklabelops/nginx:${RPROXY_TAG:-latest}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.type == master"
     ports:
       - "443:443"
     environment:
@@ -58,25 +66,28 @@ services:
       DISABLE_ACCESS_LOG: "true"
       LOG_LEVEL: "warn"
     networks:
-      - ci_net
-    tmpfs:
-      - /tmp
+      - net
     volumes:
       # Volume avoids recreating certs on every run
       - rproxy_nginx_config:/etc/nginx/keys
       - rsync_builds:/var/lib/nginx/html/builds/:ro
+      - type: tmpfs
+        target: /tmp
 
   client:
-    image: $REGISTRY/jenkins-swarm-client:$JENKINS_AGENT_TAG
+    image: ${REGISTRY:-windriver}/jenkins-swarm-client:${JENKINS_AGENT_TAG:-latest}
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.labels.type != master"
     depends_on:
       - jenkins
     environment:
       COMMAND_OPTIONS: "-master http://jenkins:8080/ -disableSslVerification -labels 'docker' -executors 2"
       SWARM_DELAYED_START: "15"
     networks:
-      - ci_net
-    tmpfs:
-      - /tmp
+      - net
     volumes:
       # Allow jenkins agent to use host docker to run containers
       - /var/run/docker.sock:/var/run/docker.sock
@@ -84,21 +95,45 @@ services:
       - jenkins_agent:/home/jenkins
       - /etc/hostname:/etc/hostname
       - /etc/localtime:/etc/localtime
+      - type: tmpfs
+        target: /tmp
 
   consul:
-    image: consul:$CONSUL_TAG
+    image: consul:${CONSUL_TAG:-0.9.3}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.type == master"
+    environment:
+      - "CONSUL_LOCAL_CONFIG={\"disable_update_check\": true}"
+      - "CONSUL_BIND_INTERFACE=eth0"
+      - "CONSUL_HTTP_ADDR=0.0.0.0"
+    entrypoint:
+      - consul
+      - agent
+      - -server
+      - -bootstrap-expect=1
+      - -data-dir=/tmp/consuldata
+      - -bind={{ GetInterfaceIP "eth0" }}
+      - -client=0.0.0.0
     networks:
-      - ci_net
-    command: "agent -server -ui -bootstrap-expect=1 -client=0.0.0.0"
+      - net
+    volumes:
+      - type: tmpfs
+        target: /tmp
 
   registrator:
     image: gliderlabs/registrator:latest
     command: -ip=$HOSTIP consul://consul:8500
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.labels.type != master"
     networks:
-      - ci_net
+      - net
     depends_on:
-      - consul
-    links:
       - consul
     volumes:
       # Allow jenkins agent to use host docker to run containers
@@ -106,21 +141,26 @@ services:
       - /etc/hostname:/etc/hostname
 
   toaster_aggregator:
-    image: $REGISTRY/toaster_aggregator
+    image: ${REGISTRY:-windriver}/toaster_aggregator
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.type == master"
     depends_on:
       - consul
-    links:
-      - rproxy
-      - consul
     networks:
-      - ci_net
+      - net
 
   rsync:
-    image: $REGISTRY/rsync
-    links:
-      - rproxy
+    image: ${REGISTRY:-windriver}/rsync
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.type == master"
     networks:
-      - ci_net
+      - rsync_net
     volumes:
       - rsync_builds:/builds
 
@@ -131,5 +171,7 @@ volumes:
   rsync_builds:
 
 networks:
-  ci_net:
-    driver: bridge
+  net:
+    driver: ${NETWORK_TYPE:-bridge}
+  rsync_net:
+    external: true

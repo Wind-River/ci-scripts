@@ -22,10 +22,19 @@
 
 node('docker') {
 
+  // function for adding array of env vars to string
+  def add_env = {
+    String command, String[] env_args ->
+    for ( arg in env_args ) {
+      command = command + " -e ${arg} "
+    }
+    return command
+  }
+
   // Node name is from docker swarm is hostname + dash + random string. Remove random part of recover hostname
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
-  def common_docker_params = "--name build-${BUILD_ID} --hostname ${hostname} -t --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000"
+  def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -t --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins -e LANG=en_US.UTF-8 -e BUILD_ID=${BUILD_ID} "
 
   stage('Docker Run Check') {
     dir('ci-scripts') {
@@ -37,13 +46,10 @@ node('docker') {
     dir('ci-scripts') {
       git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
     }
-    docker.withRegistry('http://${REGISTRY}') {
-      docker.image("${IMAGE}").inside(common_docker_params) {
-        withEnv(['LANG=en_US.UTF-8', "BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]) {
-          sh "${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
-        }
-      }
-    }
+    def env_args = ["BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]
+    def docker_params = add_env( common_docker_params, env_args )
+    def cmd="${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
+    sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
   }
 
   try {
@@ -72,25 +78,23 @@ node('docker') {
       }
 
       def docker_params = common_docker_params
+      def env_args = ["MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]
       if (params.TOASTER == "enable") {
-        docker_params = docker_params + ' --expose=8800 -P -e "SERVICE_NAME=toaster" -e "SERVICE_CHECK_HTTP=/health"'
+        docker_params = docker_params + ' --expose=8800 -P '
+        env_args = env_args + ["SERVICE_NAME=toaster", "SERVICE_CHECK_HTTP=/health"]
       }
-
-      def env_args = ['LANG=en_US.UTF-8', "MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]
 
       if (params.DEVBUILD_ARGS != "") {
-        devbuild_args = "${DEVBUILD_ARGS}".tokenize(',')
         docker_params = docker_params + ' --network=build${BUILD_ID}_default'
-        env_args = env_args + devbuild_args
+        env_args = env_args + params.DEVBUILD_ARGS.tokenize(',')
       }
-      docker.withRegistry('http://${REGISTRY}') {
-        docker.image("${IMAGE}").inside(docker_params) {
-          withEnv(env_args) {
-            sh "mkdir -p ${WORKSPACE}/builds"
-            sh "${WORKSPACE}/ci-scripts/jenkins_build.sh"
-          }
-        }
-      }
+
+      env_args = env_args + ["WORKSPACE=${WORKSPACE}", "NAME=${NAME}", "BRANCH=${BRANCH}"]
+      env_args = env_args + ["NODE_NAME=${NODE_NAME}", "SETUP_ARGS=\'${SETUP_ARGS}\'"]
+      env_args = env_args + ["PREBUILD_CMD=\'${PREBUILD_CMD}\'", "BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
+      docker_params = add_env( docker_params, env_args )
+      def cmd="${WORKSPACE}/ci-scripts/jenkins_build.sh"
+      sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
     }
   }
   finally {
@@ -112,16 +116,13 @@ node('docker') {
       dir('ci-scripts') {
         git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
       }
-      docker.withRegistry('http://${REGISTRY}') {
-        def postprocess_args = "${POSTPROCESS_ARGS}".tokenize(',')
-        // hard code network so postbuild container can access internal rsyncd server using DNS
-        def docker_params = common_docker_params + ' --network ciscripts_ci_net'
-        docker.image("${POSTPROCESS_IMAGE}").inside(docker_params) {
-          withEnv(postprocess_args) {
-            sh "${WORKSPACE}/ci-scripts/build_postprocess.sh"
-          }
-        }
-      }
+      def docker_params = common_docker_params + " --network=rsync_net "
+      def env_args = ["NAME=${NAME}", "WORKSPACE=${WORKSPACE}"]
+      env_args = env_args + ["POST_SUCCESS=${POST_SUCCESS}", "POST_FAIL=${POST_FAIL}"]
+      env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
+      docker_params = add_env( docker_params, env_args )
+      def cmd="${WORKSPACE}/ci-scripts/build_postprocess.sh"
+      sh "docker run --init ${docker_params} ${REGISTRY}/${POSTPROCESS_IMAGE} ${cmd}"
     }
   }
 }

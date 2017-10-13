@@ -65,8 +65,6 @@ post_rsync() {
     local RSYNC_STAMP="$BUILD/00-RSYNC-$NAME"
     touch "$RSYNC_STAMP"
     rsync -aL "$RSYNC_STAMP" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
-
-    touch "$STAMP"
 }
 
 post_rsync "$@"
