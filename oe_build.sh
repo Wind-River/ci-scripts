@@ -117,7 +117,7 @@ else
     . ./oe-init-build-env "$BUILD_NAME" > "$BUILD/00-prebuild.log" 2>&1
 
     # Run prebuild command which may modify files like local.conf
-    PREBUILD_CMD=("${PREBUILD_CMD[@]}" --dl_dir="$TOP/downloads")
+    PREBUILD_CMD=("${PREBUILD_CMD[@]}" --dl_dir="$TOP/../downloads")
     log "$TOP/ci-scripts/${PREBUILD_CMD[0]} ${PREBUILD_CMD[*]:1}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
     $TIME "$TOP/ci-scripts/${PREBUILD_CMD[0]}" "${PREBUILD_CMD[@]:1}" >> "$BUILD/00-prebuild.log" 2>&1
     log_stats "Prebuild" "$BUILD"
