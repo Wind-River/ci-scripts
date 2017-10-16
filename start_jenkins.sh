@@ -59,8 +59,6 @@ export RPROXY_TAG=latest
 export BUILDER_TAG=latest
 export TOASTER_TAG=latest
 export POSTBUILD_TAG=latest
-export ARTIFACTORY_IMAGE=docker.bintray.io/jfrog/artifactory-oss
-export ARTIFACTORY_TAG=5.4.6
 export CONSUL_TAG=0.9.3
 # Default to using Docker Hub
 export REGISTRY=windriver
@@ -93,14 +91,6 @@ Usage $0 [--registry] [--file] [--rm] [--with-lava]
   --postbuild-tag: Set the tag for the postbuild image
     Defaults to latest
 
-  --with-artifactory: Enable an instance of artifactory inside the CI system
-
-  --artifactory-image: Set the image name for the artifactory image used.
-    Defaults to $ARTIFACTORY_IMAGE
-
-  --artifactory-tag: Set the tag for the artifactory image.
-    Defaults to $ARTIFACTORY_TAG
-
   --registry: Set the location of the CI docker images.
     Defaults to windriver organization on Docker Hub/Cloud.
 
@@ -112,7 +102,6 @@ EOF
 
 CLEANUP=1
 PULL_IMAGES=1
-ARTIFACTORY=0
 SWARM=0
 
 declare -a FILES
@@ -132,9 +121,6 @@ while [ "$#" -gt 0 ]; do
         --postbuild-tag=*) POSTBUILD_TAG="${1#*=}"; shift 1;;
         --consul-tag=*)   CONSUL_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;
-        --with-artifactory)  ARTIFACTORY=1; shift 1;;
-        --artifactory-image=*) ARTIFACTORY_IMAGE="${1#*=}"; shift 1;;
-        --artifactory-tag=*)   ARTIFACTORY_TAG="${1#*=}"; shift 1;;
         --swarm)          SWARM=1; shift 1;;
         *)            usage ;;
     esac
@@ -188,9 +174,6 @@ if [ "$PULL_IMAGES" == '1' ]; then
     ${DOCKER_CMD[*]} pull "consul:${CONSUL_TAG}"
     ${DOCKER_CMD[*]} pull "blacklabelops/nginx:${RPROXY_TAG}"
     ${DOCKER_CMD[*]} pull gliderlabs/registrator:latest
-    if [ "$ARTIFACTORY" == "1" ]; then
-        ${DOCKER_CMD[*]} pull "${ARTIFACTORY_IMAGE}:${ARTIFACTORY_TAG}"
-    fi
 fi
 
 get_primary_ip_address() {
@@ -208,10 +191,6 @@ host "$HOSTNAME" > /dev/null 2>&1
 if [ $? != 0 ]; then
     echo "The hostname for this system is not in DNS. Attempting ip address fallback"
     export HOST=$HOSTIP
-fi
-
-if [ "$ARTIFACTORY" == "1" ]; then
-    FILES=("${FILES[@]}" --file artifactory.yaml)
 fi
 
 docker inspect rsync_net &> /dev/null
