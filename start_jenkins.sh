@@ -163,16 +163,18 @@ fi
 
 echo 'Successfully ran docker info'
 
-command -v docker-compose >/dev/null 2>&1 || { echo >&2 "Docker-compose is not installed. https://docs.docker.com/compose/install/  Aborting."; exit 1; }
+if [ "$SWARM" != "1" ]; then
+    command -v docker-compose >/dev/null 2>&1 || { echo >&2 "Docker-compose is not installed. https://docs.docker.com/compose/install/  Aborting."; exit 1; }
 
-DCOMPOSE_VERSION=$(docker-compose --version | cut -d' ' -f 3 | tr -d ',')
-vercomp '1.12.0' "$DCOMPOSE_VERSION"
-if [ $? != '2' ]; then
-    echo >&2 "Require docker-compose version 1.13.0 or later. Aborting"
-    exit 1
+    DCOMPOSE_VERSION=$(docker-compose --version | cut -d' ' -f 3 | tr -d ',')
+    vercomp '1.12.0' "$DCOMPOSE_VERSION"
+    if [ $? != '2' ]; then
+        echo >&2 "Require docker-compose version 1.13.0 or later. Aborting"
+        exit 1
+    fi
+
+    echo "Docker Compose is present and is version $DCOMPOSE_VERSION"
 fi
-
-echo "Docker Compose is present and is version $DCOMPOSE_VERSION"
 
 echo "Using registry $REGISTRY."
 
