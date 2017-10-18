@@ -123,6 +123,36 @@ def create_parser():
                     default='',
                     help="Specify the subdir of a repository in which to find the layer.")
 
+    op.add_argument("--test", dest="test", required=False,
+                    default='disable', choices=['enable', 'disable'],
+                    help="Switch to enable runtime testing of the build.\n"
+                    "Only two options supported: enable (run tests) or disable. Default: disable")
+
+    op.add_argument("--test_image", dest="test_image", required=False,
+                    default='postbuild',
+                    help="The Docker image used for the test stage.\n"
+                    "Default: postbuild.")
+
+    op.add_argument("--test_args", dest="test_args", required=False,
+                    default='',
+                    help="A comma separated list of args in form KEY=VAL that will be"
+                    "injected into test and post test script environment.")
+
+    op.add_argument("--post_test_image", dest="post_test_image", required=False,
+                    default='postbuild',
+                    help="The Docker image used for the post test stage.\n"
+                    "Default: postbuild.")
+
+    op.add_argument("--post_test_success", dest="post_test_success", required=False,
+                    default='',
+                    help="A comma separated list of scripts in the scripts/ directory"
+                    "to be run after a successful test. \nDefault: none.")
+
+    op.add_argument("--post_test_fail", dest="post_test_fail", required=False,
+                    default='',
+                    help="A comma separated list of scripts in the scripts/ directory"
+                    "to be run after a failed test. \nDefault: none.")
+
     return op
 
 
@@ -221,6 +251,12 @@ def main():
                                            'NETWORK': opts.network,
                                            'TOASTER': opts.toaster,
                                            'DEVBUILD_ARGS': devbuild_args,
+                                           'TEST': opts.test,
+                                           'TEST_IMAGE': opts.test_image,
+                                           'TEST_ARGS': opts.test_args,
+                                           'POST_TEST_IMAGE': opts.post_test_image,
+                                           'POST_TEST_SUCCESS': opts.post_test_success,
+                                           'POST_TEST_FAIL': opts.post_test_fail,
                                           })
 
                 print("Scheduled build " + str(next_build_number))

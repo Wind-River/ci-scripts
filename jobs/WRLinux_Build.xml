@@ -86,6 +86,36 @@
           <description>Comma separated list of env vars used to setup devbuilds</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST</name>
+          <description>Perform runtime tests if the build succeeds</description>
+          <defaultValue>disable</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST_IMAGE</name>
+          <description>Docker image used to run tests</description>
+          <defaultValue>postbuild</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_TEST_IMAGE</name>
+          <description>Docker image used to post test processing scripts</description>
+          <defaultValue>postbuild</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST_ARGS</name>
+          <description>Comma separated list of env vars passed to test and post test scripts</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_TEST_SUCCESS</name>
+          <description>Comma separated list of scripts from scripts dir to run after successful tests</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_TEST_FAIL</name>
+          <description>Comma separated list of scripts from scripts dir to run after failed tests</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>

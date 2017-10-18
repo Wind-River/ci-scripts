@@ -34,7 +34,7 @@ node('docker') {
   // Node name is from docker swarm is hostname + dash + random string. Remove random part of recover hostname
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
-  def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -t --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins -e LANG=en_US.UTF-8 -e BUILD_ID=${BUILD_ID} "
+  def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -t --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins -e LANG=en_US.UTF-8 -e BUILD_ID=${BUILD_ID} -e WORKSPACE=${WORKSPACE} "
 
   stage('Docker Run Check') {
     dir('ci-scripts') {
@@ -89,15 +89,14 @@ node('docker') {
         env_args = env_args + params.DEVBUILD_ARGS.tokenize(',')
       }
 
-      env_args = env_args + ["WORKSPACE=${WORKSPACE}", "NAME=${NAME}", "BRANCH=${BRANCH}"]
+      env_args = env_args + ["NAME=${NAME}", "BRANCH=${BRANCH}"]
       env_args = env_args + ["NODE_NAME=${NODE_NAME}", "SETUP_ARGS=\'${SETUP_ARGS}\'"]
       env_args = env_args + ["PREBUILD_CMD=\'${PREBUILD_CMD}\'", "BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/jenkins_build.sh"
       sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
     }
-  }
-  finally {
+  } finally {
     stage('Layerindex Cleanup') {
       if (params.DEVBUILD_ARGS != "") {
         dir('ci-scripts') {
@@ -111,18 +110,53 @@ node('docker') {
         println("No LayerIndex Cleanup necessary")
       }
     }
-
+  
     stage('Post Process') {
       dir('ci-scripts') {
         git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
       }
       def docker_params = common_docker_params + " --network=rsync_net "
-      def env_args = ["NAME=${NAME}", "WORKSPACE=${WORKSPACE}"]
+      def env_args = ["NAME=${NAME}"]
       env_args = env_args + ["POST_SUCCESS=${POST_SUCCESS}", "POST_FAIL=${POST_FAIL}"]
       env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/build_postprocess.sh"
       sh "docker run --init ${docker_params} ${REGISTRY}/${POSTPROCESS_IMAGE} ${cmd}"
+    }
+  }
+
+  try {
+    stage('Test') {
+      if (params.TEST == 'enable') {
+        dir('ci-scripts') {
+          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+        }
+        def docker_params = common_docker_params
+        def env_args = ["NAME=${NAME}"]
+        env_args = env_args + params.TEST_ARGS.tokenize(',')
+        docker_params = add_env( docker_params, env_args )
+        def cmd="${WORKSPACE}/ci-scripts/run_tests.sh"
+        sh "docker run --init ${docker_params} ${REGISTRY}/${TEST_IMAGE} ${cmd}"
+      } else {
+        println("Test disabled")
+      }
+    }
+  } finally {
+    stage('Post Test') {
+      if (params.TEST == 'enable') {
+        dir('ci-scripts') {
+          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+        }
+        def docker_params = common_docker_params
+        def env_args = ["NAME=${NAME}"]
+        env_args = env_args + ["POST_TEST_SUCCESS=${POST_TEST_SUCCESS}", "POST_TEST_FAIL=${POST_TEST_FAIL}"]
+        env_args = env_args + params.TEST_ARGS.tokenize(',')
+        docker_params = add_env( docker_params, env_args )
+        def cmd="${WORKSPACE}/ci-scripts/test_postprocess.sh"
+        sh "docker run --init ${docker_params} ${REGISTRY}/${POST_TEST_IMAGE} ${cmd}"
+      } else {
+        println("Test disabled")
+      }
     }
   }
 }
