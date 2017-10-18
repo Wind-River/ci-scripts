@@ -18,13 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM ubuntu:16.04
+FROM debian:stretch
 
 MAINTAINER Konrad Scherer <Konrad.Scherer@windriver.com>
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -qy install --no-install-recommends \
-    bzip2 openssh-client rsync git git-email && \
+    bzip2 openssh-client rsync git git-email lava-tool && \
     useradd --home-dir /home/wrlbuild --uid 1000 --gid 100 --shell /bin/bash wrlbuild && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
