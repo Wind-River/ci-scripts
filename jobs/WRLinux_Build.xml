@@ -22,6 +22,11 @@
           <defaultValue>master</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>CI_REPO</name>
+          <description>Localtion of the ci-scripts repository</description>
+          <defaultValue>https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>SETUP_ARGS</name>
           <description>List of args to pass to setup.sh</description>
           <defaultValue>--distro=wrlinux --machine=qemux86-64</defaultValue>

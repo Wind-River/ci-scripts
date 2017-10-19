@@ -50,6 +50,10 @@ def create_parser():
                     help='The branch to use for the ci-scripts repo. Used for local modifications.\n'
                     'Default master.')
 
+    op.add_argument('--ci_repo', dest='ci_repo', required=False, default='https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git',
+                    help='The location of the ci-scripts repo. Override to use local mirror.\n'
+                    'Default: https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git.')
+
     op.add_argument('--configs_file', dest='configs_file', required=True,
                     help='Name of file that contains valid build configurations.')
 
@@ -237,6 +241,7 @@ def main():
                 output = server.build_job(opts.job,
                                           {'NAME': config['name'],
                                            'CI_BRANCH': opts.ci_branch,
+                                           'CI_REPO': opts.ci_repo,
                                            'IMAGE': opts.image,
                                            'BRANCH': branch,
                                            'REMOTE': opts.remote,

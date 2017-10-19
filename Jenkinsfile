@@ -38,13 +38,13 @@ node('docker') {
 
   stage('Docker Run Check') {
     dir('ci-scripts') {
-      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+      git(url:params.CI_REPO, branch:params.CI_BRANCH)
     }
     sh "${WORKSPACE}/ci-scripts/docker_run_check.sh"
   }
   stage('Cache Sources') {
     dir('ci-scripts') {
-      git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+      git(url:params.CI_REPO, branch:params.CI_BRANCH)
     }
     def env_args = ["BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]
     def docker_params = add_env( common_docker_params, env_args )
@@ -57,9 +57,9 @@ node('docker') {
       // if devbuilds are enabled, start build in same network as layerindex
       if (params.DEVBUILD_ARGS != "") {
         dir('ci-scripts') {
-          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+          git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
-        devbuild_args = "${DEVBUILD_ARGS}".tokenize(',')
+        devbuild_args = params.DEVBUILD_ARGS.tokenize(',')
         withEnv(devbuild_args) {
           dir('ci-scripts/layerindex') {
             sh "./layerindex_start.sh"
@@ -74,7 +74,7 @@ node('docker') {
 
     stage('Build') {
       dir('ci-scripts') {
-        git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+        git(url:params.CI_REPO, branch:params.CI_BRANCH)
       }
 
       def docker_params = common_docker_params
@@ -100,7 +100,7 @@ node('docker') {
     stage('Layerindex Cleanup') {
       if (params.DEVBUILD_ARGS != "") {
         dir('ci-scripts') {
-          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+          git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
         dir('ci-scripts/layerindex') {
           sh "./layerindex_stop.sh"
@@ -113,7 +113,7 @@ node('docker') {
   
     stage('Post Process') {
       dir('ci-scripts') {
-        git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+        git(url:params.CI_REPO, branch:params.CI_BRANCH)
       }
       def docker_params = common_docker_params + " --network=rsync_net "
       def env_args = ["NAME=${NAME}"]
@@ -129,7 +129,7 @@ node('docker') {
     stage('Test') {
       if (params.TEST == 'enable') {
         dir('ci-scripts') {
-          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+          git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
         def docker_params = common_docker_params
         def env_args = ["NAME=${NAME}"]
@@ -145,7 +145,7 @@ node('docker') {
     stage('Post Test') {
       if (params.TEST == 'enable') {
         dir('ci-scripts') {
-          git(url:'git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git', branch:"${CI_BRANCH}")
+          git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
         def docker_params = common_docker_params
         def env_args = ["NAME=${NAME}"]
