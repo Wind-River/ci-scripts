@@ -5,13 +5,31 @@ the Wind River Linux Continuous Integration Prototype.
 
 ## Introduction
 
-The prototype has four components:
+I have built two build systems at WindRiver, but they were very
+specific to the WRLinux workflow and internal infrastructure. This is
+my third build system and an attempt to make a generic build and CI
+system with features around building and testing Yocto.
 
-1) Jenkins Master Docker image
-2) Jenkins Agent Docker image with Swarm plugin
-3) Ubuntu 16.04 image with all required host packages necessary to
-build Yocto.
-4) This repo with scripts to orchestrate all the components.
+This repo contains the scripts to orchestrate all the components as
+well as all the Dockerfile used to build the images. The images are
+hosted on Docker Hub and are automated builds linked to the
+Dockerfiles in this repository. All the images with links to back to
+the Dockerfile used to build them can be found here:
+https://hub.docker.com/r/windriver/
+
+## Features
+
+1) Multi-host builds using Docker Swarm. This provides an easy way to
+scale the machines in a build cluster up and down and Docker Swarm
+makes this surprisingly simple.
+
+2) Developer builds. This enables build testing of patches before they
+are committed to the main branches. This leverages the [WR setup][1]
+program and a temporary layerindex to assemble a custom project that
+matches the developer's local project.
+
+3) Toaster integration. A simple UI to dynamically expose the Toaster
+interface of all builds in progress.
 
 ## Getting Started
 
@@ -40,7 +58,7 @@ If the /var/run/docker.sock does not sufficient permissions, the swarm
 client image will attempt to enable world rw permissions on the socket
 before attempting the build.
 
-### Starting Jenkins
+### Single Host Setup
 
 To start Jenkins Master and Agent on a single system using
 docker-compose run:
@@ -56,24 +74,69 @@ localhost with the name or IP of the server where the repository was
 cloned to.
 
 The Jenkins interface is behind an nginx reverse proxy which uses a
-self signed certificate to provide TLS. Bypassing the insecure web
-page warning from the browser will be necessary.
+self signed certificate to provide TLS. The browser will warn you that
+the web page is using a cert from an unknown CA and require you to
+grant a security exception.
+
+### Multi-Host Setup
+
+The CI prototype supports distributing builds onto multiple machines
+using Docker Swarm.
+
+    ./start_jenkins.sh --swarm
+
+The machine where the `start_jenkins.sh` script is run must be a
+Docker swarm manager node. It will be labelled the "master" node and
+no builds will be scheduled on this node.
+
+Using Docker Swarm requires some manual setup on each machine that
+will be part of the cluster. Each node needs Docker 17.03+
+installed. On the node that will be master run:
+
+    docker swarm init
+
+and note the provided command line with join token. On the worker nodes
+run the provided command which will have the following form:
+
+    docker swarm join --token <token> <manager_IP>:2377
+
+Limitations:
+
+1. Each worker node will start one Jenkins worker with 2
+   executors. I will investigate using Docker labels to set Jenkins
+   Node labels to control number of executors and job scheduling
+   control.
+2. No scaling tests have been performed, although I expect this setup
+   to work well for a 2-10 machine cluster.
+
+For more information on managing a Docker Swarm, consult
+the [Docker Swarm Documentation][2]
+
+[2]: https://docs.docker.com/engine/swarm/
+
 
 ### Scheduling WRLinux Builds
 
-On the same or a different machine, clone this repository. To install
-the python-jenkins package locally run:
+By default the Jenkins Master does not have authentication enabled and
+jobs can be submitted from any machine. On the same or a different
+machine, clone this repository. To install the python-jenkins package
+locally and submit a job run:
 
     make setup
     .venv/bin/python3 ./oe_jenkins_build.py \
         --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
         --configs <config name from combos>
 
-This will contact the Jenkins Master and schedule a build on the
-Jenkins Agent.
+This will install all the python libraries into .venv and contact
+the Jenkins Master and schedule a build on the Jenkins Agent. The
+<config name from combos> is a comma separated list of names from the
+yaml file. As examples the combos-WRLINUX_9_BASE.yaml contains names
+such as qemuarm_glibc-small_Base and qemux86-64_glibc-core_Base.
 
 The combos-WRLINUX_9_BASE.yaml file is a generated list of valid
-combinations of qemu bsps and configuration options.
+combinations of qemu bsps and configuration options. At WindRiver we
+generate these yaml files using the machines and images listed in the
+LayerIndex.
 
 ### Scheduling Poky Builds
 
@@ -203,42 +266,6 @@ server.
 The contents of the rsync server are available over HTTPS through the
 reverse proxy at `https://<jenkins>/builds`
 
-### Multi-Host Builds
-
-The CI prototype supports distributing builds onto multiple machines
-using Docker Swarm.
-
-    ./start_jenkins.sh --swarm
-
-The machine where the `start_jenkins.sh` script is run must be a
-Docker swarm manager node. It will be labelled the "master" node and
-no builds will be scheduled on this node.
-
-Using Docker Swarm requires some manual setup on each machine that
-will be part of the cluster. Each node needs Docker 17.03+
-installed. On the node that will be master run:
-
-    docker swarm init
-
-and note the provided command line with join token. On the worker nodes
-run the provided command which will have the following form:
-
-    docker swarm join --token <token> <manager_IP>:2377
-
-Limitations:
-
-1. Each worker node will start one Jenkins worker with 2
-   executors. I will investigate using Docker labels to set Jenkins
-   Node labels to control number of executors and job scheduling
-   control.
-2. No scaling tests have been performed, although I expect this setup
-   to work well for a 2-10 machine cluster.
-
-For more information on managing a Docker Swarm, consult
-the [Docker Swarm Documentation][2]
-
-[2]: https://docs.docker.com/engine/swarm/
-
 ## Modifying docker images
 
 The CI prototype uses the following images:
@@ -259,6 +286,8 @@ To test image modifications rebuild the container locally and run:
 ## TODO
 
 - Build notifications
+- Runtime testing integration with LAVA
+- Select a good project name
 
 ## Contributing
 
