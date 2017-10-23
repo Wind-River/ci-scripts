@@ -182,7 +182,7 @@ get_primary_ip_address() {
     echo "$ip"
 }
 
-export HOST="$HOSTNAME"
+export HOST=$(hostname -f)
 export HOSTIP=
 HOSTIP=$(get_primary_ip_address)
 

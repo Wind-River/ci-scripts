@@ -26,14 +26,20 @@ post_rsync() {
     command -v bzip2 >/dev/null 2>&1 || { echo >&2 "bzip2 required. Aborting."; exit 0; }
     command -v rsync >/dev/null 2>&1 || { echo >&2 "rsync required. Aborting."; exit 0; }
 
-    if [ -z "$NAME" ] || [ -z "$RSYNC_DEST_DIR" ]; then
-        echo "Error: Rsync post process script requires NAME and RSYNC_DEST_DIR defined!"
+    if [ -z "$NAME" ]; then
+        echo "Error: Rsync post process script requires NAME defined!"
         exit 0
     fi
 
     # Use internal rsync server if one has not been specified
     if [ -z "$RSYNC_SERVER" ]; then
+        echo "RSYNC_SERVER not defined. Using internal rsync server."
         RSYNC_SERVER=rsync
+    fi
+
+    # if RSYNC_DEST_DIR not defined and internal rsync server is used, then default to a reasonable destination
+    if [ -z "$RSYNC_DEST_DIR" ] && [ "$RSYNC_SERVER" == "rsync" ]; then
+        RSYNC_DEST_DIR="builds/${NAME}-$(date --iso-8601=date)"
     fi
 
     # The directory that will be rsync'd elsewhere
@@ -58,13 +64,17 @@ post_rsync() {
     fi
 
     # Initial rsync copies symlinks to destination
-    # Note: RSYNC_OPTIONS must be a bash array
-    rsync -aL "$RSYNC_SOURCE_DIR" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    echo "Rsyncing objects to rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    rsync -avL "$RSYNC_SOURCE_DIR" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
 
     # Notify that rsync is complete
     local RSYNC_STAMP="$BUILD/00-RSYNC-$NAME"
     touch "$RSYNC_STAMP"
-    rsync -aL "$RSYNC_STAMP" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    rsync -avL "$RSYNC_STAMP" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+
+    if [ "$RSYNC_SERVER" == "rsync" ]; then
+        echo "Artifacts can be accessed at ${JENKINS_URL/%jenkins\//builds}${RSYNC_DEST_DIR/#builds/}"
+    fi
 }
 
 post_rsync "$@"

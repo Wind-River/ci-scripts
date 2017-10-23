@@ -80,9 +80,9 @@ def create_parser():
                     "injected into post process script environment.")
 
     op.add_argument("--post_success", dest="post_success", required=False,
-                    default='cleanup',
+                    default='rsync,cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
-                    "to be run after a successful build. \nDefault: cleanup.")
+                    "to be run after a successful build. \nDefault: rsync,cleanup.")
 
     op.add_argument("--post_fail", dest="post_fail", required=False,
                     default='cleanup',
