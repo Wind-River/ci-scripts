@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 SHELL = /bin/bash #requires bash
-VENV = $(PWD)/.venv
+VENV = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/.venv
 DEPS = $(wildcard *.py)
 GET_PIP = $(VENV)/bin/get-pip.py
 PIP = $(VENV)/bin/pip3
