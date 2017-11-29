@@ -25,17 +25,35 @@ if [ -z "$BASE" ]; then
     exit 1
 fi
 
+if [ -z "$CREDENTIALS" ] && [ -f "${BASE}/credentials.txt" ]; then
+    CREDENTIALS=credentials.txt
+fi
+
 call_setup_with_timeout()
 {
     local SETUP_REPO=$1
     local TIMEOUT=$2
+    local CREDENTIAL_CONTENT=
+    local USER=
+    local PASSWORD=
+    local SETUP_ARGS=(--all-layers --dl-layers --mirror "--accept-eula=yes")
+
     if [ -z "$TIMEOUT" ]; then
         TIMEOUT=20m
     fi
+
+    # extract credentials and pass to setup.sh
+    if [ -f "${BASE}/${CREDENTIALS}" ]; then
+        CREDENTIAL_CONTENT=$(cat "${BASE}/${CREDENTIALS}")
+        USER=${CREDENTIAL_CONTENT%%:*}
+        PASSWORD=${CREDENTIAL_CONTENT##*:}
+        SETUP_ARGS=(${SETUP_ARGS[@]} "--user=${USER}" "--password=${PASSWORD}")
+    fi
+
     # give setup $TIMEOUT minutes to complete and set TERM signal. If that doesn't work,
     # send KILL 60s later
     timeout --kill-after=60s "$TIMEOUT" \
-            "./${SETUP_REPO}/setup.sh" --all-layers --dl-layers --mirror --repo-verbose --accept-eula=yes
+            "./${SETUP_REPO}/setup.sh" "${SETUP_ARGS[@]}"
     local RET=$?
     if [ $RET != 0 ]; then
         echo "fatal: Setup command exited with $RET or timed out"
@@ -67,14 +85,35 @@ wrl_clone_or_update()
         SETUP_REPO=wrlinux-x
     fi
 
-    cd ${BASE}
+    # create credential file for use by git credential.helper
+    if [ -f "${BASE}/${CREDENTIALS}" ]; then
+        echo "Using credentials in ${BASE}/${CREDENTIALS}"
+        local CREDENTIAL_CONTENT=
+        CREDENTIAL_CONTENT=$(cat "${BASE}/${CREDENTIALS}")
+        local REMOTE_PROTOCOL=${REMOTE%%//*}
+        local REMOTE_URL=${REMOTE##*//}
+        echo "${REMOTE_PROTOCOL}//${CREDENTIAL_CONTENT}@${REMOTE_URL}" > "${BASE}/url_${CREDENTIALS}"
+    fi
+
     if [ ! -f "${BASE}/wrlinux-${BRANCH}/${SETUP_REPO}/setup.sh" ]; then
         (
-            mkdir -p "${BASE}/wrlinux-$BRANCH"
+            mkdir -p "${BASE}/wrlinux-$BRANCH/${SETUP_REPO}"
+            cd "${BASE}/wrlinux-$BRANCH/${SETUP_REPO}"
+
+            echo "Initializing repo in $SETUP_REPO"
+            git init
+            git remote add -t "$BRANCH" origin "${REMOTE}"
+            if [ -f "${BASE}/${CREDENTIALS}" ]; then
+                git config credential.helper "store --file ${BASE}/url_${CREDENTIALS}"
+            fi
+            echo "Fetch and checkout branch $WRLINUX_BRANCH from $REMOTE"
+            git fetch origin "${WRLINUX_BRANCH}"
+            if ! git checkout -t "origin/${WRLINUX_BRANCH}"; then
+                echo "FATAL: Clone from branch ${WRLINUX_BRANCH} on repo ${REMOTE} failed."
+                echo "Validate credentials are correct."
+                exit 1
+            fi
             cd "${BASE}/wrlinux-$BRANCH"
-            rm -rf "$SETUP_REPO"
-            echo "Cloning $SETUP_REPO with setup program on branch $WRLINUX_BRANCH from $REMOTE"
-            git clone --branch "$WRLINUX_BRANCH" --single-branch "${REMOTE}"
             echo "Mirroring wrlinux source tree with setup program on branch $BRANCH"
             call_setup_with_timeout "$SETUP_REPO" 60m
         )
@@ -92,6 +131,7 @@ wrl_clone_or_update()
             call_setup_with_timeout "$SETUP_REPO"
         )
     fi
+    rm -f "${BASE}/url_${CREDENTIALS}"
 }
 
 lock_and_update()
@@ -103,7 +143,10 @@ lock_and_update()
     exec 8>"$LOCKFILE"
     flock --exclusive 8
     echo "Lock for $BRANCH aquired"
-    wrl_clone_or_update "$BRANCH" "$REMOTE"
+    if ! wrl_clone_or_update "$BRANCH" "$REMOTE"; then
+        echo "FATAL: Clone failed"
+        exit 1
+    fi
     flock --unlock 8
     echo "Completed update of $BRANCH and releasing lock"
 }
@@ -126,13 +169,25 @@ main()
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
-            WRLinux-9-LTS*)
+            WRLinux-lts-*-Base)
                 if [ -z "$REMOTE" ]; then
-                    REMOTE='https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-9'
+                    REMOTE='https://github.com/WindRiver-Labs/wrlinux-x'
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
-            WRLINUX_9*)
+            WRLinux-9-LTS*)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE="https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-9"
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
+                ;;
+            WRLinux-lts*-Core)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE="https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-x"
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
+                ;;
+            WRLINUX_*)
                 if [ -z "$REMOTE" ]; then
                     REMOTE='git://ala-git.wrs.com/wrlinux-x'
                 fi

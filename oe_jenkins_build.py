@@ -23,12 +23,29 @@
 import os
 import sys
 import ssl
+import requests
 import yaml
 import jenkins
 
-
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
+
+def fetch_credentials(jenkins_master_endpoint):
+    credential_ids = []
+    credential_endpoint = jenkins_master_endpoint + "/credentials/store/system/domain/_/api/json?tree=credentials[id]"
+    try:
+        requests.packages.urllib3.disable_warnings()
+        response = requests.get(credential_endpoint, verify=False)
+        credentials = response.json()['credentials']
+        for credential in credentials:
+            credential_ids.append(credential['id'])
+    except requests.ConnectionError:
+        print("Connection to Jenkins REST api failed.")
+        sys.exit(1)
+    except KeyError:
+        print("No credential stored in Jenkins")
+        sys.exit(1)
+    return credential_ids
 
 
 def create_parser():
@@ -47,10 +64,11 @@ def create_parser():
                     help='Jenkins Job name. \nDefault WRLinux_Build')
 
     op.add_argument('--ci_branch', dest='ci_branch', required=False, default='master',
-                    help='The branch to use for the ci-scripts repo. Used for local modifications.\n'
-                    'Default master.')
+                    help='The branch to use for the ci-scripts repo.'
+                    'Used for local modifications.\nDefault master.')
 
-    op.add_argument('--ci_repo', dest='ci_repo', required=False, default='https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git',
+    op.add_argument('--ci_repo', dest='ci_repo', required=False,
+                    default='https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git',
                     help='The location of the ci-scripts repo. Override to use local mirror.\n'
                     'Default: https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git.')
 
@@ -118,8 +136,8 @@ def create_parser():
                     help="Specify the layer vcs_url to used with a Devbuild."
                     "If not specified the vcs_url will not be changed.")
 
-    op.add_argument("--devbuild_layer_actual_branch", dest="devbuild_layer_actual_branch", required=False,
-                    default='',
+    op.add_argument("--devbuild_layer_actual_branch", dest="devbuild_layer_actual_branch",
+                    required=False, default='',
                     help="Specify the branch to be used with on the modified layer for a Devbuild."
                     "Defaults to branch used for build")
 
@@ -157,6 +175,14 @@ def create_parser():
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a failed test. \nDefault: none.")
 
+    op.add_argument("--git_credential", dest="git_credential", required=False,
+                    default='disable', choices=['enable', 'disable'],
+                    help="Specify if jenkins need to use stored credential.")
+
+    op.add_argument("--git_credential_id", dest="git_credential_id", required=False,
+                    default='git',
+                    help="Specify the credential id when git_credential is enabled. Default: git")
+
     return op
 
 
@@ -179,6 +205,14 @@ def main():
 
     if not jenkins_url.endswith('/jenkins'):
         jenkins_url = jenkins_url + '/jenkins'
+
+    if opts.git_credential == "enable":
+        credentials = fetch_credentials(jenkins_url)
+        if opts.git_credential_id not in credentials:
+            print("Could not find the Git Credential Id labelled %s in Jenkins." % opts.git_credential_id)
+            sys.exit(1)
+        else:
+            print("Using the Git Credential Id %s in Jenkins to access git server." % opts.git_credential_id)
 
     try:
         server = jenkins.Jenkins(jenkins_url)
@@ -235,7 +269,6 @@ def main():
                     if not opts.devbuild_layer_vcs_subdir:
                         devbuild_args += ",DEVBUILD_LAYER_VCS_SUBDIR=" + opts.devbuild_layer_vcs_subdir
 
-
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
 
                 output = server.build_job(opts.job,
@@ -255,6 +288,8 @@ def main():
                                            'POST_FAIL': opts.post_fail,
                                            'NETWORK': opts.network,
                                            'TOASTER': opts.toaster,
+                                           'GIT_CREDENTIAL': opts.git_credential,
+                                           'GIT_CREDENTIAL_ID': opts.git_credential_id,
                                            'DEVBUILD_ARGS': devbuild_args,
                                            'TEST': opts.test,
                                            'TEST_IMAGE': opts.test_image,

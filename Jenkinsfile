@@ -44,14 +44,27 @@ node('docker') {
     }
     sh "${WORKSPACE}/ci-scripts/docker_run_check.sh"
   }
+
   stage('Cache Sources') {
     dir('ci-scripts') {
       git(url:params.CI_REPO, branch:params.CI_BRANCH)
     }
+
     def env_args = ["BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]
     def docker_params = add_env( common_docker_params, env_args )
+    if (params.GIT_CREDENTIAL == "enable") {
+      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:"${GIT_CREDENTIAL_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+        writeFile (file: "credentials.txt", text: "${USERNAME}:${PASSWORD}")
+      }
+    }
+
     def cmd="${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
     sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
+
+    // cleanup credentials
+    if (params.GIT_CREDENTIAL == "enable") {
+      sh "rm -f credentials.txt url_credentials.txt"
+    }
   }
 
   try {

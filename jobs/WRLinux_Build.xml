@@ -121,6 +121,16 @@
           <description>Comma separated list of scripts from scripts dir to run after failed tests</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_CREDENTIAL</name>
+          <description>Using credentials stored in Jenkins to access git server</description>
+          <defaultValue>disable</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_CREDENTIAL_ID</name>
+          <description>ID of Git Credentials stored in Jenkins</description>
+          <defaultValue>git</defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>

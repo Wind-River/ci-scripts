@@ -266,6 +266,18 @@ server.
 The contents of the rsync server are available over HTTPS through the
 reverse proxy at `https://<jenkins>/builds`
 
+### Using Jenkins credentials to access Git server
+
+Jenkins has an encrypted credential store which can manage credentials
+used to access the git server. Connect to Jenkins and select
+Credentials in the left menu. Then select System -> "Global
+(unrestricted)" -> Add Credentials. Use ID "git" which is the default
+used by oe_jenkins_build.py.
+
+    .venv/bin/python3 ./oe_jenkins_build.py \
+        --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
+        --configs <config name from combos> --git_credential=enable
+
 ## Modifying docker images
 
 The CI prototype uses the following images:

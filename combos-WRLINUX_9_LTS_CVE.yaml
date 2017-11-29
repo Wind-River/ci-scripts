@@ -1,0 +1,312 @@
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemuarm_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuarm
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemuppc_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuppc
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemumips64_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemumips64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemumips_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemumips
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemux86-64_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemux86-64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemuarma9_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuarma9
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemuarm64_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuarm64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-small
+  name: qemux86_glibc-small_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemux86
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemuarm_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarm
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemuarm_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarm
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemuppc_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuppc
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemuppc_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuppc
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemumips64_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemumips64_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemumips_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemumips_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemux86-64_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86-64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemux86-64_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86-64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemuarma9_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarma9
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemuarma9_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarma9
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemuarm64_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarm64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemuarm64_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarm64
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-core
+  name: qemux86_glibc-core_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86
+  - --accept-eula=yes
+  - --dl-layers
+- branch: WRLinux-9-LTS-CVE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemux86_glibc-std_LTS
+  prebuild:
+  - notconfigure.sh
+  - --enable-bootimage=ext4
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86
+  - --accept-eula=yes
+  - --dl-layers
