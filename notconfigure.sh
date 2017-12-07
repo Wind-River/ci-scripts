@@ -41,6 +41,8 @@ LICENSE_BLACKLIST=
 DEBUGINFO_SPLIT=
 ALLOW_BSP_PKGS=
 TEST_IMAGE=no
+OE_TEST=no
+TEST_SUITES=
 BB_NO_NETWORK=
 PREMIRROR_PATH=
 DL_DIR=
@@ -65,6 +67,8 @@ do
         --enable-debuginfo-split=*)          DEBUGINFO_SPLIT="${i#*=}" ;;
         --allow-bsp-pkgs=*)     ALLOW_BSP_PKGS="${i#*=}" ;;
         --test-image=*)         TEST_IMAGE="${i#*=}" ;;
+        --oe-test=*)            OE_TEST="${i#*=}" ;;
+        --test-suites=*)        TEST_SUITES="${i#*=}" ;;
         --no-network=*)         BB_NO_NETWORK="${i#*=}" ;;
         --premirror_path=*)     PREMIRROR_PATH="${i#*=}" ;;
         --dl_dir=*)             DL_DIR="${i#*=}" ;;
@@ -213,8 +217,28 @@ process_package(){
         echo "IMAGE_FSTYPES_remove = \"live\""
     fi
 
-    if [ -n "$BB_NO_NETWORK" ]; then
-        echo "BB_NO_NETWORK = \"${BB_NO_NETWORK}\""
+    if [ -n "$OE_TEST" ] && [ "$OE_TEST" != "no" ]; then
+        echo "INHERIT += \"testexport\""
+
+        # Setup target and server IP address
+        echo "TEST_TARGET_IP = \"localhost\""
+        echo "TEST_SERVER_IP = \"localhost\""
+
+        if [ -z "$TEST_SUITES" ]; then
+            echo "TEST_SUITES = \"ping ssh df date scp pam perl python rpm\""
+        else
+            echo "TEST_SUITES = \"$(echo $TEST_SUITES | sed 's/,/\ /g')\""
+        fi
+
+        if [ "$OE_TEST" == "with_wrlinux9" ]; then
+            # Make sure OE test has python3 library, this is for WRL9
+            echo "IMAGE_INSTALL_append += \"python3-pip\""
+        elif [ "$OE_TEST" == "with_wrlinux10" ]; then
+            # Make sure OE test has python3 library, this is for WRL10
+            echo "IMAGE_INSTALL_append += \"python3-pkgutil\""
+            echo "IMAGE_INSTALL_append += \"python3-unittest\""
+            echo "IMAGE_INSTALL_append += \"python3-multiprocessing\""
+        fi
     fi
 
     if [ -n "$PREMIRROR_PATH" ]; then
@@ -224,7 +248,7 @@ process_package(){
     fi
 
     if [ -n "$DL_DIR" ]; then
-        echo "DL_DIR = \"$DL_DIR\""
+        echo "DL_DIR = \"$WORKSPACE/../$DL_DIR/\""
     fi
 
     if [ -n "$MACHINE" ]; then
@@ -233,8 +257,15 @@ process_package(){
 
     if [ "$SHARED_SSTATE_DIR" == "yes" ]; then
         echo "SSTATE_DIR = \"$WORKSPACE/../sstate_cache/\""
+    elif [ -n "$SHARED_SSTATE_DIR" ]; then
+        echo "SSTATE_DIR = \"$WORKSPACE/../$SHARED_SSTATE_DIR/\""
     fi
 } >> "$LOCALCONF"
+
+if [ -n "$BB_NO_NETWORK" ]; then
+    sed -i '/BB_NO_NETWORK/d' "$LOCALCONF"
+    echo "BB_NO_NETWORK = \"${BB_NO_NETWORK}\"" >> "$LOCALCONF"
+fi
 
 if [ -n "$SYSTEM_INIT" ] && [ "$SYSTEM_INIT" == "sysvinit" ]; then
     process_init

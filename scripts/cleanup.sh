@@ -28,9 +28,9 @@ cleanup() {
         exit 1
     fi
 
-    echo "Removing build directory $BUILD/$NAME"
+    echo "Removing build directory $BUILD/$NAME/tmp* and $BUILD/$NAME/layers"
     # fail if $BUILD is empty SC2115
-    rm -rf "${BUILD:?}/$NAME"
+    rm -rf "${BUILD:?}/$NAME/tmp*" "${BUILD:?}/$NAME/layers"
 }
 
 cleanup "$@"

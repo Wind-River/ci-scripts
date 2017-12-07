@@ -34,7 +34,7 @@ node('docker') {
   // Node name is from docker swarm is hostname + dash + random string. Remove random part of recover hostname
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
-  def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -t --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins "
+  def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -i --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins "
   common_env_args = ["LANG=en_US.UTF-8", "BUILD_ID=${BUILD_ID}", "WORKSPACE=${WORKSPACE}", "JENKINS_URL=${JENKINS_URL}" ]
   common_docker_params = add_env( common_docker_params, common_env_args )
 
@@ -109,7 +109,21 @@ node('docker') {
       env_args = env_args + ["PREBUILD_CMD=\'${PREBUILD_CMD}\'", "BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/jenkins_build.sh"
-      sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
+
+      try {
+        sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
+      } catch (err) {
+        def err_message = err.getMessage()
+        if (err_message == "script returned exit code 2") {
+          echo "Build stage succeeded but with errors!"
+          currentBuild.result = 'UNSTABLE'
+        }
+        else {
+          echo "Build stage failed!"
+          currentBuild.result = 'FAILURE'
+          throw err
+        }
+      }
     }
   } finally {
     stage('Layerindex Cleanup') {
@@ -149,6 +163,7 @@ node('docker') {
         def docker_params = common_docker_params
         def env_args = ["NAME=${NAME}"]
         env_args = env_args + params.TEST_ARGS.tokenize(',')
+        env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
         docker_params = add_env( docker_params, env_args )
         def cmd="${WORKSPACE}/ci-scripts/run_tests.sh"
         sh "docker run --init ${docker_params} ${REGISTRY}/${TEST_IMAGE} ${cmd}"
@@ -166,6 +181,7 @@ node('docker') {
         def env_args = ["NAME=${NAME}"]
         env_args = env_args + ["POST_TEST_SUCCESS=${POST_TEST_SUCCESS}", "POST_TEST_FAIL=${POST_TEST_FAIL}"]
         env_args = env_args + params.TEST_ARGS.tokenize(',')
+        env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
         docker_params = add_env( docker_params, env_args )
         def cmd="${WORKSPACE}/ci-scripts/test_postprocess.sh"
         sh "docker run --init ${docker_params} ${REGISTRY}/${POST_TEST_IMAGE} ${cmd}"

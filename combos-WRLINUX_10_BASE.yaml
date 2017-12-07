@@ -1,0 +1,13 @@
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std && bitbake wrlinux-image-glibc-std -c testexport'
+  name: intel-x86-64_wrlinux-image-glibc-std
+  prebuild:
+  - notconfigure.sh
+  - --oe-test=with_wrlinux10
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-x86-64
+  - --dl-layers
+  - --accept-eula=yes

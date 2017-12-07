@@ -102,7 +102,7 @@ fi
 
 # run the setup tool
 log "${SETUP_ARGS[*]}" 2>&1 | tee "$BUILD/00-wrsetup.log"
-$TIME  "${SETUP_ARGS[@]}" >> "$BUILD/00-wrsetup.log" 2>&1
+$TIME bash -c "${SETUP_ARGS[*]}" >> "$BUILD/00-wrsetup.log" 2>&1
 RET=$?
 log_stats "Setup" "$BUILD"
 echo "Setup: ${SETUP_ARGS[*]}" >> "$STATFILE"
@@ -117,9 +117,8 @@ else
     . ./oe-init-build-env "$BUILD_NAME" > "$BUILD/00-prebuild.log" 2>&1
 
     # Run prebuild command which may modify files like local.conf
-    PREBUILD_CMD=("${PREBUILD_CMD[@]}" --dl_dir="$TOP/../downloads")
-    log "$TOP/ci-scripts/${PREBUILD_CMD[0]} ${PREBUILD_CMD[*]:1}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
-    $TIME "$TOP/ci-scripts/${PREBUILD_CMD[0]}" "${PREBUILD_CMD[@]:1}" >> "$BUILD/00-prebuild.log" 2>&1
+    log "${PREBUILD_CMD[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
+    $TIME bash -c "${PREBUILD_CMD[*]}" >> "$BUILD/00-prebuild.log" 2>&1
     log_stats "Prebuild" "$BUILD"
     echo "Prebuild: ${PREBUILD_CMD[*]}" >> "$STATFILE"
 
@@ -130,19 +129,34 @@ else
 
     echo "Build: ${BUILD_CMD[*]}" >> "$STATFILE"
     log "${BUILD_CMD[*]}" 2>&1 | tee "$BUILD/00-wrbuild.log"
-    $TIME "${BUILD_CMD[@]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
+    $TIME bash -c "${BUILD_CMD[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
 
     RET=${PIPESTATUS[0]}
+
+    # If build failed but all images got generated, don't exit 1
+    if [ "$RET" != 0 ]; then
+        DETECT_IMAGES=$(detect_built_images $BUILD "$NAME")
+        DETECT_IMAGES=${DETECT_IMAGES// /;/}
+        IFS=' ; ' read -ra IMAGES <<< "$DETECT_IMAGES"
+
+        if [ -z "${IMAGES[3]}" ]; then
+            log "Detect built images: At least one of the images doesn't exist!"
+        else
+            log "Detect built images: Build failed but all images got generated"
+            RET=2 # used by Jenkins to mark build as UNSTABLE but continue to run tests
+        fi
+    fi
 
     echo "FinishUTC: $(date +%s)" >> "$STATFILE"
     log_stats "Build" "$BUILD"
 
-    if [ "$RET" != 0 ]; then
+    if [ "$RET" == 0 ]; then
+        echo "Status: PASSED" >> "$STATFILE"
+    elif [ "$RET" == 1 ]; then
         log "Build failed"
         echo "Status: FAILED" >> "$STATFILE"
     else
         echo "Status: PASSED" >> "$STATFILE"
-
     fi
 fi
 

@@ -25,7 +25,7 @@ send_mail()
     local BUILD="$1"
     local TOP="$2"
 
-    # for generate_failmail function
+    # for generate_mail function
     source "$TOP/common.sh"
 
     # email addresses come as comma separated list
@@ -56,7 +56,11 @@ send_mail()
     done
     set +f; unset IFS
 
-    git send-email --from=BuildFailures@windriver.com --quiet --confirm=never \
+    # git send-email requires .gitconfig at writable location and perl requires that
+    # LANG is a valid locale. The postbuild image meets these requirements
+    git config --global user.email "ci-scripts@windriver.com"
+    git config --global user.name "CI"
+    git send-email --from=ci-scripts@windriver.com --quiet --confirm=never \
         "${TO_STR[@]}" "--smtp-server=$SMTPSERVER" "$BUILD/mail.txt"
     if [ $? != 0 ]; then
         echo "git send fail email failed"

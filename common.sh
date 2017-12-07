@@ -305,7 +305,7 @@ function generate_failmail
     fi
 
     {
-        echo "Subject: [wraxl] $SUBJECT"
+        echo "Subject: [ci-scripts] $SUBJECT"
         echo ""
         echo "Build in $MACHINE $ARCH"
         echo "Branch being built is $BRANCH"
@@ -416,7 +416,7 @@ function generate_successmail() {
     local BRANCH=$(get_stat 'Branch')
     local CONFIGARGS=($(get_stat 'Config'))
     {
-        echo "Subject: [wraxl] Build $BUILD_NAME Succeeded."
+        echo "Subject: [ci-scripts] Build $BUILD_NAME Succeeded."
         echo ""
         echo "Build in $MACHINE $ARCH"
         echo "Branch being built is $BRANCH"
@@ -581,4 +581,64 @@ create_statfile() {
         echo "Start: $(date)"
         echo "StartUTC: $(date +%s)"
     } >> "$STATFILE"
+}
+
+create_test_statfile() {
+    local STATFILE=$1
+    {
+        echo -e "\nBuild info:"
+        echo "==========="
+        echo "Name: $NAME"
+        if [ -n "$TOOLCHAIN_BRANCH" ]; then
+            echo "Toolchain Branch: $TOOLCHAIN_BRANCH"
+        fi
+        if [ -n "$BUILD_ID" ]; then
+            echo "build_id: $BUILD_ID"
+        fi
+        if [ -n "$BUILD_NUM" ]; then
+            echo "build_num: $BUILD_NUM"
+        fi
+        echo -e "\nTest info:"
+        echo "=========="
+        if [ -n "$EMAIL" ]; then
+            echo "Email: $EMAIL"
+        fi
+        echo "Start: $(date) ($(date +%s))"
+    } >> "$STATFILE"
+}
+
+function get_wrlinux_version() {
+    local BUILD=$1
+    local SETUPLOG=$BUILD/00-wrsetup.log
+    local KEYWORD="Build tools installer version "
+
+    if [ -f "$SETUPLOG" ]; then
+        local INSTALLER_VER=
+        INSTALLER_VER=$(cat "$SETUPLOG" | grep "$KEYWORD" | sed "s/$KEYWORD//g")
+        if [ -n "$INSTALLER_VER" ]; then
+            IFS='.' read -ra WRL_VER <<< "$INSTALLER_VER"
+            echo "${WRL_VER[0]}"
+        fi
+    fi
+}
+
+function detect_built_images() {
+    local BUILD=$1
+    local NAME=$2
+
+    local WRL_VER=
+    WRL_VER=$(get_wrlinux_version "$BUILD")
+    if [ "$WRL_VER" == "10" ]; then
+        TMP_DIR=tmp-glibc
+    else
+        TMP_DIR=tmp
+    fi
+
+    local IMG_DIR="${BUILD}/${NAME}/${TMP_DIR}/deploy/images"
+
+    if [ -d "$IMG_DIR" ]; then
+        for image in "bzImage" "hddimg" "tar.bz2" "manifest"; do
+            find "$IMG_DIR" -name "*${image}"
+        done
+    fi
 }
