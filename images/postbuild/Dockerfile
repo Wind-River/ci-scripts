@@ -24,8 +24,12 @@ MAINTAINER Konrad Scherer <Konrad.Scherer@windriver.com>
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -qy install --no-install-recommends \
-    bzip2 openssh-client rsync git git-email lava-tool && \
+    bzip2 openssh-client rsync git git-email lava-tool locales && \
     useradd --home-dir /home/wrlbuild --uid 1000 --gid 100 --shell /bin/bash wrlbuild && \
+    mkdir -p /home/wrlbuild && chown 1000:100 /home/wrlbuild && \
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
+    /usr/sbin/locale-gen en_US.UTF-8 && \
+    /usr/sbin/update-locale LANG=en_US.UTF-8 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
