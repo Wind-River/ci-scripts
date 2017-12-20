@@ -102,7 +102,7 @@ wrl_clone_or_update()
 
             echo "Initializing repo in $SETUP_REPO"
             git init
-            git remote add -t "$BRANCH" origin "${REMOTE}"
+            git remote add -t "${WRLINUX_BRANCH}" origin "${REMOTE}"
             if [ -f "${BASE}/${CREDENTIALS}" ]; then
                 git config credential.helper "store --file ${BASE}/url_${CREDENTIALS}"
             fi
