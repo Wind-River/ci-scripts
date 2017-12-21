@@ -56,7 +56,7 @@ ln -sf "$ENVIRON" .
 . "./$ENVIRON"
 
 # When doing devbuilds, setup needs to use the local layerindex
-if [ -n "$DEVBUILD_ARGS" ]; then
+if [ -n "$DEVBUILD_LAYER_NAME" ]; then
     sed -i "s#http://layers.openembedded.org/layerindex/api/#http://layerindex:5000/layerindex/api/#" setup/bin/settings.py
 fi
 
