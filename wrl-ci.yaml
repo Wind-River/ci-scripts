@@ -23,9 +23,16 @@ services:
   jenkins:
     image: ${REGISTRY:-windriver}/jenkins-master:${JENKINS_MASTER_TAG:-latest}
     environment:
-      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false -Dhudson.slaves.WorkspaceList=_'
+      JAVA_OPTS: >
+        -Djenkins.install.runSetupWizard=false
+        -Dhudson.slaves.WorkspaceList=_
+        -Dhudson.security.csrf.requestfield=Jenkins-Crumb
+        -Dorg.jenkinsci.remoting.engine.JnlpProtocol1.disabled=true
+        -Dorg.jenkinsci.remoting.engine.JnlpProtocol2.disabled=true
+        -Dorg.jenkinsci.remoting.engine.JnlpProtocol3.disabled=true
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0 --prefix=/jenkins'
       JENKINS_UI_URL: "https://$HOST/jenkins/"
+      JENKINS_AGENT_PASSWORD : "${JENKINS_AGENT_PASSWORD}"
     deploy:
       replicas: 1
       placement:
@@ -37,6 +44,8 @@ services:
       - jenkins_home:/var/jenkins_home
       - type: tmpfs
         target: /tmp
+    secrets:
+      - agent_password
 
   rproxy:
     image: blacklabelops/nginx:${RPROXY_TAG:-latest}
@@ -61,6 +70,10 @@ services:
       SERVER1REVERSE_PROXY_APPLICATION3: "custom"
       SERVER1REVERSE_PROXY_DIRECTIVE3FIELD1: 'alias /var/lib/nginx/html/builds/'
       SERVER1REVERSE_PROXY_DIRECTIVE3FIELD2: 'autoindex on'
+      SERVER1REVERSE_PROXY_LOCATION4: "/auth"
+      SERVER1REVERSE_PROXY_APPLICATION4: "custom"
+      SERVER1REVERSE_PROXY_DIRECTIVE4FIELD1: 'alias /var/lib/nginx/html/jenkins_home/auth/'
+      SERVER1REVERSE_PROXY_DIRECTIVE4FIELD2: 'autoindex on'
       NGINX_REDIRECT_PORT80: "true"
       SERVER1CERTIFICATE_DNAME: "/CN=WindRiver/OU=Linux/O=windriver.com/L=Alameda/C=US"
       DISABLE_ACCESS_LOG: "true"
@@ -73,6 +86,8 @@ services:
       - rproxy_nginx_config:/etc/nginx/keys
       # expose the rsync server contents over https
       - rsync_builds:/var/lib/nginx/html/builds/:ro
+      # expose the jenkins auth content over https
+      - jenkins_home:/var/lib/nginx/html/jenkins_home/:ro
       - type: tmpfs
         target: /tmp
 
@@ -88,6 +103,7 @@ services:
     environment:
       COMMAND_OPTIONS: "-master http://jenkins:8080/jenkins -disableSslVerification -labels 'docker' -executors 2"
       SWARM_DELAYED_START: "15"
+      SWARM_AGENT_PASSWORD: "${JENKINS_AGENT_PASSWORD}"
     networks:
       - net
     volumes:
@@ -99,6 +115,8 @@ services:
       - /etc/localtime:/etc/localtime
       - type: tmpfs
         target: /tmp
+    secrets:
+      - agent_password
 
   consul:
     image: consul:${CONSUL_TAG:-0.9.3}
@@ -171,6 +189,10 @@ volumes:
   jenkins_agent:
   rproxy_nginx_config:
   rsync_builds:
+
+secrets:
+  agent_password:
+    external: true
 
 networks:
   net:

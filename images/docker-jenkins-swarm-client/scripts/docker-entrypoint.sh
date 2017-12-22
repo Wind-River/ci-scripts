@@ -30,14 +30,11 @@ if ! echo "$COMMAND_OPTIONS" | grep -q -- '-fsroot' ; then
     COMMAND_OPTIONS="${COMMAND_OPTIONS} -fsroot ${SWARM_HOME}"
 fi
 
-if [ -f "${USER_NAME_SECRET}" ]; then
-    read -r USR < "${USER_NAME_SECRET}"
-    COMMAND_OPTIONS="${COMMAND_OPTIONS} -username $USR"
-fi
-
-if [ -f "${PASSWORD_SECRET}" ]; then
-    read -r PSS < "${PASSWORD_SECRET}"
-    COMMAND_OPTIONS="${COMMAND_OPTIONS} -password $PSS"
+# Use docker secret to retrieve password, but env always overrides
+if [ -n "${SWARM_AGENT_PASSWORD}" ]; then
+    COMMAND_OPTIONS="${COMMAND_OPTIONS} -username ${SWARM_AGENT_USER} -password ${SWARM_AGENT_PASSWORD}"
+elif [ -f /run/secrets/agent_password ]; then
+    COMMAND_OPTIONS="${COMMAND_OPTIONS} -username ${SWARM_AGENT_USER} -password $(cat /run/secrets/agent_password)"
 fi
 
 if [ -n "${SWARM_CLIENT_NAME}" ]; then

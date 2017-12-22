@@ -52,9 +52,8 @@ ENV SWARM_CLIENT_VERSION="3.4" \
     SWARM_SHA="ef74404b14710491ca7e416bb9bed29f7f5236db" \
     SWARM_HOME="/home/jenkins" \
     SWARM_DELAYED_START="" \
-    COMMAND_OPTIONS="" \
-    USER_NAME_SECRET="" \
-    PASSWORD_SECRET=""
+    SWARM_AGENT_USER="agent" \
+    COMMAND_OPTIONS=""
 
 # note busybox sha1sum requires two spaces between SHA and filename
 RUN wget -q https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/${SWARM_CLIENT_VERSION}/swarm-client-${SWARM_CLIENT_VERSION}.jar -P /usr/bin/ \

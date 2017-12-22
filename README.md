@@ -278,6 +278,26 @@ used by oe_jenkins_build.py.
         --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
         --configs <config name from combos> --git_credential=enable
 
+### Scheduling Builds with Secured Jenkins Master
+
+oe_jenkins_build.py can submit builds to secured jenkins master. It can
+automatically detect if jenkins master is secured. For secured jenkins
+ master, it will detect if a local authentication file exists and tried
+to use it to login. Default name of the local auth file is jenkins_auth.txt
+at the root path of this CI script, while users can apply their user defined
+file by using `--jenkins-auth=FILE_NAME` arguments.
+Content format of the local auth file should be `USERNAME:API_TOKEN`,
+and only on line of text is allowed.
+
+Failing to find the local auth file will make oe_jenkins_build.py use auth
+information hosted on jenkins master to connect. If auth information on
+jenkins master is invalid for login, please contact the manager of jenkins
+server and put the valid authentication in local auth file to submit builds.
+
+    .venv/bin/python3 ./oe_jenkins_build.py \
+        --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
+        --configs <config name from combos> --jenkins_auth <path to file>
+
 ## Modifying docker images
 
 The CI prototype uses the following images:

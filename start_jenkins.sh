@@ -219,8 +219,26 @@ function docker_stack_cleanup {
     exit 0
 }
 
+function random_char
+{
+    local VALID_CHARS=abcdefghijklmnopqrstuvwxyz0123456789
+    local RANDOM_INDEX=$(( RANDOM % ${#VALID_CHARS} ))
+    echo -n ${VALID_CHARS:$RANDOM_INDEX:1}
+}
+
+function random_char_seq
+{
+    local char_seq=
+    for arg in $(seq 1 "$1"); do
+        char_seq="$char_seq$(random_char)"
+    done
+    echo -n "$char_seq"
+}
+
 echo "Jenkins Master UI will be available at https://$HOSTIP"
 if [ "$SWARM" == "0" ]; then
+    export JENKINS_AGENT_PASSWORD="$(random_char_seq 10)"
+
     echo "Creating rsync network"
     docker network create --attachable --driver bridge rsync_net
 
@@ -239,8 +257,7 @@ if [ "$SWARM" == "0" ]; then
 else
     export NETWORK_TYPE=overlay
 
-    docker node ls &> /dev/null
-    if [ "$?" != "0" ]; then
+    if ! docker node ls &> /dev/null; then
         echo "This Docker engine is not in swarm mode or is not a swarm manager."
         echo "This script requires that the host be a Docker Swarm manager."
         echo 'Use "docker swarm init" or "docker swarm join" to connect this node to swarm and try again.'
@@ -251,6 +268,9 @@ else
     if [ "$NUM_NODES" -le "1" ]; then
         echo "WARNING: No worker nodes detected. No builds will be scheduled until worker nodes join the swarm cluster"
     fi
+
+    docker secret rm agent_password &> /dev/null
+    random_char_seq 10 | docker secret create agent_password -
 
     echo "Using Docker Swarm with the following nodes"
     docker node ls
