@@ -25,13 +25,13 @@
 #
 # To populate it with entries from a running layerindex like layers.openembedded.org:
 #
-# ./layerindex_start.sh --input=restapi-web --branch=master \
+# ./layerindex_start.sh --type=restapi-web --branch=master \
 #          --source=https://layers.openembedded.org/layerindex/api/
 #
 # To populate it with a cached mirror-index:
 #
 # ./layerindex_start.sh --type=restapi-files --branch=WRLINUX_9_BASE \
-#    --base_url=https://github.com/WindRiver-Labs/wrlinux-9.git \
+#    --base_url=https://github.com/WindRiver-Labs/ \
 #    --source=https://github.com/WindRiver-Labs/mirror-index.git
 
 COMPOSE_PROJECT_NAME=${PWD##*/}
@@ -39,14 +39,26 @@ if [ -n "$BUILD_ID" ]; then
     export COMPOSE_PROJECT_NAME="build$BUILD_ID"
 fi
 
-TYPE=restapi-web
-BASE_URL=https://github.com/WindRiver-Labs/
+BASE_URL=https://github.com/WindRiver-Labs
 OUTPUT=/opt/layerindex
-SOURCE=https://layers.openembedded.org/layerindex/api/
 
-if [ -z "$BRANCH" ]; then
-    BRANCH=WRLINUX_9_BASE
+if [ -z "$LAYERINDEX_SOURCE" ]; then
+    SOURCE=https://layers.openembedded.org/layerindex/api/
+else
+    SOURCE="$LAYERINDEX_SOURCE"
 fi
+
+if [ -z "$DEVBUILD_BRANCH" ]; then
+    BRANCH=WRLINUX_9_BASE
+else
+    BRANCH="$DEVBUILD_BRANCH"
+fi
+
+if [ -z "$REMOTE" ]; then
+    REMOTE=https://github.com/WindRiver-Labs/wrlinux-9
+fi
+
+SETUPTOOLS=$(echo "$REMOTE" |sed 's/https:\/\/github.com\/WindRiver-Labs\///g')
 
 echo "Command: $0"
 for i in "$@"
@@ -62,6 +74,10 @@ do
     esac
     shift
 done
+
+if [ "$TYPE" == '' ]; then
+    TYPE=restapi-web
+fi
 
 if [ "$TYPE" == 'restapi-web' ] && [ -z "$SOURCE" ]; then
     echo "When import type is restapi-web a source layerindex must be defined"
@@ -84,6 +100,13 @@ for i in {11..1};do echo -n "$i." && sleep 1; done; echo
 
 DOCKER_EXEC=(docker-compose exec -T)
 
+# replace BITBAKE_REPO_URL in settings.py if it's been set
+if [ "$BITBAKE_REPO_URL" != '' ]; then
+    replace_line="BITBAKE_REPO_URL = \"$BITBAKE_REPO_URL\""
+    sed -i "/^BITBAKE_REPO_URL/c ${replace_line}" settings.py
+    cat settings.py | grep BITBAKE_REPO_URL
+fi
+
 # override settings.py and tell gunicorn to reload
 docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/
 docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/layerindex
@@ -96,10 +119,10 @@ echo "Initializing database"
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py migrate'
 
 # clone repos that will be used to generate initial layerindex state
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/; git clone --depth=1 https://github.com/WindRiver-Labs/wrlinux-9.git'
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/; git clone --depth=1 $REMOTE"
 
 # copy script that transforms mirror-index into django format
-docker cp ./transform_index.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/wrlinux-9/bin
+docker cp ./transform_index.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/"$SETUPTOOLS"/bin
 
 declare -a TRANSFORM_CMD
 
@@ -117,7 +140,7 @@ TRANSFORM_CMD+=(--input "$TYPE" --branch "$BRANCH" --output "$OUTPUT" --source "
 # transform mirror-index to django format
 echo
 echo "Transforming database"
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/wrlinux-9/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/"$SETUPTOOLS"/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
 
 # import initial layerindex state.
 echo

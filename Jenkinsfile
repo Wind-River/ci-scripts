@@ -26,6 +26,9 @@ node('docker') {
   def add_env = {
     String command, String[] env_args ->
     for ( arg in env_args ) {
+      if ( arg.contains('EMAIL=') ) {
+        arg = arg.replace(' ', ',')
+      }
       command = command + " -e ${arg} "
     }
     return command
@@ -75,9 +78,12 @@ node('docker') {
           git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
         devbuild_args = params.DEVBUILD_ARGS.tokenize(',')
+        devbuild_args = devbuild_args + ["LAYERINDEX_SOURCE=${LAYERINDEX_SOURCE}"]
+        devbuild_args = devbuild_args + ["BITBAKE_REPO_URL=${BITBAKE_REPO_URL}"]
         withEnv(devbuild_args) {
           dir('ci-scripts/layerindex') {
-            sh "./layerindex_start.sh"
+            sh "printenv"
+            sh "./layerindex_start.sh --type=${LAYERINDEX_TYPE}"
             sh "./layerindex_layer_update.sh"
           }
         }

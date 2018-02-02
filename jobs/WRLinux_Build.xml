@@ -92,6 +92,21 @@
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>LAYERINDEX_TYPE</name>
+          <description>Specify the type of layer index</description>
+          <defaultValue>restapi-web</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYERINDEX_SOURCE</name>
+          <description>Specify the source URL of layer index</description>
+          <defaultValue>https://layers.openembedded.org/layerindex/api/</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BITBAKE_REPO_URL</name>
+          <description>Specify the URL of bitbake repo</description>
+          <defaultValue>git://git.openembedded.org/bitbake</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>TEST</name>
           <description>Perform runtime tests if the build succeeds</description>
           <defaultValue>disable</defaultValue>

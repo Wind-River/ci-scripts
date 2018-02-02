@@ -1,0 +1,174 @@
+# Copyright (c) 2018 Wind River Systems Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+system:
+  # Jenkins master endpoint.
+  jenkins: https://yow-lpdtest.wrs.com
+  # Jenkins Job name.
+  # Default: WRLinux_Build
+  job: WRLinux_Build
+  # The Docker registry to pull images from.
+  # Default: windriver
+  registry: windriver
+  # Specify the file path for jenkins authentication infomation
+  jenkins_auth: jenkins_auth.txt
+  # Specify if jenkins need to use stored credential.
+  # Default: disable
+  git_credential: disable
+  # Specify the credential id when git_credential is enabled.
+  # Default: git
+  git_credential_id: git
+  # The network switch for network access. Only three options allowed:
+  # Default: bridge (with network access) or
+  # overlay (docker swarm mode) or
+  # none (without network).
+  network: bridge
+  # The switch for using toaster in build. Only two options allowed:
+  # enable (with toaster) and disable (without toaster).
+  # Default: enable.
+  toaster: enable
+
+ci_config:
+  # The branch to use for the ci-scripts repo. Used for local modifications.
+  # Default: master
+  ci_branch: devbuild
+  # The location of the ci-scripts repo. Override to use local mirror.
+  # Default: https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git
+  ci_repo: git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git
+
+cache_sources:
+  # Specify a remote for the wrlinux_update.sh script to clone or update from.
+  # Default: ''
+  remote:
+
+layerindex_overrides:
+  # Specify a layer name to be modified as part of a Devbuild.
+  - layer_name: nxp-imx7
+    # Override the branch defined in the combos file.
+    # Default: the same as 'branch' set in 'build' section
+    branch: WRLINUX_10_17_LTS
+    # Specify the layer vcs_url to used with a Devbuild. If not specified the
+    # vcs_url will not be changed.
+    layer_vcs_url: git://git.wrs.com/layers/wr-bsps/nxp-imx7
+    # Specify the branch to be used with on the modified layer for a Devbuild.
+    # Defaults to branch used for build.
+    layer_actual_branch: WRLINUX_10_17_LTS_RCPL0004
+    # Specify the subdir of a repository in which to find the layer.
+    layer_vcs_subdir:
+
+  # Specify a layer name to be modified as part of a Devbuild.
+  - layer_name: intel-haswell
+    # Override the branch defined in the combos file.
+    # Default: the same as 'branch' set in 'build' section
+    branch: WRLINUX_10_17_LTS
+    # Specify the layer vcs_url to used with a Devbuild. If not specified the
+    # vcs_url will not be changed.
+    layer_vcs_url: git://git.wrs.com/layers/wr-bsps/intel-x86
+    # Specify the branch to be used with on the modified layer for a Devbuild.
+    # Defaults to branch used for build.
+    layer_actual_branch: WRLINUX_10_17_LTS_RCPL0004
+    # Specify the subdir of a repository in which to find the layer.
+    layer_vcs_subdir:
+
+build:
+  # The Docker image used for the build.
+  # Default: ubuntu1604_64.
+  image: ubuntu1604_64
+  # Name of file that contains valid build configurations.
+  build_configs_file: configs/WRLinux10/combos-WRLINUX_10_BASE.yaml
+  # Override the branch defined in the combos file.
+  # Default: ''
+  branch: WRLINUX_10_17_LTS
+  # builds as specified in config_file. Use all to queue
+  # all the configs.
+  build_configs:
+    - intel-x86-64_wrlinux-image-glibc-std
+  # Specify the layer index type
+  # Default: restapi-web
+  # Set to restapi-files if populate it with a cached mirror-index
+  layerindex_type: restapi-web
+  # Specify the source URL of layer index
+  # Default: https://layers.openembedded.org/layerindex/api/
+  layerindex_source: http://layers.wrs.com/layerindex/api/
+  # Specify the URL of bitbake repo
+  # Default: git://git.openembedded.org/bitbake
+  bitbake_repo_url: git://ala-git.wrs.com/bitbake
+
+post_build:
+  # The Docker image used for the post process stage.
+  # Default: postbuild
+  post_process_image: postbuild
+  # list of args in form KEY: VAL that will be injected into
+  # post process script environment.
+  # Default: ''
+  postprocess_args:
+    RSYNC_SERVER: yow-lpdtest.wrs.com
+    RSYNC_DEST_DIR: builds/wrlinux10
+    SMTPSERVER: prod-webmail.windriver.com
+    OE_TEST: yes
+    #- EMAIL: 'user1@windriver.com user2@xxx.com'
+    EMAIL: yang.wang@windriver.com
+  # list of scripts in the scripts/ directory to be run after
+  # a successful build.
+  # Default: rsync,cleanup.
+  post_success:
+    - rsync
+    - cleanup
+  # list of scripts in the scripts/ directory to be run after
+  # a failed build.
+  # Default: cleanup,send_email
+  post_fail:
+    - rsync
+    - cleanup
+    - send_mail
+
+test_config:
+  # Switch to enable runtime testing of the build. Only two options supported:
+  # enable (run tests) or disable.
+  # Default: disable
+  test: enable
+  # The Docker image used for the test stage.
+  # Default: postbuild
+  test_image: postbuild
+  # list of args in form KEY: VAL that will be injected into
+  # test and post test script environment.
+  test_args:
+    LAVA_SERVER: yow-lpdtest.wrs.com:8080
+    LAVA_USER: lpdtest
+    NFS_ROOT: /net/yow-lpdtest/var/lib/tftpboot
+    HTTP_ROOT: http://128.224.56.215/tftpboot
+    TEST_DEVICE: simics
+    TEST_SUITE: oeqa-default-test
+    RETRY: 1
+
+post_test:
+  # The Docker image used for the post test stage.
+  # Default: postbuild
+  post_test_image: postbuild
+  # list of scripts in the scripts/ directory to be run after
+  # a successful test.
+  # Default: none
+  post_test_success:
+    - send_mail
+  # list of scripts in the scripts/ directory to be run after
+  # a successful test.
+  # Default: none
+  post_test_fail:
+    - send_mail

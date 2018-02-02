@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2017 Wind River Systems Inc.
+# Copyright (c) 2017-2018 Wind River Systems Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# To ignore no-member pylint errors:
+#     pylint: disable=E1101
 
 import os
 import re
@@ -66,7 +69,7 @@ def fetch_auth_from_jenkins_server(jenkins_master_endpoint):
     try:
         print("Trying to use auth info on jenkins server to login.")
         requests.packages.urllib3.disable_warnings()
-        response = requests.get(jenkins_auth_endpoint,verify=False)
+        response = requests.get(jenkins_auth_endpoint, verify=False)
         return tuple(response.text.split(":"))
     except:
         print("Fetching auth info from jenkins server fails.")
@@ -124,143 +127,269 @@ def create_parser():
 
     op = ArgumentParser(description=descr, formatter_class=RawTextHelpFormatter)
 
-    op.add_argument('--jenkins', dest='jenkins', required=True,
+    op.add_argument('--jenkins', dest='jenkins', required=False,
                     help='Jenkins master endpoint.')
 
-    op.add_argument('--job', dest='job', required=False, default='WRLinux_Build',
+    op.add_argument('--job', dest='job', required=False,
                     help='Jenkins Job name. \nDefault WRLinux_Build')
 
-    op.add_argument('--ci_branch', dest='ci_branch', required=False, default='master',
+    op.add_argument('--ci_branch', dest='ci_branch', required=False,
                     help='The branch to use for the ci-scripts repo.'
                     'Used for local modifications.\nDefault master.')
 
     op.add_argument('--ci_repo', dest='ci_repo', required=False,
-                    default='https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git',
                     help='The location of the ci-scripts repo. Override to use local mirror.\n'
                     'Default: https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git.')
 
-    op.add_argument('--configs_file', dest='configs_file', required=True,
+    op.add_argument('--configs_file', dest='configs_file', required=False,
+                    help='Name of file that contains the configurations for ci system.')
+
+    op.add_argument('--build_configs_file', dest='build_configs_file', required=False,
                     help='Name of file that contains valid build configurations.')
 
-    op.add_argument('--configs', dest='configs', required=True,
-                    help='Comma separated list of builds as specified in config_file.'
+    op.add_argument('--build_configs', dest='build_configs', required=False,
+                    help='Comma separated list of builds as specified in build_configs_file.'
                     'Use all to queue all the configs.')
 
     op.add_argument("--image", dest="image", required=False,
-                    default='ubuntu1604_64',
                     help="The Docker image used for the build. \nDefault: ubuntu1604_64.")
 
     op.add_argument("--registry", dest="registry", required=False,
-                    default='windriver',
                     help="The Docker registry to pull images from. \nDefault: windriver.")
 
     op.add_argument("--postprocess_image", dest="post_process_image", required=False,
-                    default='postbuild',
                     help="The Docker image used for the post process stage. \n"
                     "Default: postbuild.")
 
     op.add_argument("--postprocess_args", dest="postprocess_args", required=False,
-                    default='',
                     help="A comma separated list of args in form KEY=VAL that will be"
                     "injected into post process script environment.")
 
     op.add_argument("--post_success", dest="post_success", required=False,
-                    default='rsync,cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a successful build. \nDefault: rsync,cleanup.")
 
     op.add_argument("--post_fail", dest="post_fail", required=False,
-                    default='cleanup',
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a failed build. \nDefault: cleanup,send_email.")
 
     op.add_argument("--network", dest="network", required=False,
-                    default='bridge', choices=['bridge', 'none'],
+                    choices=['bridge', 'none'],
                     help="The network switch for network access.\n"
                     "Only two options allowed: bridge (with network access) and none (without network). \n"
                     "Default: bridge.")
 
     op.add_argument("--toaster", dest="toaster", required=False,
-                    default='enable', choices=['enable', 'disable'],
+                    choices=['enable', 'disable'],
                     help="The switch for using toaster in build.\n"
                     "Only two options allowed: enable (with toaster) and disable (without toaster).\n"
                     "Default: enable.")
 
     op.add_argument("--branch", dest="branch", required=False,
-                    default='',
                     help="Override the branch defined in the combos file.")
 
     op.add_argument("--remote", dest="remote", required=False,
-                    default='',
                     help="Specify a remote for the wrlinux_update.sh script to clone or update from.")
 
     op.add_argument("--devbuild_layer_name", dest="devbuild_layer_name", required=False,
-                    default='',
                     help="Specify a layer name to be modified as part of a Devbuild.")
 
     op.add_argument("--devbuild_layer_vcs_url", dest="devbuild_layer_vcs_url", required=False,
-                    default='',
                     help="Specify the layer vcs_url to used with a Devbuild."
                     "If not specified the vcs_url will not be changed.")
 
     op.add_argument("--devbuild_layer_actual_branch", dest="devbuild_layer_actual_branch",
-                    required=False, default='',
+                    required=False,
                     help="Specify the branch to be used with on the modified layer for a Devbuild."
                     "Defaults to branch used for build")
 
     op.add_argument("--devbuild_layer_vcs_subdir", dest="devbuild_layer_vcs_subdir", required=False,
-                    default='',
                     help="Specify the subdir of a repository in which to find the layer.")
 
+    op.add_argument("--layerindex_type", dest="layerindex_type", required=False,
+                    help="Specify the type of layer index. \n"
+                    "Default: restapi-web")
+
+    op.add_argument("--layerindex_source", dest="layerindex_source", required=False,
+                    help="Specify the source URL of layer index. \n"
+                    "Default: https://layers.openembedded.org/layerindex/api")
+
+    op.add_argument("--bitbake_repo_url", dest="bitbake_repo_url", required=False,
+                    help="Specify the URL of bitbake repo. \n"
+                    "Default: git://git.openembedded.org/bitbake")
+
     op.add_argument("--test", dest="test", required=False,
-                    default='disable', choices=['enable', 'disable'],
+                    choices=['enable', 'disable'],
                     help="Switch to enable runtime testing of the build.\n"
                     "Only two options supported: enable (run tests) or disable. Default: disable")
 
     op.add_argument("--test_image", dest="test_image", required=False,
-                    default='postbuild',
                     help="The Docker image used for the test stage.\n"
                     "Default: postbuild.")
 
     op.add_argument("--test_args", dest="test_args", required=False,
-                    default='',
                     help="A comma separated list of args in form KEY=VAL that will be"
                     "injected into test and post test script environment.")
 
     op.add_argument("--post_test_image", dest="post_test_image", required=False,
-                    default='postbuild',
                     help="The Docker image used for the post test stage.\n"
                     "Default: postbuild.")
 
     op.add_argument("--post_test_success", dest="post_test_success", required=False,
-                    default='',
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a successful test. \nDefault: none.")
 
     op.add_argument("--post_test_fail", dest="post_test_fail", required=False,
-                    default='',
                     help="A comma separated list of scripts in the scripts/ directory"
                     "to be run after a failed test. \nDefault: none.")
 
     op.add_argument("--git_credential", dest="git_credential", required=False,
-                    default='disable', choices=['enable', 'disable'],
+                    choices=['enable', 'disable'],
                     help="Specify if jenkins need to use stored credential.")
 
     op.add_argument("--git_credential_id", dest="git_credential_id", required=False,
-                    default='git',
                     help="Specify the credential id when git_credential is enabled. Default: git")
 
     op.add_argument("--jenkins_auth", dest="jenkins_auth", required=False,
-                    default='jenkins_auth.txt',
                     help="Specify the file path for jenkins authentication infomation")
 
     return op
 
 
+def replace_dict_key(dic):
+    """ Handle environment variables for devbuild_argsa """
+    dict_var_names = {
+        'branch'             : 'DEVBUILD_BRANCH',
+        'layer_name'         : 'DEVBUILD_LAYER_NAME',
+        'layer_vcs_url'      : 'DEVBUILD_LAYER_VCS_URL',
+        'layer_actual_branch': 'DEVBUILD_LAYER_ACTUAL_BRANCH',
+        'layer_vcs_subdir'   : 'DEVBUILD_LAYER_VCS_SUBDIR',
+    }
+
+    for key, value in dic.items():
+        if key in dict_var_names:
+            dic[dict_var_names[key]] = dic.pop(key)
+    for key, value in dic.items():
+        if value is None:
+            dic[key] = ''
+
+    return dic
+
+
+def parse_configs_from_yaml(configs_file):
+    """
+    This function is used to get all the options from a configuration file:
+    configs/oe_jenkins_build.yaml
+    """
+    class Opts(dict):
+        """ This class will be used to collect all the options. """
+        pass
+
+    def setattr_without_none(obj, attr, value):
+        setattr(obj, attr, '' if value is None else value)
+
+    def dict2list(d):
+        return [(str(k) + '=' + (str(v) if v is not None else '')) for k, v in d.items()]
+
+    if configs_file is None:
+        configs_file = 'configs/oe_jenkins_build.yaml'
+
+    with open(configs_file) as yaml_configs_file:
+
+        yaml_configs = yaml.load(yaml_configs_file)
+
+        if yaml_configs is None:
+            print("No configurations were found in " + configs_file)
+            sys.exit(1)
+
+        else:
+            # Get attributes without parsing details
+            layer_id = 0
+            setattr(Opts, 'devbuild_args', '')
+
+            for section in yaml_configs:
+                for section_cfgs in yaml_configs[section]:
+                    if isinstance(section_cfgs, dict):
+                        # configs for layers
+                        if section_cfgs['layer_name']:
+                            layer_id += 1
+                            layername = 'layer_' + str(layer_id) + '_' + section_cfgs['layer_name']
+                            setattr_without_none(Opts, layername, section_cfgs)
+
+                            # TODO: we will support multiple layers in devbuild_args, currently
+                            # devbuild_args is set to the first layer with its layer_name is defined
+                            if layer_id == 1:
+                                setattr(Opts, 'devbuild_args',
+                                        ','.join(dict2list(replace_dict_key(section_cfgs))))
+                        else:
+                            print("WARNING - no layer_name: " + str(section_cfgs))
+                    else:
+                        value = yaml_configs[section][section_cfgs]
+                        # configs for postprocess_args, test_args
+                        if isinstance(value, dict):
+                            setattr_without_none(Opts, section_cfgs, ','.join(dict2list(value)))
+                        # configs for build_configs, post_fail/success, post_test_fail/success
+                        elif isinstance(value, list):
+                            setattr_without_none(Opts, section_cfgs, ','.join(value))
+                        else:
+                            setattr_without_none(Opts, section_cfgs, value)
+
+    return Opts
+
+
 def main():
     """Main"""
+    # Common functions
+    def get_attr_list(d):
+        return [attr for attr in d.__dict__.keys() if not attr.startswith("__")]
+
+    def num_spaces(word, fixed_length):
+        return fixed_length - len(word)
+
+    def dict2list(d):
+        return [(str(k) + '=' + str(v)) for k, v in d.items()]
+
+    # Get options from command line
     parser = create_parser()
-    opts = parser.parse_args(sys.argv[1:])
+    cml_opts = parser.parse_args(sys.argv[1:])
+
+    cml_opts_attr_list = get_attr_list(cml_opts)
+    cml_opts_attr_list.sort()
+
+    # Get options from YAML configuration file
+    opts = parse_configs_from_yaml(cml_opts.configs_file)
+
+    opts_attr_list = get_attr_list(opts)
+    opts_attr_list.sort()
+
+    # Override the options get from YAML config file
+    for attr in cml_opts_attr_list:
+        cml_value = getattr(cml_opts, attr)
+
+        if cml_value and attr != 'configs_file':
+            yaml_value = getattr(opts, attr)
+
+            if attr in opts_attr_list:
+                # support overriding sub-items in postprocess_args and test_args
+                if attr in ['postprocess_args', 'test_args']:
+                    cml_value_in_dict = dict(item.split("=") for item in cml_value.split(","))
+                    yaml_value_in_dict = dict(item.split("=") for item in yaml_value.split(","))
+
+                    yaml_value_key_list = list(yaml_value_in_dict.keys())
+                    for key, val in cml_value_in_dict.items():
+                        if key in yaml_value_key_list:
+                            yaml_value_in_dict[key] = val
+
+                    setattr(opts, attr, ','.join(dict2list(yaml_value_in_dict)))
+                else:
+                    setattr(opts, attr, cml_value)
+            else:
+                print("WARNING: ", attr, "is not a known option in YAML config file!")
+
+    print("============ Options after override ============")
+    for attr in opts_attr_list:
+        print(attr, ' ' * num_spaces(attr, 22), ':', getattr(opts, attr))
+    print("================================================")
 
     if opts.network == "none" and opts.toaster == "enable":
         print("Cannot enable Toaster if network is disabled."
@@ -288,10 +417,10 @@ def main():
             print("Using the Git Credential Id %s in Jenkins to access git server." % opts.git_credential_id)
 
     try:
-        if(not jenkins_auth):
+        if not jenkins_auth:
             server = jenkins.Jenkins(jenkins_url)
         else:
-            server = jenkins.Jenkins(jenkins_url, username = jenkins_auth[0], password = jenkins_auth[1])
+            server = jenkins.Jenkins(jenkins_url, username=jenkins_auth[0], password=jenkins_auth[1])
     except jenkins.JenkinsException:
         print("Connection to Jenkins server %s failed." % jenkins_url)
         sys.exit(1)
@@ -304,11 +433,20 @@ def main():
         with open(job_config) as job_config_file:
             xml_config = job_config_file.read()
             if opts.ci_branch != 'master':
+                # replace branch in xml definition of job
                 import xml.etree.ElementTree as ET
                 root = ET.fromstring(xml_config)
                 branches = root.find('definition').find('scm').find('branches')
                 branch = branches.find('hudson.plugins.git.BranchSpec').find('name')
                 branch.text = '*/' + opts.ci_branch
+                xml_config = ET.tostring(root, encoding="unicode")
+            if opts.ci_repo:
+                # replace git repo in xml definition of job
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(xml_config)
+                ci_repos = root.find('definition').find('scm').find('userRemoteConfigs')
+                ci_repo = ci_repos.find('hudson.plugins.git.UserRemoteConfig').find('url')
+                ci_repo.text = opts.ci_repo
                 xml_config = ET.tostring(root, encoding="unicode")
 
     try:
@@ -317,33 +455,20 @@ def main():
     except jenkins.NotFoundException:
         server.create_job(opts.job, xml_config)
 
-    with open(opts.configs_file) as configs_file:
-        configs = yaml.load(configs_file)
+    with open(opts.build_configs_file) as build_configs_file:
+        configs = yaml.load(build_configs_file)
         if configs is None:
             sys.exit(1)
 
-        configs_to_run = opts.configs.split(',')
+        configs_to_run = opts.build_configs.split(',')
         for config in configs:
-            if opts.configs == 'all' or config['name'] in configs_to_run:
+            if opts.build_configs == 'all' or config['name'] in configs_to_run:
 
                 print("Generating command for config %s" % config['name'])
 
                 branch = config.get('branch', "WRLINUX_9_BASE")
                 if opts.branch:
                     branch = opts.branch
-
-                devbuild_args = ""
-                if opts.devbuild_layer_name:
-                    devbuild_args = "DEVBUILD_LAYER_NAME=" + opts.devbuild_layer_name
-                    devbuild_args += ",DEVBUILD_BRANCH=" + branch
-                    devbuild_args += ",DEVBUILD_LAYER_VCS_URL=" + opts.devbuild_layer_vcs_url
-
-                    if not opts.devbuild_layer_actual_branch:
-                        opts.devbuild_layer_actual_branch = branch
-                    devbuild_args += ",DEVBUILD_LAYER_ACTUAL_BRANCH=" + opts.devbuild_layer_actual_branch
-
-                    if not opts.devbuild_layer_vcs_subdir:
-                        devbuild_args += ",DEVBUILD_LAYER_VCS_SUBDIR=" + opts.devbuild_layer_vcs_subdir
 
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
 
@@ -366,7 +491,10 @@ def main():
                                            'TOASTER': opts.toaster,
                                            'GIT_CREDENTIAL': opts.git_credential,
                                            'GIT_CREDENTIAL_ID': opts.git_credential_id,
-                                           'DEVBUILD_ARGS': devbuild_args,
+                                           'DEVBUILD_ARGS': opts.devbuild_args,
+                                           'LAYERINDEX_TYPE': opts.layerindex_type,
+                                           'LAYERINDEX_SOURCE': opts.layerindex_source,
+                                           'BITBAKE_REPO_URL': opts.bitbake_repo_url,
                                            'TEST': opts.test,
                                            'TEST_IMAGE': opts.test_image,
                                            'TEST_ARGS': opts.test_args,

@@ -74,7 +74,7 @@ post_rsync() {
     # "Copy" all 00-* log files to rsync dir
     find "$BUILD" -type f -name "00-*" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
-    if [ "$OE_TEST" == "yes" ]; then
+    if [[ "$OE_TEST" == "yes" || "$OE_TEST" == True ]]; then
         # Get rpm package for OE test
         local DEPLOY_DIR=
         DEPLOY_DIR=$(readlink -f "${NAME}/${TMP_DIR}/deploy/rpm")

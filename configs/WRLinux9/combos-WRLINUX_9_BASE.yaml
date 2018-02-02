@@ -1,13 +1,12 @@
 - branch: WRLINUX_9_BASE
   build:
-  - oe_test_build.sh
+  - 'bitbake wrlinux-image-glibc-std ; bitbake wrlinux-image-glibc-std -c testexport'
   name: intel-x86-64_wrlinux-image-glibc-std
   prebuild:
   - notconfigure.sh
   - --oe-test=with_wrlinux9
   - --enable-shared-sstate=wrl9_sstate_cache
-  - --dl_dir=wrl9_downloads
-  - --test-suites=ping,ssh,df,date,scp,pam,perl,python,auto
+  - --test-suites=ping,ssh,df,date,scp,pam,perl,python
   setup:
   - --distro=wrlinux
   - --machine=intel-x86-64
