@@ -42,13 +42,11 @@ services:
       - net
     volumes:
       - jenkins_home:/var/jenkins_home
-      - type: tmpfs
-        target: /tmp
     secrets:
       - agent_password
 
   rproxy:
-    image: blacklabelops/nginx:${RPROXY_TAG:-latest}
+    image: windriver/nginx:${RPROXY_TAG:-latest}
     deploy:
       replicas: 1
       placement:
@@ -88,8 +86,6 @@ services:
       - rsync_builds:/var/lib/nginx/html/builds/:ro
       # expose the jenkins auth content over https
       - jenkins_home:/var/lib/nginx/html/jenkins_home/:ro
-      - type: tmpfs
-        target: /tmp
 
   client:
     image: ${REGISTRY:-windriver}/jenkins-swarm-client:${JENKINS_AGENT_TAG:-latest}
@@ -113,8 +109,6 @@ services:
       - jenkins_agent:/home/jenkins
       - /etc/hostname:/etc/hostname
       - /etc/localtime:/etc/localtime
-      - type: tmpfs
-        target: /tmp
     secrets:
       - agent_password
 
