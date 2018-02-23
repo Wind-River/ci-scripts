@@ -4,9 +4,9 @@
   name: intel-x86-64_wrlinux-image-glibc-std
   prebuild:
   - notconfigure.sh
-  - --oe-test=with_wrlinux9
   - --enable-shared-sstate=wrl9_sstate_cache
-  - --test-suites=ping,ssh,df,date,scp,pam,perl,python
+  - --oe-test=with_wrlinux9
+  - --oe-test-suites=ping,ssh,df,date,scp,pam,perl,python
   setup:
   - --distro=wrlinux
   - --machine=intel-x86-64

@@ -61,6 +61,11 @@ HTTP_ROOT=http://128.224.56.215/tftpboot,RSYNC_DEST_DIR=builds/x86-64_oe-test-04
     quit_test -1
 fi
 
+# when using simics instances in simics server
+#SIMICS_IMG_ROOT="$NFS_ROOT"
+# when using simics instances in simics-docker
+SIMICS_IMG_ROOT='/images'
+
 if [ -z "$TEST_DEVICE" ]; then
     TEST_DEVICE=simics
 fi
@@ -96,16 +101,16 @@ if [ -d lava-test ]; then
     echo "Test git repo: git://ala-git.wrs.com/lpd-ops/lava-test.git" >> "$TEST_STATFILE"
 
     # LAVA authentication
-    echo "[LAVA-CMD] lava-tool auth-list |grep yow-lpdtest"
-    lava-tool auth-list | grep yow-lpdtest
+    echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
+    lava-tool auth-list | grep ${LAVA_SERVER}
 
     # If the auth token exists, remove it
     if [ $? == 0 ]; then
         echo "[LAVA-CMD] lava-tool auth-remove http://${LAVA_USER}@${LAVA_SERVER}"
         lava-tool auth-remove "http://${LAVA_USER}@${LAVA_SERVER}"
 
-        echo "[LAVA-CMD] lava-tool auth-list |grep yow-lpdtest"
-        lava-tool auth-list | grep yow-lpdtest
+        echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
+        lava-tool auth-list | grep ${LAVA_SERVER}
         if [ $? == 0 ]; then
             echo "lava-tool auth-remove failed!" >> "$TEST_STATFILE"
             quit_test -1
@@ -114,12 +119,12 @@ if [ -d lava-test ]; then
 
     # Add new auth token to make sure it's the latest
     echo "[LAVA-CMD] lava-tool auth-add http://${LAVA_USER}@${LAVA_SERVER} \
-        --token-file ${BUILD}/lava-test/scripts/auth-token-lpdtest"
+        --token-file ${BUILD}/lava-test/scripts/auth-token"
     lava-tool auth-add "http://${LAVA_USER}@${LAVA_SERVER}" --token-file \
-        "${BUILD}/lava-test/scripts/auth-token-lpdtest"
+        "${BUILD}/lava-test/scripts/auth-token"
 
-    echo "[LAVA-CMD] lava-tool auth-list |grep yow-lpdtest"
-    lava-tool auth-list |grep yow-lpdtest
+    echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
+    lava-tool auth-list |grep ${LAVA_SERVER}
     if [ $? != 0 ]; then
         echo "lava-tool auth-add failed!" >> "$TEST_STATFILE"
         quit_test -1
@@ -153,7 +158,7 @@ popd
 if [ $TEST_DEVICE == 'simics' ]; then
     JOB_TEMPLATE=${BUILD}/lava-test/jobs/templates/wrlinux-${WRL_VER}/x86_simics_job_${TEST_SUITE}_template.yaml
     cp -f "$JOB_TEMPLATE" "${BUILD}/lava-test/${TEST_JOB}"
-    sed -i "s@HDD_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "lava-test/${TEST_JOB}"
+    sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "lava-test/${TEST_JOB}"
 else
     JOB_TEMPLATE=${BUILD}/lava-test/jobs/templates/wrlinux-${WRL_VER}/x86_64_job_${TEST_SUITE}_template.yaml
     cp -f "$JOB_TEMPLATE" "${BUILD}/lava-test/${TEST_JOB}"

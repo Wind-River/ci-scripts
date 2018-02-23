@@ -68,7 +68,7 @@ docker-compose run:
 This will download the images from the Docker Cloud/Hub and start the
 images using docker-compose.
 
-The jenkins web UI is accessible at https://localhost/jenkins. If
+The Jenkins web UI is accessible at https://localhost/jenkins. If
 attempting to access the web UI from a different machine, replace
 localhost with the name or IP of the server where the repository was
 cloned to.
@@ -86,7 +86,7 @@ using Docker Swarm.
     ./start_jenkins.sh --swarm
 
 The machine where the `start_jenkins.sh` script is run must be a
-Docker swarm manager node. It will be labelled the "master" node and
+Docker swarm manager node. It will be labeled the "master" node and
 no builds will be scheduled on this node.
 
 Using Docker Swarm requires some manual setup on each machine that
@@ -115,7 +115,7 @@ the [Docker Swarm Documentation][2]
 [2]: https://docs.docker.com/engine/swarm/
 
 
-### Scheduling WRLinux Builds
+## Scheduling Jobs
 
 By default the Jenkins Master does not have authentication enabled and
 jobs can be submitted from any machine. On the same or a different
@@ -124,8 +124,8 @@ locally and submit a job run:
 
     make setup
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
-        --configs <config name from combos>
+        --jenkins <jenkins> --configs <config name from combos> \
+        --build_configs_file configs/WRLinux9/combos-WRLINUX_9_BASE.yaml
 
 This will install all the python libraries into .venv and contact
 the Jenkins Master and schedule a build on the Jenkins Agent. The
@@ -143,7 +143,8 @@ LayerIndex.
 An example config is provided to demonstrate building Poky locally:
 
     .venv/bin/python3 ./oe_jenkins_build.py --jenkins <jenkins> \
-       --configs_file combos-pyro.yaml --configs=pyro-minimal
+       --build_configs_file configs/OpenEmbedded/combos-pyro.yaml \
+       --configs=pyro-minimal
 
 To reuse the ubuntu1604_64 image, the poky build uses the WRLinux
 buildtools from Github.
@@ -200,7 +201,7 @@ To add post build steps, add a script to the scripts directory and add
 the script name to the --post_success and/or --post_fail and add any
 required parameters to --postprocess_args.
 
-### Developer Builds
+## Developer Builds
 
 An ideal Continuous Integration workflow supports the testing of
 patches before they are committed to the "trunk" branches. Also known
@@ -223,7 +224,9 @@ layer git repository and run builds and tests using this branch.
 An example workflow:
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins <jenkins> --configs_file combos-master.yaml
+        --jenkins <jenkins> --configs master-minimal \
+        --devbuild_layer_name openembedded-core \
+        --build_configs_file configs/OpenEmbedded/combos-master.yaml \
         --configs master-minimal --devbuild_layer_name openembedded-core \
         --devbuild_layer_vcs_url git://github.com/kscherer/openembedded-core.git \
         --devbuild_actual_branch devbuild
@@ -254,7 +257,7 @@ Current Limitations:
 
 [1]: https://github.com/Wind-River/wr-lx-setup
 
-### Rsync server
+## Rsync server
 
 To support collection of build artifact results from a build cluster,
 an rsync server has been integrated. The runs beside the reverse proxy
@@ -266,7 +269,7 @@ server.
 The contents of the rsync server are available over HTTPS through the
 reverse proxy at `https://<jenkins>/builds`
 
-### Using Jenkins credentials to access Git server
+## Using Jenkins Credential Store to access Git server
 
 Jenkins has an encrypted credential store which can manage credentials
 used to access the git server. Connect to Jenkins and select
@@ -275,28 +278,154 @@ Credentials in the left menu. Then select System -> "Global
 used by oe_jenkins_build.py.
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
-        --configs <config name from combos> --git_credential=enable
+        --jenkins <jenkins> --configs <config name from combos> \
+        --build_configs_file configs/WRLinux9/combos-WRLINUX_9_BASE.yaml \
+        --git_credential=enable
 
-### Scheduling Builds with Secured Jenkins Master
+## Scheduling Jobs when Jenkins requires Authentication
 
-oe_jenkins_build.py can submit builds to secured jenkins master. It can
-automatically detect if jenkins master is secured. For secured jenkins
- master, it will detect if a local authentication file exists and tried
-to use it to login. Default name of the local auth file is jenkins_auth.txt
-at the root path of this CI script, while users can apply their user defined
-file by using `--jenkins-auth=FILE_NAME` arguments.
-Content format of the local auth file should be `USERNAME:API_TOKEN`,
-and only on line of text is allowed.
+The oe_jenkins_build.py can submit jobs to the Jenkins master that
+requires Authentication. If unauthenticated access fails,
+oe_jenkins_build.py check for a local file containing the
+authentication credentials. The default name of the local auth file is
+jenkins_auth.txt at the root path of this CI script. To use a
+different file name use the command line option
+`--jenkins-auth=FILE_NAME`. Format of the local auth file
+should be `USERNAME:API_TOKEN`, and only one line of text is allowed.
 
-Failing to find the local auth file will make oe_jenkins_build.py use auth
-information hosted on jenkins master to connect. If auth information on
-jenkins master is invalid for login, please contact the manager of jenkins
-server and put the valid authentication in local auth file to submit builds.
+The windriver/jenkins-master image requires authentication and has a
+special mechanism to retrieve this information transparently. If
+authentication to a different Jenkins server fails, contact the
+manager of Jenkins server and put the valid authentication in local
+auth file to submit jobs.
 
     .venv/bin/python3 ./oe_jenkins_build.py \
-        --jenkins <jenkins> --configs_file combos-WRLINUX_9_BASE.yaml \
-        --configs <config name from combos> --jenkins_auth <path to file>
+        --jenkins <jenkins> --configs <config name from combos> \
+        --build_configs_file configs/WRLinux9/combos-WRLINUX_9_BASE.yaml \
+        --jenkins_auth <path to file>
+
+## Runtime tests
+
+Tuntime tests are supported using LAVA, which is a server running
+outside of CI scripts. The LAVA server configuration is set in
+config files which locate in configs folder.
+
+To enable runtime tests, the following settings in the YAML config
+file under configs folder are required:
+
+```yaml
+  post_build:
+    post_process_image: postbuild
+    postprocess_args:
+      RSYNC_SERVER: yow-lpdtest.wrs.com
+      RSYNC_DEST_DIR: builds/wrlinux10
+      OE_TEST: yes
+    post_success:
+      - rsync
+      - cleanup
+
+  test_config:
+	test: enable
+    test_image: postbuild
+    test_args:
+      LAVA_SERVER: <lava_server_link>
+      LAVA_USER: <lava_username>
+      NFS_ROOT: /net/yow-lpdtest/var/lib/tftpboot
+      HTTP_ROOT: http://128.224.56.215/tftpboot
+      TEST_DEVICE: [simics (default) or hardware]
+      TEST_SUITE: <test_suite_name>
+      RETRY: 1
+```
+
+Because different tests may require different settings of build and
+execution, here are the configurations for supported tests:
+
+### OEQA Tests
+
+_Build_
+
+1. Build config file for WRLinux, such as combos-WRLINUX_10_BASE.yaml.
+   notconfigure.sh will make required changes to local.conf:
+    ```yaml
+    prebuild:
+      - notconfigure.sh
+      - --oe-test=with_wrlinux10
+      - --oe-test-suites=ping,ssh,df,connman,syslog,xorg,scp,vnc,date,pam,perl,python,rpm,ldd,smart,dmesg
+    ```
+
+_Execution_
+
+1. Specify TEST_DEVICE and TEST_SUITE in YAML config file under configs folder, for example:
+    ```yaml
+    TEST_DEVICE: simics
+    TEST_SUITE: oeqa-default-test
+    ```
+2. The LAVA job template files for OEQA tests is stored in lava-test git repository,
+(http://git.wrs.com/cgit/lpd-ops/lava-test.git) No special settings are required.
+    > jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml  (hardware)
+    > jobs/templates/wrlinux-10/x86_simics_job_oeqa-default-test_template.yaml (simics)
+
+### Linaro (LAVA) tests
+
+Linaro provides lots of open source test suites, which are defined in:
+https://git.linaro.org/qa/test-definitions.git, we can use them in CI as well.
+
+_Build_
+
+1. Build config file for WRLinux, such as combos-WRLINUX_10_BASE.yaml.
+   notconfigure.sh will make required changes to local.conf:
+    ```yaml
+    prebuild:
+      - notconfigure.sh
+      - --oe-test=with_wrlinux10
+      - --lava-test=yes
+    ```
+
+_Execution_
+1. Specify TEST_DEVICE and TEST_SUITE in YAML config file under
+configs folder, for example:
+    ```yaml
+    # Supported tests and matching devices
+    #
+    # test_suit                       | supported device
+    # --------------------------------+-------------------
+    # linaro-smoke-test               | simics or hardware
+    # linaro-busybox-test             | simics or hardware
+    # linaro-signal-test              | simics or hardware
+    # linaro-singlenode-advanced-test | simics or hardware
+    # linaro-pi-stress-test           | hardware
+    # linaro-pmq-test                 | hardware
+    # linaro-rt-migrate-test          | hardware
+    #
+    TEST_DEVICE: simics
+    TEST_SUITE: linaro-smoke-test
+    ```
+2. The LAVA job template files for Linaro tests are stored in lava-test
+git repository, above listed all supported Linaro tests and their job
+template files are:
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-busybox-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-pi-stress-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-pmq-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-rt-migrate-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-signal-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-singlenode-advanced-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_64_job_linaro-smoke-test_template.yaml (hardware)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-busybox-test_template.yaml (simics)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-pi-stress-test_template.yaml (simics)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-pmq-test_template.yaml (simics)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-rt-migrate-test_template.yaml (simics)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-signal-test_template.yaml (simics)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-singlenode-advanced-test_template.yaml (simics)
+    > jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml (simics)
+
+    If new test suites are introduced, new job template files need to be created as well.
+
+    **Note:**
+    Test suite name must be set properly and consistent in the following places:
+    *  Inside job template file, under test section, the 'name' field of 'definitions'
+    *  Job template file name contains test suite name, for example:
+        >  x86_simics_job_**linaro-smoke-test**_template.yaml
+    *  TEST_SUITE in YAML config file under configs folder
 
 ## Modifying docker images
 
@@ -318,7 +447,7 @@ To test image modifications rebuild the container locally and run:
 ## TODO
 
 - Build notifications
-- Runtime testing integration with LAVA
+- Simplify settings of runtime tests
 - Select a good project name
 
 ## Contributing

@@ -68,7 +68,8 @@ do
         --allow-bsp-pkgs=*)     ALLOW_BSP_PKGS="${i#*=}" ;;
         --test-image=*)         TEST_IMAGE="${i#*=}" ;;
         --oe-test=*)            OE_TEST="${i#*=}" ;;
-        --test-suites=*)        TEST_SUITES="${i#*=}" ;;
+        --oe-test-suites=*)     OE_TEST_SUITES="${i#*=}" ;;
+        --lava-test=*)          LAVA_TEST="${i#*=}" ;;
         --no-network=*)         BB_NO_NETWORK="${i#*=}" ;;
         --premirror_path=*)     PREMIRROR_PATH="${i#*=}" ;;
         --dl_dir=*)             DL_DIR="${i#*=}" ;;
@@ -217,18 +218,8 @@ process_package(){
         echo "IMAGE_FSTYPES_remove = \"live\""
     fi
 
-    if [ -n "$OE_TEST" ] && [ "$OE_TEST" != "no" ]; then
+    if [ -n "$OE_TEST" ] && [ "$OE_TEST" != "no" ] || [ "$LAVA_TEST" == "yes" ]; then
         echo "INHERIT += \"testexport\""
-
-        # Setup target and server IP address
-        echo "TEST_TARGET_IP = \"localhost\""
-        echo "TEST_SERVER_IP = \"localhost\""
-
-        if [ -z "$TEST_SUITES" ]; then
-            echo "TEST_SUITES = \"ping ssh df date scp pam perl python rpm\""
-        else
-            echo "TEST_SUITES = \"$(echo $TEST_SUITES | sed 's/,/\ /g')\""
-        fi
 
         if [ "$OE_TEST" == "with_wrlinux9" ]; then
             # Make sure OE test has python3 library, this is for WRL9
@@ -239,6 +230,33 @@ process_package(){
             echo "IMAGE_INSTALL_append += \"python3-unittest\""
             echo "IMAGE_INSTALL_append += \"python3-multiprocessing\""
         fi
+    fi
+
+    if [ -n "$OE_TEST" ] && [ "$OE_TEST" != "no" ]; then
+        # Setup target and server IP address
+        echo "TEST_TARGET_IP = \"localhost\""
+        echo "TEST_SERVER_IP = \"localhost\""
+
+        if [ -z "$OE_TEST_SUITES" ]; then
+            echo "TEST_SUITES = \"ping ssh df date scp pam perl python rpm\""
+        else
+            echo "TEST_SUITES = \"$(echo $OE_TEST_SUITES | sed 's/,/\ /g')\""
+        fi
+    fi
+
+    if [ "$LAVA_TEST" == "yes" ]; then
+        echo "IMAGE_INSTALL_append += \"rt-tests ltp sysbench iozone3 bonnie++ fwts dmidecode fio busybox\""
+        echo "PNWHITELIST_openembedded-layer += 'sysbench'"
+        echo "PNWHITELIST_openembedded-layer += 'fwts'"
+        echo "PNWHITELIST_openembedded-layer += 'fio'"
+        echo "PNWHITELIST_openembedded-layer += 'busybox'"
+        echo "PNWHITELIST_openembedded-layer += 'numactl'"
+        echo "PREFERRED_PROVIDER_virtual/kernel = 'linux-yocto-rt'"
+
+        echo "LINUX_KERNEL_TYPE = 'preempt-rt'"
+        echo "BB_NO_NETWORK_pn-fwts = '0'"
+        echo "BB_NO_NETWORK_pn-fio = '0'"
+        echo "BB_NO_NETWORK_pn-sysbench = '0'"
     fi
 
     if [ -n "$PREMIRROR_PATH" ]; then
