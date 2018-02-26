@@ -40,7 +40,7 @@ $(VENV):
 	touch $(VENV); \
 	wget -O $(GET_PIP) https://bootstrap.pypa.io/get-pip.py; \
 	$(VENV)/bin/python3 $(GET_PIP) --ignore-installed; \
-	$(PIP) install pylint flake8 python-jenkins PyYAML requests;
+	$(PIP) install pylint flake8 python-jenkins PyYAML requests gitpython;
 
 setup: $(VENV) ## Install all python dependencies in .venv
 
@@ -52,5 +52,5 @@ volume_clean: ## Delete named docker volumes
 		docker volume rm ci_rproxy_nginx_config; \
 	}
 
-clean: volume_clean ## Delete virtualenv and all build directories
+clean: ## Delete virtualenv
 	rm -rf $(VENV)

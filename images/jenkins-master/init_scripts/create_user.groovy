@@ -6,7 +6,7 @@ import hudson.security.csrf.DefaultCrumbIssuer
 import jenkins.security.s2m.AdminWhitelistRule
 /**
  * This is the groovy script to enable global security in Jenkins-master
- * Major aim of jenkins security is to ensure only oe_jenkins_build.py can submit build jobs to jenkins
+ * Major aim of jenkins security is to ensure only jenkins_job_submit.py can submit build jobs to jenkins
  *
  * This script applies matrix authority strategy to authorize three users for different authorities
  * Administrator user has the authority to all operations in jenkins
@@ -92,7 +92,7 @@ instance.getInjector().getInstance(AdminWhitelistRule.class).setMasterKillSwitch
 instance.save()
 
 // Output API key to a shared file bind mount to rproxy
-// oe_jenkins_build.py uses this API key to set up security connection and submit jobs
+// jenkins_job_submit.py uses this API key to set up security connection and submit jobs
 def env = System.getenv()
 def authPath = new File("/var/jenkins_home/auth/")
 if (!authPath.exists()) {

@@ -123,7 +123,7 @@ machine, clone this repository. To install the python-jenkins package
 locally and submit a job run:
 
     make setup
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --configs <config name from combos> \
         --build_configs_file configs/WRLinux9/combos-WRLINUX_9_BASE.yaml
 
@@ -142,7 +142,7 @@ LayerIndex.
 
 An example config is provided to demonstrate building Poky locally:
 
-    .venv/bin/python3 ./oe_jenkins_build.py --jenkins <jenkins> \
+    .venv/bin/python3 ./jenkins_job_submit.py --jenkins <jenkins> \
        --build_configs_file configs/OpenEmbedded/combos-pyro.yaml \
        --configs=pyro-minimal
 
@@ -173,7 +173,7 @@ build to avoid having to add tools like rsync to the build
 container. This also allows the build to run without network
 access. To select a different post build image:
 
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --postprocess_image <image>
 
 The prototype contains a generic post build step that does not require
@@ -181,7 +181,7 @@ modifications to job config or Jenkinsfile. The post build scripts are
 located in the scripts directory and can be selected to run using the
 command line:
 
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --post_success=rsync,cleanup \
         --post_fail=send_email,cleanup
 
@@ -191,7 +191,7 @@ scripts/cleanup.sh after a failed build.
 
 To pass parameters to the post build scripts use:
 
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --postprocess_args FOO1=bar,FOO2=baz
 
 The prototype will take the parameters, split them and inject them
@@ -223,7 +223,7 @@ layer git repository and run builds and tests using this branch.
 
 An example workflow:
 
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --configs master-minimal \
         --devbuild_layer_name openembedded-core \
         --build_configs_file configs/OpenEmbedded/combos-master.yaml \
@@ -275,18 +275,18 @@ Jenkins has an encrypted credential store which can manage credentials
 used to access the git server. Connect to Jenkins and select
 Credentials in the left menu. Then select System -> "Global
 (unrestricted)" -> Add Credentials. Use ID "git" which is the default
-used by oe_jenkins_build.py.
+used by jenkins_job_submit.py.
 
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --configs <config name from combos> \
         --build_configs_file configs/WRLinux9/combos-WRLINUX_9_BASE.yaml \
         --git_credential=enable
 
 ## Scheduling Jobs when Jenkins requires Authentication
 
-The oe_jenkins_build.py can submit jobs to the Jenkins master that
+The jenkins_job_submit.py can submit jobs to the Jenkins master that
 requires Authentication. If unauthenticated access fails,
-oe_jenkins_build.py check for a local file containing the
+jenkins_job_submit.py check for a local file containing the
 authentication credentials. The default name of the local auth file is
 jenkins_auth.txt at the root path of this CI script. To use a
 different file name use the command line option
@@ -299,7 +299,7 @@ authentication to a different Jenkins server fails, contact the
 manager of Jenkins server and put the valid authentication in local
 auth file to submit jobs.
 
-    .venv/bin/python3 ./oe_jenkins_build.py \
+    .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --configs <config name from combos> \
         --build_configs_file configs/WRLinux9/combos-WRLINUX_9_BASE.yaml \
         --jenkins_auth <path to file>

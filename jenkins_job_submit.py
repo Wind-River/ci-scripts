@@ -30,6 +30,7 @@ import ssl
 import requests
 import yaml
 import jenkins
+import git
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -279,7 +280,7 @@ def replace_dict_key(dic):
 def parse_configs_from_yaml(configs_file):
     """
     This function is used to get all the options from a configuration file:
-    configs/oe_jenkins_build.yaml
+    configs/jenkins_job_configs.yaml
     """
     class Opts(dict):
         """ This class will be used to collect all the options. """
@@ -292,7 +293,7 @@ def parse_configs_from_yaml(configs_file):
         return [(str(k) + '=' + (str(v) if v is not None else '')) for k, v in d.items()]
 
     if configs_file is None:
-        configs_file = 'configs/oe_jenkins_build.yaml'
+        configs_file = 'wrigel-configs/jenkins_job_configs.yaml'
 
     with open(configs_file) as yaml_configs_file:
 
@@ -355,6 +356,15 @@ def main():
 
     cml_opts_attr_list = get_attr_list(cml_opts)
     cml_opts_attr_list.sort()
+
+    # Check existence of wrigel-configs repo
+    if not os.path.exists("wrigel-configs"):
+        print("wrigel-configs repo does NOT exist, clone it.")
+        git.Git(".").clone("git://ala-git.wrs.com/git/projects/wrlinux-ci/wrigel-configs.git")
+    else:
+        print("wrigel-configs repo exists, pull latest changes.")
+        wrigel_configs = git.cmd.Git("wrigel-configs")
+        wrigel_configs.pull()
 
     # Get options from YAML configuration file
     opts = parse_configs_from_yaml(cml_opts.configs_file)
