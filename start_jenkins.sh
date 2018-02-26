@@ -126,7 +126,7 @@ while [ "$#" -gt 0 ]; do
         --consul-tag=*)   CONSUL_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;
         --swarm)          SWARM=1; shift 1;;
-        --jenkins-agent-num-executors) JENKINS_AGENT_NUM_EXECUTORS="${1#*=}"; shift 1;;
+        --jenkins-agent-num-executors=*) JENKINS_AGENT_NUM_EXECUTORS="${1#*=}"; shift 1;;
         *)            usage ;;
     esac
 done
