@@ -37,6 +37,7 @@ WORLD_BUILD=
 SKIP_CLEANUP=no
 WRLINUX=
 ARCH=$(uname -m)
+SOURCE_LAYOUT=
 
 echo "Command: $0"
 for i in "$@"
@@ -59,6 +60,7 @@ do
         --wrlinux=*)            WRLINUX=${i#*=} ;;
         --fail_repo=*)          FAIL_REPO=${i#*=} ;; # override default in configs.sh
         --toaster=*)            TOASTER=${i#*=} ;;
+        --source_layout=*)      SOURCE_LAYOUT=${i#*=} ;;
         *)                      ;;
     esac
     shift
@@ -79,23 +81,33 @@ create_statfile "$STATFILE"
 # Start the hang check by the build post process script
 touch "$BUILD/00-INPROGRESS"
 
+# Default to release layout unless the remote is defined using git protocol
+# which means it will be in the dev layout
+if [ -z "$SOURCE_LAYOUT" ]; then
+    if [ "${REMOTE:0:6}" == 'git://' ]; then
+        SOURCE_LAYOUT=dev
+    else
+        SOURCE_LAYOUT=release
+    fi
+fi
+
+CACHE_BASE="${TOP}/../wrlinux-${SOURCE_LAYOUT}-${BRANCH}"
+
 # if setup_args starts with -- add the setup command
 if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
     if [ -z "$WRLINUX" ]; then
-        WRLINUX="$TOP/wrlinux-$BRANCH/wrlinux-9"
+        WRLINUX="${CACHE_BASE}/wrlinux-9"
     fi
     if [ ! -d "$WRLINUX" ]; then
-        WRLINUX="$TOP/wrlinux-$BRANCH/wrlinux-x"
+        WRLINUX="${CACHE_BASE}/wrlinux-x"
     fi
     if [ ! -d "$WRLINUX" ]; then
-        echo "Local clone of WRLinux at $TOP/wrlinux-$BRANCH not found!"
+        echo "Local clone of WRLinux at $WRLINUX not found!"
         exit 1
     fi
 
-    WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
-
     # Make a clone of local mirror so setup will use local mirror
-    wrlinux_setup_clone "$WRLINUX" "$BUILD" "$WRLINUX_BRANCH" "$TOP"
+    wrlinux_setup_clone "$WRLINUX" "$BUILD" "$BRANCH" "$TOP"
 
     SETUP_ARGS=("$BUILD/${WRLINUX:(-9)}/setup.sh" "${SETUP_ARGS[@]}")
 fi

@@ -53,7 +53,7 @@ node('docker') {
       git(url:params.CI_REPO, branch:params.CI_BRANCH)
     }
 
-    def env_args = ["BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]
+    def env_args = ["BASE=${WORKSPACE}/..", "REMOTE=${REMOTE}"]
     def docker_params = add_env( common_docker_params, env_args )
     if (params.GIT_CREDENTIAL == "enable") {
       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:"${GIT_CREDENTIAL_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -99,7 +99,7 @@ node('docker') {
       }
 
       def docker_params = common_docker_params
-      def env_args = ["MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}"]
+      def env_args = ["MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]
       if (params.TOASTER == "enable") {
         docker_params = docker_params + ' --expose=8800 -P '
         env_args = env_args + ["SERVICE_NAME=toaster", "SERVICE_CHECK_HTTP=/health"]

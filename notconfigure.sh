@@ -168,7 +168,7 @@ process_package(){
     fi
 
     if [ -n "$PKG_JOBS" ]; then
-        echo "BB_NUMER_THREADS = \"$PKG_JOBS\""
+        echo "BB_NUMBER_THREADS = \"$PKG_JOBS\""
     fi
 
     if [ "$BUILDSTATS" == "yes" ]; then

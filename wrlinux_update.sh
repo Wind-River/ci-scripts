@@ -75,15 +75,16 @@ check_mirror_index_size()
 wrl_clone_or_update()
 {
     local BRANCH=$1
-
     local REMOTE=$2
+    local SOURCE_LAYOUT=$3
+
     local SETUP_REPO=
-    local WRLINUX_BRANCH=
-    WRLINUX_BRANCH=$(echo "${BRANCH^^}" | tr '-' '_' )
-    SETUP_REPO=wrlinux-9
-    if [ "${REMOTE:0:6}" == 'git://' ]; then
-        SETUP_REPO=wrlinux-x
+    SETUP_REPO=wrlinux-x
+    if [ "${REMOTE:0:4}" == 'http' ] && [ "${BRANCH:0:9}" == 'WRLINUX_9' ]; then
+        SETUP_REPO=wrlinux-9
     fi
+
+    local CACHE_BASE="${BASE}/wrlinux-${SOURCE_LAYOUT}-${BRANCH}"
 
     # create credential file for use by git credential.helper
     if [ -f "${BASE}/${CREDENTIALS}" ]; then
@@ -95,38 +96,38 @@ wrl_clone_or_update()
         echo "${REMOTE_PROTOCOL}//${CREDENTIAL_CONTENT}@${REMOTE_URL}" > "${BASE}/url_${CREDENTIALS}"
     fi
 
-    if [ ! -f "${BASE}/wrlinux-${BRANCH}/${SETUP_REPO}/setup.sh" ]; then
+    if [ ! -f "${CACHE_BASE}/${SETUP_REPO}/setup.sh" ]; then
         (
-            mkdir -p "${BASE}/wrlinux-$BRANCH/${SETUP_REPO}"
-            cd "${BASE}/wrlinux-$BRANCH/${SETUP_REPO}"
+            mkdir -p "${CACHE_BASE}/${SETUP_REPO}"
+            cd "${CACHE_BASE}/${SETUP_REPO}"
 
             echo "Initializing repo in $SETUP_REPO"
             git init
-            git remote add -t "${WRLINUX_BRANCH}" origin "${REMOTE}"
+            git remote add -t "${BRANCH}" origin "${REMOTE}"
             if [ -f "${BASE}/${CREDENTIALS}" ]; then
                 git config credential.helper "store --file ${BASE}/url_${CREDENTIALS}"
             fi
-            echo "Fetch and checkout branch $WRLINUX_BRANCH from $REMOTE"
-            git fetch origin "${WRLINUX_BRANCH}"
-            if ! git checkout -t "origin/${WRLINUX_BRANCH}"; then
-                echo "FATAL: Clone from branch ${WRLINUX_BRANCH} on repo ${REMOTE} failed."
+            echo "Fetch and checkout branch $BRANCH from $REMOTE"
+            git fetch origin "${BRANCH}"
+            if ! git checkout -t "origin/${BRANCH}"; then
+                echo "FATAL: Clone from branch ${BRANCH} on repo ${REMOTE} failed."
                 echo "Validate credentials are correct."
                 exit 1
             fi
-            cd "${BASE}/wrlinux-$BRANCH"
+            cd "${CACHE_BASE}"
             echo "Mirroring wrlinux source tree with setup program on branch $BRANCH"
             call_setup_with_timeout "$SETUP_REPO" 60m
         )
     else
         (
-            echo "Updating $SETUP_REPO on branch $WRLINUX_BRANCH"
-            cd "${BASE}/wrlinux-${BRANCH}/${SETUP_REPO}"
+            echo "Updating $SETUP_REPO on branch $BRANCH"
+            cd "${CACHE_BASE}/${SETUP_REPO}"
             git fetch --quiet
-            git reset --hard "origin/$WRLINUX_BRANCH"
+            git reset --hard "origin/$BRANCH"
         )
         (
             echo "Updating wrlinux source tree with setup program on branch $BRANCH"
-            cd "${BASE}/wrlinux-$BRANCH/"
+            cd "${CACHE_BASE}/"
             check_mirror_index_size
             call_setup_with_timeout "$SETUP_REPO"
         )
@@ -138,12 +139,19 @@ lock_and_update()
 {
     local BRANCH=$1
     local REMOTE=$2
+    if [ -z "$SOURCE_LAYOUT" ]; then
+        if [ "${REMOTE:0:6}" == 'git://' ]; then
+            SOURCE_LAYOUT=dev
+        else
+            SOURCE_LAYOUT=release
+        fi
+    fi
     echo "Starting update for $BRANCH by trying to take lock"
-    local LOCKFILE="${BASE}/.update-${BRANCH}.lck"
+    local LOCKFILE="${BASE}/.update-${SOURCE_LAYOUT}-${BRANCH}.lck"
     exec 8>"$LOCKFILE"
     flock --exclusive 8
     echo "Lock for $BRANCH aquired"
-    if ! wrl_clone_or_update "$BRANCH" "$REMOTE"; then
+    if ! wrl_clone_or_update "$BRANCH" "$REMOTE" "$SOURCE_LAYOUT"; then
         echo "FATAL: Clone failed"
         exit 1
     fi
@@ -163,33 +171,27 @@ main()
     local BRANCH=
     for BRANCH in $BRANCHES; do
         case "$BRANCH" in
-            WRLinux-9-Base*)
+            WRLINUX_9_BASE)
                 if [ -z "$REMOTE" ]; then
                     REMOTE='https://github.com/WindRiver-Labs/wrlinux-9'
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
-            WRLinux-lts-*-Base)
+            WRLINUX_10_17_BASE)
                 if [ -z "$REMOTE" ]; then
                     REMOTE='https://github.com/WindRiver-Labs/wrlinux-x'
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
-            WRLinux-9-LTS*)
+            WRLINUX_9_LTS*)
                 if [ -z "$REMOTE" ]; then
                     REMOTE="https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-9"
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
-            WRLinux-lts*-Core)
+            WRLINUX_10_17_LTS)
                 if [ -z "$REMOTE" ]; then
                     REMOTE="https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-x"
-                fi
-                lock_and_update "$BRANCH" "$REMOTE"
-                ;;
-            WRLINUX_*)
-                if [ -z "$REMOTE" ]; then
-                    REMOTE='git://ala-git.wrs.com/wrlinux-x'
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
