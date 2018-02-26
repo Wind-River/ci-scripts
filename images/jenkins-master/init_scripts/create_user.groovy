@@ -66,9 +66,10 @@ globalStrategy.add(Item.CANCEL, 'authenticated')
 globalStrategy.add(Item.CREATE, 'authenticated')
 globalStrategy.add(Item.DELETE, 'authenticated')
 
-// read only access for anonymous users
+// read only access and ability to cancel running jobs for anonymous users
 globalStrategy.add(Jenkins.READ,'anonymous')
 globalStrategy.add(Item.READ, 'anonymous')
+globalStrategy.add(Item.CANCEL, 'anonymous')
 
 // agent user can only manage agents
 globalStrategy.add(Computer.BUILD, agentUser)
