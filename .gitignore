@@ -4,3 +4,4 @@
 *.elc
 .venv/*
 jenkins_auth.txt
+wrigel-configs/*
