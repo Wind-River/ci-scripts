@@ -97,7 +97,7 @@ services:
     depends_on:
       - jenkins
     environment:
-      COMMAND_OPTIONS: "-master http://jenkins:8080/jenkins -disableSslVerification -labels 'docker' -executors 2"
+      COMMAND_OPTIONS: "-master http://jenkins:8080/jenkins -disableSslVerification -labels 'docker' -executors ${JENKINS_AGENT_NUM_EXECUTORS:2}"
       SWARM_DELAYED_START: "15"
       SWARM_AGENT_PASSWORD: "${JENKINS_AGENT_PASSWORD}"
     networks:

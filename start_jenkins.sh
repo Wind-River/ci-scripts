@@ -62,6 +62,7 @@ export POSTBUILD_TAG=latest
 export CONSUL_TAG=0.9.3
 # Default to using Docker Hub
 export REGISTRY=windriver
+export JENKINS_AGENT_NUM_EXECUTORS=2
 
 usage() {
     cat <<EOF
@@ -82,11 +83,14 @@ Usage $0 [--registry] [--file] [--rm] [--with-lava]
   --jenkins-agent-tag: Set the tag for the jenkins-swarm-client image.
     Defaults to latest
 
+  --jenkins-agent-num-executors: Number of executors to run on each Jenkins Agent.
+    Default: 2
+
   --builder-tag: Set the tag for the ubuntu1604_64 builder image
     Defaults to latest
 
   --consul-tag: Set the tag for the consul image
-    Defaults to 0.9.0
+    Defaults to 0.9.3
 
   --postbuild-tag: Set the tag for the postbuild image
     Defaults to latest
@@ -122,6 +126,7 @@ while [ "$#" -gt 0 ]; do
         --consul-tag=*)   CONSUL_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;
         --swarm)          SWARM=1; shift 1;;
+        --jenkins-agent-num-executors) JENKINS_AGENT_NUM_EXECUTORS="${1#*=}"; shift 1;;
         *)            usage ;;
     esac
 done
