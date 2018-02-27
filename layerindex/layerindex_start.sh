@@ -58,7 +58,7 @@ if [ -z "$REMOTE" ]; then
     REMOTE=https://github.com/WindRiver-Labs/wrlinux-9
 fi
 
-SETUPTOOLS=$(echo "$REMOTE" |sed 's/https:\/\/github.com\/WindRiver-Labs\///g')
+SETUPTOOLS=$(basename $REMOTE)
 
 echo "Command: $0"
 for i in "$@"
