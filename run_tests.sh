@@ -38,7 +38,7 @@ function quit_test () {
 
         echo -e "\nTest result:"
         echo -e "============"
-        awk -F "\"*,\"*" '{if (NR!=1) {print $14, "\t", $3}}' "$TEST_REPORT"
+        awk -F "\"*,\"*" '{if (NR!=1 && (NF-1)>0) {print $(NF-1), "\t", $3}}' $TEST_REPORT >> "$TEST_STATFILE"
     } >> "$TEST_STATFILE"
 
     cat "$TEST_STATFILE"
