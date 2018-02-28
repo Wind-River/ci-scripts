@@ -36,6 +36,7 @@ PATCHRESOLVE=
 BUILDTYPE=
 SYSTEM_INIT=
 PKGS=
+WHITELIST_PKGS=
 PKG_MANAGER=
 LICENSE_BLACKLIST=
 DEBUGINFO_SPLIT=
@@ -61,6 +62,7 @@ do
         --enable-build=*)       BUILDTYPE="${i#*=}" ;;
         --with-init=*)          SYSTEM_INIT="${i#*=}" ;;
         --with-package=*)       PKGS="${i#*=}" ;;
+        --whitelist-package=*)  WHITELIST_PKGS="${i#*=}" ;;
         --enable-package-manager=*)          PKG_MANAGER="${i#*=}" ;;
         --with-license-flags-blacklist=*)    LICENSE_BLACKLIST="${i#*=}" ;;
         --with-license-blacklist=*)          LICENSE_BLACKLIST="${i#*=}" ;;
@@ -158,6 +160,13 @@ process_package(){
     done
 }
 
+process_whitelist(){
+    local packages=$1
+    for i in ${packages//,/ } ; do
+        echo "PNWHITELIST_openembedded-layer += \"$i\""
+    done
+}
+
 {
     if [ "$RM_WORK" == "yes" ]; then
         echo "INHERIT += \"rm_work\""
@@ -191,7 +200,11 @@ process_package(){
         process_package "$PKGS"
     fi
 
-    if [ -n "$DEBUGINFO_SPLIT" -a "$DEBUGINFO_SPLIT" == "no" ]; then
+    if [ -n "$WHITELIST_PKGS" ]; then
+        process_whitelist "$WHITELIST_PKGS"
+    fi
+
+    if [ -n "$DEBUGINFO_SPLIT" ] && [ "$DEBUGINFO_SPLIT" == "no" ]; then
         echo "INHIBIT_PACKAGE_DEBUG_SPLIT = \"1\""
     fi
 
