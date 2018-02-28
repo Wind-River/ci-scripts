@@ -267,14 +267,15 @@ def replace_dict_key(dic):
         'layer_vcs_subdir'   : 'DEVBUILD_LAYER_VCS_SUBDIR',
     }
 
+    newdict={}
     for key, value in dic.items():
         if key in dict_var_names:
-            dic[dict_var_names[key]] = dic.pop(key)
+            newdict[dict_var_names[key]] = value
     for key, value in dic.items():
         if value is None:
-            dic[key] = ''
+            newdict[key] = ''
 
-    return dic
+    return newdict
 
 
 def parse_configs_from_yaml(configs_file):
