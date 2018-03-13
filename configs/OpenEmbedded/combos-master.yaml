@@ -5,7 +5,7 @@
   name: master-minimal
   prebuild:
   - notconfigure.sh
-  - --enable-shared-sstate=yes
+  - --enable-shared-sstate=oecore_sstate
   - --enable-bootimage=ext4
   setup:
   - wr-lx-setup.sh

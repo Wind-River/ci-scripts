@@ -48,7 +48,7 @@ BB_NO_NETWORK=
 PREMIRROR_PATH=
 DL_DIR=
 MACHINE=
-SHARED_SSTATE_DIR=no
+SHARED_SSTATE_DIR=
 
 for i in "$@"
 do
@@ -286,9 +286,7 @@ process_whitelist(){
         echo "MACHINE = \"$MACHINE\""
     fi
 
-    if [ "$SHARED_SSTATE_DIR" == "yes" ]; then
-        echo "SSTATE_DIR = \"$WORKSPACE/../sstate_cache/\""
-    elif [ -n "$SHARED_SSTATE_DIR" ]; then
+    if [ -n "$SHARED_SSTATE_DIR" ]; then
         echo "SSTATE_DIR = \"$WORKSPACE/../$SHARED_SSTATE_DIR/\""
     fi
 } >> "$LOCALCONF"

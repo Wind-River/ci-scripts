@@ -63,7 +63,7 @@
   prebuild:
   - notconfigure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=yes
+  - --enable-shared-sstate=wrl9_sstate_cache
   setup:
   - --distro=wrlinux-small
   - --machine=qemux86-64
