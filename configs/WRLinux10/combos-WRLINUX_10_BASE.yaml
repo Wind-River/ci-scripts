@@ -3,7 +3,7 @@
   - 'bitbake wrlinux-image-glibc-std ; bitbake wrlinux-image-glibc-std -c testexport'
   name: intel-x86-64_wrlinux-image-glibc-std
   prebuild:
-  - notconfigure.sh
+  - build_configure.sh
   - --enable-shared-sstate=wrl10_sstate_cache
   - --oe-test=with_wrlinux10
   - --oe-test-suites=ping,ssh,df,connman,syslog,xorg,scp,vnc,date,pam,perl,python,rpm,ldd,smart,dmesg

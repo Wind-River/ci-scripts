@@ -1,10 +1,9 @@
 #!/bin/bash
 
-source ${WORKSPACE}/ci-scripts/common.sh
+source "$WORKSPACE"/ci-scripts/common.sh
 export HOME=/home/jenkins
 
 BUILD="$WORKSPACE/builds/builds-$BUILD_ID"
-TIME="/usr/bin/time $QUIET -f %e -o $BUILD/test_time.log"
 
 TEST_MAIL=${BUILD}/mail.txt
 TEST_REPORT=${BUILD}/${TEST_SUITE}.csv
@@ -38,7 +37,7 @@ function quit_test () {
 
         echo -e "\nTest result:"
         echo -e "============"
-        awk -F "\"*,\"*" '{if (NR!=1 && (NF-1)>0) {print $(NF-1), "\t", $3}}' $TEST_REPORT >> "$TEST_STATFILE"
+        awk -F "\"*,\"*" '{if (NR!=1 && (NF-1)>0) {print $(NF-1), "\t", $3}}' "$TEST_REPORT" >> "$TEST_STATFILE"
     } >> "$TEST_STATFILE"
 
     cat "$TEST_STATFILE"
@@ -54,7 +53,7 @@ command -v lava-tool >/dev/null 2>&1 || { echo >&2 "lava-tool required. Aborting
 if [ -z "$LAVA_USER" ] || [ -z "$LAVA_SERVER" ] || [ -z "$NFS_ROOT" ] || \
    [ -z "$HTTP_ROOT" ] || [ -z "$RSYNC_DEST_DIR" ]; then
     echo "Error: runtime test script requires LAVA_USER, LAVA_SERVER, \
-          NFS_ROOT, HTTP_ROOT and RSYNC_DEST_DIR defined!" >> $"$TEST_STATFILE"
+          NFS_ROOT, HTTP_ROOT and RSYNC_DEST_DIR defined!" >> "$TEST_STATFILE"
     echo "Example: --test_args=LAVA_USER=lpdtest,\
 LAVA_SERVER=yow-lpdtest.wrs.com:8080,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,\
 HTTP_ROOT=http://128.224.56.215/tftpboot,RSYNC_DEST_DIR=builds/x86-64_oe-test-04"
@@ -82,6 +81,7 @@ FILE_LINK="${HTTP_ROOT}/${RSYNC_DEST_DIR}/${NAME}"
     echo "WRLinux ver:   $WRL_VER"
     echo "LAVA server:   $LAVA_SERVER"
     echo "LAVA user:     $LAVA_USER"
+    echo "LAVA token:    $LAVA_AUTH_TOKEN"
     echo "NFS root:      $NFS_ROOT"
     echo "HTTP root:     $HTTP_ROOT"
     echo "Test images:   ${FILE_LINK}"
@@ -102,7 +102,7 @@ if [ -d lava-test ]; then
 
     # LAVA authentication
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
-    lava-tool auth-list | grep ${LAVA_SERVER}
+    lava-tool auth-list | grep "$LAVA_SERVER"
 
     # If the auth token exists, remove it
     if [ $? == 0 ]; then
@@ -110,11 +110,16 @@ if [ -d lava-test ]; then
         lava-tool auth-remove "http://${LAVA_USER}@${LAVA_SERVER}"
 
         echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
-        lava-tool auth-list | grep ${LAVA_SERVER}
+        lava-tool auth-list | grep "$LAVA_SERVER"
         if [ $? == 0 ]; then
             echo "lava-tool auth-remove failed!" >> "$TEST_STATFILE"
             quit_test -1
         fi
+    fi
+
+    # Replace LAVA auth-token if user specified in configs
+    if [ ! -z "$LAVA_AUTH_TOKEN" ]; then
+        echo "$LAVA_AUTH_TOKEN" > "$BUILD"/lava-test/scripts/auth-token
     fi
 
     # Add new auth token to make sure it's the latest
@@ -124,7 +129,7 @@ if [ -d lava-test ]; then
         "${BUILD}/lava-test/scripts/auth-token"
 
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
-    lava-tool auth-list |grep ${LAVA_SERVER}
+    lava-tool auth-list |grep "$LAVA_SERVER"
     if [ $? != 0 ]; then
         echo "lava-tool auth-add failed!" >> "$TEST_STATFILE"
         quit_test -1
@@ -137,7 +142,8 @@ fi
 
 # Find image name
 pushd "$BUILD/rsync/$NAME"
-IMAGE_NAME=$(ls ./*.tar.bz2 | sed s/.tar.bz2//g)
+IMAGE_FULL_NAME=$(ls ./*.tar.bz2)
+IMAGE_NAME="${IMAGE_FULL_NAME%.tar.bz2}"
 echo "IMAGE_NAME = $IMAGE_NAME"
 
 # Find rpm-doc file name
@@ -186,7 +192,7 @@ do
     # Submit an example job
     echo "[LAVA-CMD] lava-tool submit-job http://${LAVA_USER}@${LAVA_SERVER} lava-test/${TEST_JOB}"
     ret=$(lava-tool submit-job "http://${LAVA_USER}@${LAVA_SERVER}" "lava-test/${TEST_JOB}")
-    job_id=$(echo "$ret" | sed "s/submitted as job: http:\/\/${LAVA_SERVER}\/scheduler\/job\///g")
+    job_id=${ret//submitted as job: http:\/\/${LAVA_SERVER}\/scheduler\/job\//}
 
     if [ -z "$job_id" ]; then
         echo "job_id = ${job_id}, failed to submit LAVA job!" >> "$TEST_STATFILE"

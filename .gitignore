@@ -5,3 +5,4 @@
 .venv/*
 jenkins_auth.txt
 wrigel-configs/*
+wrigel-configs

@@ -34,7 +34,7 @@
         <hudson.model.StringParameterDefinition>
           <name>PREBUILD_CMD</name>
           <description>Command to be run before build commonly used to modify local.conf</description>
-          <defaultValue>notconfigure.sh</defaultValue>
+          <defaultValue>build_configure.sh</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>BUILD_CMD</name>

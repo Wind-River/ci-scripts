@@ -4,7 +4,7 @@
   - core-image-minimal
   name: pyro-minimal
   prebuild:
-  - notconfigure.sh
+  - build_configure.sh
   - --enable-bootimage=ext4
   setup:
   - poky_setup.sh

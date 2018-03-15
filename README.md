@@ -345,10 +345,10 @@ execution, here are the configurations for supported tests:
 _Build_
 
 1. Build config file for WRLinux, such as combos-WRLINUX_10_BASE.yaml.
-   notconfigure.sh will make required changes to local.conf:
+   build_configure.sh will make required changes to local.conf:
     ```yaml
     prebuild:
-      - notconfigure.sh
+      - build_configure.sh
       - --oe-test=with_wrlinux10
       - --oe-test-suites=ping,ssh,df,connman,syslog,xorg,scp,vnc,date,pam,perl,python,rpm,ldd,smart,dmesg
     ```
@@ -373,10 +373,10 @@ https://git.linaro.org/qa/test-definitions.git, we can use them in CI as well.
 _Build_
 
 1. Build config file for WRLinux, such as combos-WRLINUX_10_BASE.yaml.
-   notconfigure.sh will make required changes to local.conf:
+   build_configure.sh will make required changes to local.conf:
     ```yaml
     prebuild:
-      - notconfigure.sh
+      - build_configure.sh
       - --oe-test=with_wrlinux10
       - --lava-test=yes
     ```

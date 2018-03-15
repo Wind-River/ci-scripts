@@ -4,7 +4,7 @@
   - core-image-minimal
   name: master-minimal
   prebuild:
-  - notconfigure.sh
+  - build_configure.sh
   - --enable-shared-sstate=oecore_sstate
   - --enable-bootimage=ext4
   setup:
