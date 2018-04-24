@@ -432,6 +432,7 @@ def main():
             server = jenkins.Jenkins(jenkins_url)
         else:
             server = jenkins.Jenkins(jenkins_url, username=jenkins_auth[0], password=jenkins_auth[1])
+        server._session.verify = False
     except jenkins.JenkinsException:
         print("Connection to Jenkins server %s failed." % jenkins_url)
         sys.exit(1)
