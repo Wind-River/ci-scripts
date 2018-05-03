@@ -29,7 +29,7 @@ RUN dpkg --add-architecture i386 && \
     diffstat subversion libgl1-mesa-dev libglu1-mesa-dev libsdl1.2-dev \
     texinfo gawk gcc gcc-multilib help2man g++ git-core python-gtk2 bash cpio \
     diffutils xz-utils make file screen wget time patch openssh-client \
-    curl locales openssl ca-certificates iproute2 iputils-ping python3 repo && \
+    curl locales openssl ca-certificates iproute2 iputils-ping python3 python3-yaml repo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/man && \
