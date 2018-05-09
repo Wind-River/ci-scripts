@@ -152,6 +152,9 @@ def create_parser():
                     help='Comma separated list of builds as specified in build_configs_file.'
                     'Use all to queue all the configs.')
 
+    op.add_argument('--test_configs_file', dest='test_configs_file', required=False,
+                    help='Name of file that contains run-time test configurations.')
+
     op.add_argument("--image", dest="image", required=False,
                     help="The Docker image used for the build. \nDefault: ubuntu1604_64.")
 
@@ -220,9 +223,8 @@ def create_parser():
                     "Default: git://git.openembedded.org/bitbake")
 
     op.add_argument("--test", dest="test", required=False,
-                    choices=['enable', 'disable'],
-                    help="Switch to enable runtime testing of the build.\n"
-                    "Only two options supported: enable (run tests) or disable. Default: disable")
+                    help="Switch to specific test suite name, such as oeqa-default-test \n"
+                    "to enable runtime testing of the build. Default: disable")
 
     op.add_argument("--test_image", dest="test_image", required=False,
                     help="The Docker image used for the test stage.\n"
@@ -390,6 +392,8 @@ def main():
                     for key, val in cml_value_in_dict.items():
                         if key in yaml_value_key_list:
                             yaml_value_in_dict[key] = val
+                            if key == 'TEST_DEVICE':
+                                test_device = val
 
                     setattr(opts, attr, ','.join(dict2list(yaml_value_in_dict)))
                 else:
@@ -472,9 +476,9 @@ def main():
         if configs is None:
             sys.exit(1)
 
-        configs_to_run = opts.build_configs.split(',')
+        configs_to_build = opts.build_configs.split(',')
         for config in configs:
-            if opts.build_configs == 'all' or config['name'] in configs_to_run:
+            if opts.build_configs == 'all' or config['name'] in configs_to_build:
 
                 print("Generating command for config %s" % config['name'])
 
@@ -483,6 +487,33 @@ def main():
                     branch = opts.branch
 
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
+
+                prebuild_cmd_for_test = 'null'
+                build_cmd_for_test = ''
+                runtime_test_cmd = 'null'
+                if opts.test != 'disable' and opts.test != '' and opts.test is not None:
+                    with open(opts.test_configs_file) as test_configs_file:
+                        test_configs = yaml.load(test_configs_file)
+                        if test_configs is None:
+                            print('ERROR: Test is enabled but test configs file is empty.')
+                            sys.exit(1)
+
+                    #TODO: currently only run one test in test_configs
+                    for test_config in test_configs:
+                        if test_config['name'] == opts.test:
+                            print('Test is enabled and test suite is set to ' + opts.test)
+                            prebuild_cmd_for_test = ' '.join(test_config['prebuild_cmd_for_test'])
+
+                            if test_config['build_cmd_for_test'] is not None:
+                                build_cmd_for_test = ' '.join(test_config['build_cmd_for_test'])
+
+                            runtime_test_cmd = 'run_tests.sh' \
+                                               + ' ' + test_config['lava_test_repo'] \
+                                               + ' ' + test_config[test_device]['job_template'] \
+                                               + ' ' + str(test_config[test_device]['timeout'])
+
+                if prebuild_cmd_for_test == 'null':
+                    print('Test is disabled.')
 
                 output = server.build_job(opts.job,
                                           {'NAME': config['name'],
@@ -493,7 +524,9 @@ def main():
                                            'REMOTE': opts.remote,
                                            'SETUP_ARGS': ' '.join(config['setup']),
                                            'PREBUILD_CMD': ' '.join(config['prebuild']),
+                                           'PREBUILD_CMD_FOR_TEST': prebuild_cmd_for_test,
                                            'BUILD_CMD': ' '.join(config['build']),
+                                           'BUILD_CMD_FOR_TEST': build_cmd_for_test,
                                            'REGISTRY': opts.registry,
                                            'POSTPROCESS_IMAGE': opts.post_process_image,
                                            'POSTPROCESS_ARGS': opts.postprocess_args,
@@ -508,6 +541,8 @@ def main():
                                            'LAYERINDEX_SOURCE': opts.layerindex_source,
                                            'BITBAKE_REPO_URL': opts.bitbake_repo_url,
                                            'TEST': opts.test,
+                                           'TEST_CONFIGS_FILE': opts.test_configs_file,
+                                           'RUNTIME_TEST_CMD': runtime_test_cmd,
                                            'TEST_IMAGE': opts.test_image,
                                            'TEST_ARGS': opts.test_args,
                                            'POST_TEST_IMAGE': opts.post_test_image,

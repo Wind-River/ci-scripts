@@ -37,9 +37,19 @@
           <defaultValue>build_configure.sh</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>PREBUILD_CMD_FOR_TEST</name>
+          <description>Command to be run before build commonly used to modify local.conf</description>
+          <defaultValue>test_configure.py</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>BUILD_CMD</name>
           <description>The full build command</description>
           <defaultValue>bitbake wrlinux-image-glibc-core</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_CMD_FOR_TEST</name>
+          <description>The full build command for test</description>
+          <defaultValue>bitbake wrlinux-image-glibc-core -c testexport</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>IMAGE</name>
@@ -108,8 +118,18 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>TEST</name>
-          <description>Perform runtime tests if the build succeeds</description>
+          <description>Perform runtime tests if the build succeeds, it's suite name or disable</description>
           <defaultValue>disable</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST_CONFIGS_FILE</name>
+          <description>Test configuration file for build and runtime tests</description>
+          <defaultValue>configs/test_configs.yaml</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RUNTIME_TEST_CMD</name>
+          <description>The command to do runtime test</description>
+          <defaultValue>run_tests.sh</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>TEST_IMAGE</name>

@@ -1,14 +1,41 @@
 #!/bin/bash
+if [ -z "$3" ]; then
+    echo "ERROR: run_tests.sh needs these variables:"
+    echo "       LAVA_TEST_REPO, LAVA_JOB_TEMPLATE, LAVA_JOB_TIMEOUT"
+    exit 1
+fi
+
+LAVA_TEST_REPO=$1
+LAVA_JOB_TEMPLATE=$2
+LAVA_JOB_TIMEOUT=$3
 
 source "$WORKSPACE"/ci-scripts/common.sh
 export HOME=/home/jenkins
 
+JOB_BASE_NAME=$(basename "$WORKSPACE")
 BUILD="$WORKSPACE/builds/builds-$BUILD_ID"
 
 TEST_MAIL=${BUILD}/mail.txt
-TEST_REPORT=${BUILD}/${TEST_SUITE}.csv
-TEST_STATFILE=${BUILD}/teststats.log
-create_test_statfile "$TEST_STATFILE"
+TEST_REPORT=${BUILD}/${TEST}.csv
+OEQA_TEST_IMAGE=testexport.tar.gz
+
+# Create teststats.json file
+TEST_STATFILE=${BUILD}/teststats.json
+create_report_statfile "$TEST_STATFILE" "$JENKINS_URL" "$JOB_BASE_NAME"
+
+{
+    if [ -f "$BUILD/00-PASS" ]; then
+        printf '    "build_result": "PASSED"\n'
+    elif [ -f "$BUILD/00-FAIL" ]; then
+        printf '    "build_result": "FAILED"\n'
+    fi
+    printf '  },\n'
+    printf '\n  "test_info": {\n'
+    if [ -n "$EMAIL" ]; then
+        printf '    "email": "%s",\n' "$EMAIL"
+    fi
+    printf '    "start_time": "%s (%s)",\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$(date +%s)"
+} >> "$TEST_STATFILE"
 
 function generate_test_mail () {
     STATUS=$1
@@ -26,21 +53,34 @@ function quit_test () {
     if [ "$RET" == 0 ]; then
         STATUS='PASSED'
         touch "$BUILD/00-TEST-PASS"
+    elif [ "$RET" == -2 ]; then
+        STATUS='NOTARGET'
+        touch "$BUILD/00-TEST-FAIL"
     else
         STATUS='FAILED'
         touch "$BUILD/00-TEST-FAIL"
     fi
 
     {
-        echo "End: $(date) ($(date +%s))"
-        echo "Status: ${STATUS}"
+        printf '    "end_time": "%s %s",\n' "$(date '+%Y-%m-%d %H:%M:%S')" "($(date +%s))"
+        printf '    "test_result": "%s"\n' "${STATUS}"
+        printf '  },\n'
 
-        echo -e "\nTest result:"
-        echo -e "============"
-        awk -F "\"*,\"*" '{if (NR!=1 && (NF-1)>0) {print $(NF-1), "\t", $3}}' "$TEST_REPORT" >> "$TEST_STATFILE"
+        printf '\n  "test_report": {\n'
+        awk -F "," '{if (NR!=1 && (NF-1)>0) {print "   ", $(NF-1), ":", $3, ","}}' "$TEST_REPORT"
+        printf '    "eof": ""\n'
+        printf '  }\n'
+        printf '}'
     } >> "$TEST_STATFILE"
 
-    cat "$TEST_STATFILE"
+    rsync -avL "$TEST_STATFILE" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+
+    # Get LAVA job log
+    LAVA_JOB_PLAIN_LOG="http://${LAVA_SERVER}/scheduler/job/${job_id}/log_file/plain"
+    LAVA_JOB_LOG="$BUILD/lava_job.log"
+    echo "curl -k $LAVA_JOB_PLAIN_LOG -o $LAVA_JOB_LOG"
+    curl -k "$LAVA_JOB_PLAIN_LOG" -o "$LAVA_JOB_LOG"
+    rsync -avL "$LAVA_JOB_LOG" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
 
     generate_test_mail $STATUS
     exit "$RET"
@@ -53,7 +93,7 @@ command -v lava-tool >/dev/null 2>&1 || { echo >&2 "lava-tool required. Aborting
 if [ -z "$LAVA_USER" ] || [ -z "$LAVA_SERVER" ] || [ -z "$NFS_ROOT" ] || \
    [ -z "$HTTP_ROOT" ] || [ -z "$RSYNC_DEST_DIR" ]; then
     echo "Error: runtime test script requires LAVA_USER, LAVA_SERVER, \
-          NFS_ROOT, HTTP_ROOT and RSYNC_DEST_DIR defined!" >> "$TEST_STATFILE"
+          NFS_ROOT, HTTP_ROOT and RSYNC_DEST_DIR defined!"
     echo "Example: --test_args=LAVA_USER=lpdtest,\
 LAVA_SERVER=yow-lpdtest.wrs.com:8080,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,\
 HTTP_ROOT=http://128.224.56.215/tftpboot,RSYNC_DEST_DIR=builds/x86-64_oe-test-04"
@@ -69,8 +109,8 @@ if [ -z "$TEST_DEVICE" ]; then
     TEST_DEVICE=simics
 fi
 
-if [ -z "$TEST_SUITE" ]; then
-    TEST_SUITE=oeqa-default-test
+if [ -z "$TEST" ]; then
+    TEST=oeqa-default-test
 fi
 
 WRL_VER=$(get_wrlinux_version "$BUILD")
@@ -78,15 +118,15 @@ WRL_VER=$(get_wrlinux_version "$BUILD")
 FILE_LINK="${HTTP_ROOT}/${RSYNC_DEST_DIR}/${NAME}"
 
 {
-    echo "WRLinux ver:   $WRL_VER"
-    echo "LAVA server:   $LAVA_SERVER"
-    echo "LAVA user:     $LAVA_USER"
-    echo "LAVA token:    $LAVA_AUTH_TOKEN"
-    echo "NFS root:      $NFS_ROOT"
-    echo "HTTP root:     $HTTP_ROOT"
-    echo "Test images:   ${FILE_LINK}"
-    echo "Test device:   ${TEST_DEVICE}"
-    echo "Test suite:    ${TEST_SUITE}"
+    printf '    "wrl_ver": "%s",\n' "$WRL_VER"
+    printf '    "LAVA_server": "%s",\n' "$LAVA_SERVER"
+    printf '    "LAVA_user": "%s",\n' "$LAVA_USER"
+    printf '    "LAVA_token": "%s",\n' "$LAVA_AUTH_TOKEN"
+    printf '    "NFS_root": "%s",\n' "$NFS_ROOT"
+    printf '    "HTTP_root": "%s",\n' "$HTTP_ROOT"
+    printf '    "test_images": "%s",\n' "${HTTP_ROOT}/${RSYNC_DEST_DIR}"
+    printf '    "test_device": "%s",\n' "${TEST_DEVICE}"
+    printf '    "test_suite": "%s",\n' "${TEST}"
 } >> "$TEST_STATFILE"
 
 # Start the hang check by the test post process script
@@ -95,16 +135,18 @@ touch "$BUILD/00-TEST-INPROGRESS"
 cd "$BUILD"
 
 # Get test job templates and necessary script files
-git clone --quiet git://ala-git.wrs.com/lpd-ops/lava-test.git
+repo_folder=$(basename "$LAVA_TEST_REPO" | sed 's/.git//g')
+git clone --quiet "$LAVA_TEST_REPO"
 
-if [ -d lava-test ]; then
-    echo "Test git repo: git://ala-git.wrs.com/lpd-ops/lava-test.git" >> "$TEST_STATFILE"
+if [ -d "$repo_folder" ]; then
+    printf '    "test_git_repo": "%s",\n' "$LAVA_TEST_REPO" >> "$TEST_STATFILE"
 
     # LAVA authentication
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
     lava-tool auth-list | grep "$LAVA_SERVER"
 
-    # If the auth token exists, remove it
+    # If the auth token exists, remove it because LAVA server could be updated and
+    # old token may not work any more
     if [ $? == 0 ]; then
         echo "[LAVA-CMD] lava-tool auth-remove http://${LAVA_USER}@${LAVA_SERVER}"
         lava-tool auth-remove "http://${LAVA_USER}@${LAVA_SERVER}"
@@ -112,33 +154,38 @@ if [ -d lava-test ]; then
         echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
         lava-tool auth-list | grep "$LAVA_SERVER"
         if [ $? == 0 ]; then
-            echo "lava-tool auth-remove failed!" >> "$TEST_STATFILE"
+            printf '    "ERROR": "lava-tool auth-remove failed!"\n' >> "$TEST_STATFILE"
             quit_test -1
         fi
     fi
 
     # Replace LAVA auth-token if user specified in configs
+    TOKEN_FILE="$repo_folder/scripts/auth-token"
     if [ ! -z "$LAVA_AUTH_TOKEN" ]; then
-        echo "$LAVA_AUTH_TOKEN" > "$BUILD"/lava-test/scripts/auth-token
+        echo "$LAVA_AUTH_TOKEN" > "$BUILD/$TOKEN_FILE"
     fi
 
-    # Add new auth token to make sure it's the latest
+    # Add latest auth token to make sure it's the latest
     echo "[LAVA-CMD] lava-tool auth-add http://${LAVA_USER}@${LAVA_SERVER} \
-        --token-file ${BUILD}/lava-test/scripts/auth-token"
+        --token-file $BUILD/$TOKEN_FILE"
     lava-tool auth-add "http://${LAVA_USER}@${LAVA_SERVER}" --token-file \
-        "${BUILD}/lava-test/scripts/auth-token"
+        "${BUILD}/$TOKEN_FILE"
 
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
     lava-tool auth-list |grep "$LAVA_SERVER"
     if [ $? != 0 ]; then
-        echo "lava-tool auth-add failed!" >> "$TEST_STATFILE"
+        printf '    "ERROR": "lava-tool auth-add failed!"\n' >> "$TEST_STATFILE"
         quit_test -1
     fi
 else
-    echo "clone git repo: lava-test failed!" >> "$TEST_STATFILE"
+    printf '    "ERROR": "clone git repo: %s failed!"\n' "$repo_folder" >> "$TEST_STATFILE"
     quit_test -1
 fi
 
+# Find kernel file name
+pushd "$BUILD/rsync/$NAME"
+KERNEL_FILE=$(ls ./*Image)
+echo "KERNEL_FILE = $KERNEL_FILE"
 
 # Find image name
 pushd "$BUILD/rsync/$NAME"
@@ -146,59 +193,60 @@ IMAGE_FULL_NAME=$(ls ./*.tar.bz2)
 IMAGE_NAME="${IMAGE_FULL_NAME%.tar.bz2}"
 echo "IMAGE_NAME = $IMAGE_NAME"
 
+# Find dtb file
+DTB_FILE=$(ls ./*.dtb | tail -1)
+echo "DTB_FILE = $DTB_FILE"
+
 # Find rpm-doc file name
 RPM_NAME=$(ls rpm-doc*)
 echo "RPM_NAME = $RPM_NAME"
 
-# Set OE test export image name
-TEST_EXPORT_IMAGE=testexport.tar.gz
-
 # Set LAVA test job name
 TIME_STAMP=$(date +%Y%m%d_%H%M%S)
-TEST_JOB=test_${TIME_STAMP}.yaml
-echo "LAVA test job: ${BUILD}/lava-test/${TEST_JOB}" >> "$TEST_STATFILE"
+TEST_JOB="$BUILD/$repo_folder/test_${TIME_STAMP}.yaml"
+printf '    "LAVA_test_job": "%s",\n' "$TEST_JOB" >> "$TEST_STATFILE"
 
 popd
 
 # Replace image files in LAVA JOB file
-if [ $TEST_DEVICE == 'simics' ]; then
-    JOB_TEMPLATE=${BUILD}/lava-test/jobs/templates/wrlinux-${WRL_VER}/x86_simics_job_${TEST_SUITE}_template.yaml
-    cp -f "$JOB_TEMPLATE" "${BUILD}/lava-test/${TEST_JOB}"
-    sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "lava-test/${TEST_JOB}"
+JOB_TEMPLATE="$BUILD/$LAVA_JOB_TEMPLATE"
+cp -f "$JOB_TEMPLATE" "$TEST_JOB"
+
+if [ "$TEST_DEVICE" == 'simics' ]; then
+    sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "$TEST_JOB"
 else
-    JOB_TEMPLATE=${BUILD}/lava-test/jobs/templates/wrlinux-${WRL_VER}/x86_64_job_${TEST_SUITE}_template.yaml
-    cp -f "$JOB_TEMPLATE" "${BUILD}/lava-test/${TEST_JOB}"
-    sed -i "s@KERNEL_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/bzImage@g" "lava-test/${TEST_JOB}"
-    sed -i "s@ROOTFS@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.tar.bz2@g" "lava-test/${TEST_JOB}"
+    sed -i "s@KERNEL_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${KERNEL_FILE}@g; \
+            s@ROOTFS@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.tar.bz2@g; \
+            s@DTB_FILE@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${DTB_FILE}@g" "$TEST_JOB"
 fi
 
 # For OE QA test specifically
-if [[ $TEST_SUITE == *"oeqa"* ]]; then
-    sed -i "s@TEST_PACKAGE@--no-check-certificate\ $FILE_LINK\/${TEST_EXPORT_IMAGE}@g" "lava-test/${TEST_JOB}"
-    sed -i "s@MANIFEST_FILE@--no-check-certificate\ $FILE_LINK\/${IMAGE_NAME}.manifest@g" "lava-test/${TEST_JOB}"
-    sed -i "s@RPM_FILE@--no-check-certificate\ $FILE_LINK\/${RPM_NAME}@g" "lava-test/${TEST_JOB}"
+if [[ "$TEST" == *"oeqa"* ]]; then
+    sed -i "s@TEST_PACKAGE@$FILE_LINK\/${OEQA_TEST_IMAGE}@g; \
+            s@RPM_FILE@$FILE_LINK\/${RPM_NAME}@g; \
+            s@MANIFEST_FILE@$FILE_LINK\/${IMAGE_NAME}.manifest@g" "$TEST_JOB"
 fi
-#cat lava-test/${TEST_JOB}
+#cat "$TEST_JOB"
 
 if [ -z "$RETRY" ]; then
     RETRY=0;
 fi
-echo "Retry times:   $RETRY" >> "$TEST_STATFILE"
+printf '    "retry_times": %d,\n' "$RETRY" >> "$TEST_STATFILE"
 
-echo -e "\nStart running OE test ..." >> "$TEST_STATFILE"
+echo "Start running LAVA test ..."
 
 for (( r=0; r<=RETRY; r++ ))
 do
     # Submit an example job
-    echo "[LAVA-CMD] lava-tool submit-job http://${LAVA_USER}@${LAVA_SERVER} lava-test/${TEST_JOB}"
-    ret=$(lava-tool submit-job "http://${LAVA_USER}@${LAVA_SERVER}" "lava-test/${TEST_JOB}")
+    echo "[LAVA-CMD] lava-tool submit-job http://${LAVA_USER}@${LAVA_SERVER} $TEST_JOB"
+    ret=$(lava-tool submit-job "http://${LAVA_USER}@${LAVA_SERVER}" "$TEST_JOB")
     job_id=${ret//submitted as job: http:\/\/${LAVA_SERVER}\/scheduler\/job\//}
 
     if [ -z "$job_id" ]; then
-        echo "job_id = ${job_id}, failed to submit LAVA job!" >> "$TEST_STATFILE"
+        printf '    "ERROR": "job_id = %d, failed to submit LAVA job!"\n' "$job_id" >> "$TEST_STATFILE"
         quit_test -1
     else
-        echo "LAVA test job id: $job_id" >> "$TEST_STATFILE"
+        printf '\n    "LAVA_test_job_id": %d,\n' "$job_id" >> "$TEST_STATFILE"
     fi
 
     echo "[LAVA-CMD] lava-tool job-details http://${LAVA_USER}@${LAVA_SERVER} ${job_id}"
@@ -206,35 +254,36 @@ do
 
     # Echo LAVA job links
     {
-        echo "Test job def: http://${LAVA_SERVER}/scheduler/job/${job_id}/definition"
-        echo "Test log:     http://${LAVA_SERVER}/scheduler/job/${job_id}"
-        echo "Test result:  http://${LAVA_SERVER}/results/${job_id}"
+        printf '    "test_job_def": "http://%s/scheduler/job/%d/definition",\n' "$LAVA_SERVER" "$job_id"
+        printf '    "test_log": "http://%s/scheduler/job/%d",\n' "$LAVA_SERVER" "$job_id"
+        printf '    "test_report": "http://%s/results/%d",\n' "$LAVA_SERVER" "$job_id"
     } >> "$TEST_STATFILE"
 
-    # Loop 60 x 10s to wait test result
-    for (( c=1; c<=60; c++ ))
+    # Loop $LAVA_JOB_TIMEOUT seconds to wait test result
+    TEST_LOOPS=$((LAVA_JOB_TIMEOUT / 10))
+    for (( c=1; c<="$TEST_LOOPS"; c++ ))
     do
        ret=$(lava-tool job-status "http://${LAVA_USER}@${LAVA_SERVER}" "${job_id}" |grep 'Job Status: ')
        job_status=${ret//Job Status: /}
        echo "$c. Job Status: $job_status"
        if [ "$job_status" == 'Complete' ]; then
-           echo "Job ${job_id} finished successfully!" >> "$TEST_STATFILE"
+           printf '    "test_job_status": "Completed",\n' >> "$TEST_STATFILE"
 
            # Generate test report
-           echo "[LAVA-CMD] lava-tool test-suite-results --csv http://${LAVA_USER}@${LAVA_SERVER} ${job_id} 0_${TEST_SUITE} > ${TEST_REPORT}"
-           lava-tool test-suite-results --csv "http://${LAVA_USER}@${LAVA_SERVER}" "${job_id}" 0_${TEST_SUITE} > "${TEST_REPORT}"
+           echo "curl http://${LAVA_SERVER}/results/${job_id}/0_${TEST}/csv > $TEST_REPORT"
+           curl "http://${LAVA_SERVER}/results/${job_id}/0_${TEST}/csv" > "$TEST_REPORT"
 
            if [ -f "$TEST_REPORT" ]; then
                quit_test 0
            else
-               echo "Generate test report file failed!" >> "$TEST_STATFILE"
+               printf '    "ERROR": "Generate test report file failed!"\n' >> "$TEST_STATFILE"
                quit_test -1
            fi
        elif [ "$job_status" == 'Incomplete' ]; then
-           echo "Job ${job_id} Incompleted!" >> "$TEST_STATFILE"
+           printf '    "test_job_status": "Incompleted",\n' >> "$TEST_STATFILE"
            break;
        elif [ "$job_status" == 'Canceled' ]; then
-           echo "Job ${job_id} Canceled!" >> "$TEST_STATFILE"
+           printf '    "test_job_status": "Canceled",\n' >> "$TEST_STATFILE"
            break;
        elif [ "$job_status" == 'Submitted' ] || [ "$job_status" == 'Running' ]; then
            sleep 10
@@ -242,9 +291,14 @@ do
     done
 
     if [ $r -lt $RETRY ]; then
-       echo "Retry the $((r + 1)) time ..." >> "$TEST_STATFILE"
+       printf '\n    "Status": "Retry the %d time ...",\n' "$((r + 1))" >> "$TEST_STATFILE"
     fi
 done
 
-# exit with failure or timeout
-quit_test -1
+if [ "$job_status" == 'Submitted' ] && [ "$((c-1))" == "$TEST_LOOPS" ]; then
+    # exit with no_target and timeout
+    quit_test -2
+else
+    # exit with failure or timeout
+    quit_test -1
+fi

@@ -1,0 +1,171 @@
+- name: oeqa-default-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  - bitbake wrlinux-image-glibc-std -c testexport
+  build_options:
+  - INHERIT += "testexport"
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - TEST_TARGET_IP = "localhost"
+  - TEST_SERVER_IP = "localhost"
+  - TEST_SUITES = "ping ssh df connman syslog xorg scp vnc date pam perl python rpm ldd smart dmesg dash"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_oeqa-default-test_template.yaml
+    timeout: 420
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml
+    timeout: 480
+  x86_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml
+    timeout: 480
+  intel_skylake_32_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_32_job_oeqa-default-test_template.yaml
+    timeout: 480
+  intel_skylake_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_64_job_oeqa-default-test_template.yaml
+    timeout: 600
+  intel_skylake_avx512_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_avx512_64_job_oeqa-default-test_template.yaml
+    timeout: 900
+  nxp_ls2088ardb_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls2088ardb_job_oeqa-default-test_template.yaml
+    timeout: 600
+  nxp_imx7_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_oeqa-default-test_template.yaml
+    timeout: 600
+
+- name: linaro-smoke-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml
+    timeout: 300
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-smoke-test_template.yaml
+    timeout: 300
+  x86_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-smoke-test_template.yaml
+    timeout: 300
+  intel_skylake_32_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_32_job_linaro-smoke-test_template.yaml
+    timeout: 480
+  intel_skylake_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_64_job_linaro-smoke-test_template.yaml
+    timeout: 600
+  intel_skylake_avx512_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_avx512_64_job_linaro-smoke-test_template.yaml
+    timeout: 900
+  nxp_ls2088ardb_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls2088ardb_job_linaro-smoke-test_template.yaml
+    timeout: 600
+  nxp_imx7_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_linaro-smoke-test_template.yaml
+    timeout: 600
+
+- name: linaro-singlenode-advanced-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-singlenode-advanced-test_template.yaml
+    timeout: 300
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-singlenode-advanced-test_template.yaml
+    timeout: 300
+
+- name: linaro-busybox-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - IMAGE_INSTALL_append += "busybox"
+  - PNWHITELIST_openembedded-layer += 'busybox'
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-busybox-test_template.yaml
+    timeout: 300
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-busybox-test_template.yaml
+    timeout: 300
+
+- name: linaro-signal-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-signal-test_template.yaml
+    timeout: 600
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-signal-test_template.yaml
+    timeout: 600
+
+- name: linaro-pi-stress-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-pi-stress-test_template.yaml
+    timeout: 600
+
+- name: linaro-pmq-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-pmq-test_template.yaml
+    timeout: 600
+
+- name: linaro-rt-migrate-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - IMAGE_INSTALL_append += "rt-tests ltp sysbench iozone3 bonnie++ fwts dmidecode fio"
+  - PNWHITELIST_openembedded-layer += 'sysbench'
+  - PNWHITELIST_openembedded-layer += 'fwts'
+  - PNWHITELIST_openembedded-layer += 'fio'
+  - PNWHITELIST_openembedded-layer += 'numactl'
+  - PREFERRED_PROVIDER_virtual/kernel = 'linux-yocto-rt'
+  - LINUX_KERNEL_TYPE = 'preempt-rt'
+  - BB_NO_NETWORK_pn-fwts = '0'
+  - BB_NO_NETWORK_pn-fio = '0'
+  - BB_NO_NETWORK_pn-sysbench = '0'
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-rt-migrate-test_template.yaml
+    timeout: 600

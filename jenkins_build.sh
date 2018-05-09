@@ -23,5 +23,7 @@
 "$WORKSPACE"/ci-scripts/oe_build.sh \
     --top="$WORKSPACE" --name="$NAME" --branch="$BRANCH" \
     --host="$NODE_NAME" --setup_args="$SETUP_ARGS" --prebuild_cmd="$PREBUILD_CMD" \
-    --build_cmd="$BUILD_CMD" --toaster="$TOASTER"\
+    --prebuild_cmd_for_test="$PREBUILD_CMD_FOR_TEST" \
+    --build_cmd_for_test="$BUILD_CMD_FOR_TEST" \
+    --build_cmd="$BUILD_CMD" --toaster="$TOASTER" \
     --email=Konrad.Scherer@windriver.com

@@ -32,7 +32,9 @@ HOST=
 EMAIL=
 SETUP_ARGS=()
 PREBUILD_CMD=()
+PREBUILD_CMD_FOR_TEST=()
 BUILD_CMD=()
+BUILD_CMD_FOR_TEST=()
 WORLD_BUILD=
 SKIP_CLEANUP=no
 WRLINUX=
@@ -51,8 +53,10 @@ do
         --name=*)               BUILD_NAME=${i#*=} ;;
         --email=*)              EMAIL=${i#*=} ;;
         --prebuild_cmd=*)       PREBUILD_CMD=(${i#*=}) ;;
+        --prebuild_cmd_for_test=*)    PREBUILD_CMD_FOR_TEST=(${i#*=}) ;;
         --build_id=*)           BUILD_ID=${i#*=} ;;
         --build_cmd=*)          BUILD_CMD=(${i#*=}) ;;
+        --build_cmd_for_test=*)       BUILD_CMD_FOR_TEST=(${i#*=}) ;;
         --post-success=*)       POST_SUCCESS=${i#*=} ;;
         --post-fail=*)          POST_FAIL=${i#*=} ;;
         --world_build=*)        WORLD_BUILD=${i#*=} ;;
@@ -134,6 +138,14 @@ else
     log_stats "Prebuild" "$BUILD"
     echo "Prebuild: ${PREBUILD_CMD[*]}" >> "$STATFILE"
 
+    # Run prebuild command for test which may modify files like local.conf
+    if [ "$PREBUILD_CMD_FOR_TEST" != 'null' ]; then
+        log "/usr/bin/python3 ${PREBUILD_CMD_FOR_TEST[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
+        $TIME bash -c "/usr/bin/python3 $WORKSPACE/ci-scripts/${PREBUILD_CMD_FOR_TEST[*]}" >> "$BUILD/00-prebuild.log" 2>&1
+        log_stats "Prebuild_for_test" "$BUILD"
+        echo "Prebuild_for_test: ${PREBUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
+    fi
+
     # Source toaster start script to prepare Toaster GUI
     if [ "$TOASTER" == "enable" ]; then
         source toaster start webport=0.0.0.0:8800 >> "$BUILD/00-prebuild.log" 2>&1
@@ -143,11 +155,15 @@ else
     log "${BUILD_CMD[*]}" 2>&1 | tee "$BUILD/00-wrbuild.log"
     $TIME bash -c "${BUILD_CMD[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
 
+    echo "Build for test: ${BUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
+    log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee "$BUILD/00-wrbuild.log"
+    $TIME bash -c "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
+
     RET=${PIPESTATUS[0]}
 
     # If build failed but all images got generated, don't exit 1
     if [ "$RET" != 0 ]; then
-        DETECT_IMAGES=$(detect_built_images $BUILD "$NAME")
+        DETECT_IMAGES=$(detect_built_images "$BUILD" "$NAME")
         DETECT_IMAGES=${DETECT_IMAGES// /;/}
         IFS=' ; ' read -ra IMAGES <<< "$DETECT_IMAGES"
 

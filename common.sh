@@ -583,27 +583,25 @@ create_statfile() {
     } >> "$STATFILE"
 }
 
-create_test_statfile() {
+create_report_statfile() {
     local STATFILE=$1
+    local JENKINS_URL=$2
+    local JOB_BASE_NAME=$3
     {
-        echo -e "\nBuild info:"
-        echo "==========="
-        echo "Name: $NAME"
+        echo "{"
+        echo "  \"build_info\": {"
+        echo "    \"local_date\": \"$(date +%Y-%m-%d)\","
+        echo "    \"name\": \"$NAME\","
         if [ -n "$TOOLCHAIN_BRANCH" ]; then
-            echo "Toolchain Branch: $TOOLCHAIN_BRANCH"
+            echo "    \"Toolchain Branch\": \"$TOOLCHAIN_BRANCH\","
         fi
         if [ -n "$BUILD_ID" ]; then
-            echo "build_id: $BUILD_ID"
+            echo "    \"build_id\": \"$BUILD_ID\","
+            if [ -z "$JOB_BASE_NAME" ]; then
+                JOB_BASE_NAME='WRLinux_Build'
+            fi
+            echo "    \"job_console_log\": \""$JENKINS_URL"job/"$JOB_BASE_NAME"/"$BUILD_ID"/console\","
         fi
-        if [ -n "$BUILD_NUM" ]; then
-            echo "build_num: $BUILD_NUM"
-        fi
-        echo -e "\nTest info:"
-        echo "=========="
-        if [ -n "$EMAIL" ]; then
-            echo "Email: $EMAIL"
-        fi
-        echo "Start: $(date) ($(date +%s))"
     } >> "$STATFILE"
 }
 

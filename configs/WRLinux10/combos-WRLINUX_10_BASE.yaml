@@ -1,15 +1,103 @@
 - branch: WRLINUX_10_17_LTS
   build:
-  - 'bitbake wrlinux-image-glibc-std ; bitbake wrlinux-image-glibc-std -c testexport'
+  - 'bitbake wrlinux-image-glibc-std'
   name: intel-x86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl10_sstate_cache
-  - --oe-test=with_wrlinux10
-  - --oe-test-suites=ping,ssh,df,connman,syslog,xorg,scp,vnc,date,pam,perl,python,rpm,ldd,smart,dmesg
-  - --lava-test=yes
   setup:
   - --distro=wrlinux
   - --machine=intel-x86-64
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-x86-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-x86-32
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-32
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-64
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-avx512-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-avx512-32
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-avx512-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-avx512-64
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-imx7_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-imx7
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-ls20xx_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-ls20xx
   - --dl-layers
   - --accept-eula=yes

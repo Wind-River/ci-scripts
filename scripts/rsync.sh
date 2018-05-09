@@ -62,11 +62,16 @@ post_rsync() {
          -exec /bin/bash -c "bzip2 '{}'" \;
 
     # Get image name
-    IMAGE_NAME=$(find "$EXPORT_DIR" -type l -name '*.iso' -printf '%f' |sed 's/.iso//g')
+    IMAGE_NAME=$(find "$EXPORT_DIR" -type l -name '*.tar.bz2' -printf '%f' |sed 's/.tar.bz2//g')
 
-    # Get *.hddimg, *.tar.bz2 and bzImage files
-    find "$EXPORT_DIR" -name "${IMAGE_NAME}.*" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
-    find "$EXPORT_DIR" -name "bzImage" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    # Get *.hddimg, *.tar.bz2, *.manifest and bzImage files
+    find "$EXPORT_DIR" -name "${IMAGE_NAME}.hddimg" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "${IMAGE_NAME}.tar.bz2" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "${IMAGE_NAME}.manifest" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "*Image" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    # Get images for ARM boards
+    find "$EXPORT_DIR" -name "*Image*.dtb" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "u-boot*.bin" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
     # "Copy" all conf files to rsync dir
     ln -sfrL "${BUILD}/${NAME}/conf" "$RSYNC_SOURCE_DIR/conf"
@@ -74,7 +79,7 @@ post_rsync() {
     # "Copy" all 00-* log files to rsync dir
     find "$BUILD" -type f -name "00-*" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
-    if [[ "$OE_TEST" == "yes" || "$OE_TEST" == True ]]; then
+    if [[ "$TEST" == *"oeqa"* ]]; then
         # Get rpm package for OE test
         local DEPLOY_DIR=
         DEPLOY_DIR=$(readlink -f "${NAME}/${TMP_DIR}/deploy/rpm")

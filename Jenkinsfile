@@ -112,7 +112,10 @@ node('docker') {
 
       env_args = env_args + ["NAME=${NAME}", "BRANCH=${BRANCH}"]
       env_args = env_args + ["NODE_NAME=${NODE_NAME}", "SETUP_ARGS=\'${SETUP_ARGS}\'"]
-      env_args = env_args + ["PREBUILD_CMD=\'${PREBUILD_CMD}\'", "BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
+      env_args = env_args + ["PREBUILD_CMD=\'${PREBUILD_CMD}\'", "PREBUILD_CMD_FOR_TEST=\'${PREBUILD_CMD_FOR_TEST}\'"]
+      env_args = env_args + ["TEST=${TEST}", "TEST_CONFIGS_FILE=${TEST_CONFIGS_FILE}"]
+      env_args = env_args + ["BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
+      env_args = env_args + ["BUILD_CMD_FOR_TEST=\'${BUILD_CMD_FOR_TEST}\'"]
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/jenkins_build.sh"
 
@@ -152,7 +155,7 @@ node('docker') {
       }
       def docker_params = common_docker_params + " --network=rsync_net "
       def env_args = ["NAME=${NAME}"]
-      env_args = env_args + ["POST_SUCCESS=${POST_SUCCESS}", "POST_FAIL=${POST_FAIL}"]
+      env_args = env_args + ["POST_SUCCESS=${POST_SUCCESS}", "POST_FAIL=${POST_FAIL}", "TEST=" + params.TEST]
       env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/build_postprocess.sh"
@@ -162,24 +165,25 @@ node('docker') {
 
   try {
     stage('Test') {
-      if (params.TEST == 'enable') {
+      if (params.TEST != 'disable' && params.TEST != '') {
         dir('ci-scripts') {
           git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
         def docker_params = common_docker_params
         def env_args = ["NAME=${NAME}"]
+        env_args = env_args + ["TEST=" + params.TEST, "RUNTIME_TEST_CMD=\'${RUNTIME_TEST_CMD}\'"]
         env_args = env_args + params.TEST_ARGS.tokenize(',')
         env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
         docker_params = add_env( docker_params, env_args )
-        def cmd="${WORKSPACE}/ci-scripts/run_tests.sh"
+        def cmd="${WORKSPACE}/ci-scripts/${RUNTIME_TEST_CMD}"
         sh "docker run --init ${docker_params} ${REGISTRY}/${TEST_IMAGE} ${cmd}"
       } else {
-        println("Test disabled")
+        println("Test is disabled, ignore 'Test' stage.")
       }
     }
   } finally {
     stage('Post Test') {
-      if (params.TEST == 'enable') {
+      if (params.TEST != 'disable' && params.TEST != '') {
         dir('ci-scripts') {
           git(url:params.CI_REPO, branch:params.CI_BRANCH)
         }
@@ -192,7 +196,7 @@ node('docker') {
         def cmd="${WORKSPACE}/ci-scripts/test_postprocess.sh"
         sh "docker run --init ${docker_params} ${REGISTRY}/${POST_TEST_IMAGE} ${cmd}"
       } else {
-        println("Test disabled")
+        println("Test is disabled, ignore 'Post Test' stage.")
       }
     }
   }

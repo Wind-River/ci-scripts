@@ -122,7 +122,6 @@ post_build:
     RSYNC_SERVER: 192.168.2.18
     RSYNC_DEST_DIR: builds/wrlinux9
     SMTPSERVER:
-    OE_TEST: no
     #- EMAIL: 'user1@windriver.com user2@xxx.com'
     EMAIL: ywangwrs@gmail.com
   # list of scripts in the scripts/ directory to be run after
@@ -154,9 +153,8 @@ test_config:
     LAVA_SERVER: yow-lpdtest.wrs.com:8080
     LAVA_USER: lpdtest
     NFS_ROOT: /net/yow-lpdtest/var/lib/tftpboot
-    HTTP_ROOT: http://128.224.56.215/tftpboot
+    HTTP_ROOT: http://yow-lpdtest.wrs.com/tftpboot
     TEST_DEVICE: simics
-    TEST_SUITE: oeqa-default-test
     RETRY: 1
 
 post_test:

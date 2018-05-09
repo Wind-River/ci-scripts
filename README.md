@@ -183,11 +183,11 @@ command line:
 
     .venv/bin/python3 ./jenkins_job_submit.py \
         --jenkins <jenkins> --post_success=rsync,cleanup \
-        --post_fail=send_email,cleanup
+        --post_fail=send_email,cleanup,report
 
 This would run the scripts/rsync.sh and scripts/cleanup.sh scripts
-after a successful build and scripts/send_email.sh and
-scripts/cleanup.sh after a failed build.
+after a successful build and scripts/send_email.sh, scripts/cleanup.sh
+and scripts/report.sh after a failed build.
 
 To pass parameters to the post build scripts use:
 
@@ -306,9 +306,9 @@ auth file to submit jobs.
 
 ## Runtime tests
 
-Tuntime tests are supported using LAVA, which is a server running
+Runtime tests are supported using LAVA, which is a server running
 outside of CI scripts. The LAVA server configuration is set in
-config files which locate in configs folder.
+config files which locates in configs folder.
 
 To enable runtime tests, the following settings in the YAML config
 file under configs folder are required:
@@ -319,113 +319,70 @@ file under configs folder are required:
     postprocess_args:
       RSYNC_SERVER: yow-lpdtest.wrs.com
       RSYNC_DEST_DIR: builds/wrlinux10
-      OE_TEST: yes
+      HTTP_ROOT: http://yow-lpdtest.wrs.com/tftpboot
+      REPORT_SERVER: http://yow-lpdtest.wrs.com:9200
+      SMTPSERVER: prod-webmail.windriver.com
+      EMAIL: first.last@windriver.com
     post_success:
       - rsync
       - cleanup
+    post_fail:
+      - rsync
+      - cleanup
+      - send_mail
+      - report
 
   test_config:
-	test: enable
+	test: [disable (default) or test_suite_name]
     test_image: postbuild
     test_args:
       LAVA_SERVER: <lava_server_link>
       LAVA_USER: <lava_username>
       NFS_ROOT: /net/yow-lpdtest/var/lib/tftpboot
-      HTTP_ROOT: http://128.224.56.215/tftpboot
       TEST_DEVICE: [simics (default) or hardware]
-      TEST_SUITE: <test_suite_name>
       RETRY: 1
 ```
 
-Because different tests may require different settings of build and
-execution, here are the configurations for supported tests:
+### Test Suites
+In above YAML config file, **test** under **test_config** section is used to set which test suite
+will be used for runtime test.
 
-### OEQA Tests
+_Supported Runtime Tests_
 
-_Build_
+| Product      | Supported Test Suite            | Supported  Device  |
+|--------------|---------------------------------|--------------------|
+| WRLinux 9    | oeqa-default-test (default)     | simics or hardware |
+| WRLinux 10   | oeqa-default-test (default)     | simics or hardware |
+| WRLinux 10   | linaro-smoke-test               | simics or hardware |
+| WRLinux 10   | linaro-busybox-test             | simics or hardware |
+| WRLinux 10   | linaro-signal-test              | simics or hardware |
+| WRLinux 10   | linaro-singlenode-advanced-test | simics or hardware |
+| WRLinux 10   | linaro-pi-stress-test           | hardware           |
+| WRLinux 10   | linaro-pmq-test                 | hardware           |
 
-1. Build config file for WRLinux, such as combos-WRLINUX_10_BASE.yaml.
-   build_configure.sh will make required changes to local.conf:
-    ```yaml
-    prebuild:
-      - build_configure.sh
-      - --oe-test=with_wrlinux10
-      - --oe-test-suites=ping,ssh,df,connman,syslog,xorg,scp,vnc,date,pam,perl,python,rpm,ldd,smart,dmesg
-    ```
+Configurations for each test suite are set in test_configs.yaml under configs folder. 
+Here is and example:
 
-_Execution_
-
-1. Specify TEST_DEVICE and TEST_SUITE in YAML config file under configs folder, for example:
-    ```yaml
-    TEST_DEVICE: simics
-    TEST_SUITE: oeqa-default-test
-    ```
-2. The LAVA job template files for OEQA tests is stored in lava-test git repository,
-(http://git.wrs.com/cgit/lpd-ops/lava-test.git) No special settings are required.
-    > jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml  (hardware)
-    > jobs/templates/wrlinux-10/x86_simics_job_oeqa-default-test_template.yaml (simics)
-
-### Linaro (LAVA) tests
-
-Linaro provides lots of open source test suites, which are defined in:
-https://git.linaro.org/qa/test-definitions.git, we can use them in CI as well.
-
-_Build_
-
-1. Build config file for WRLinux, such as combos-WRLINUX_10_BASE.yaml.
-   build_configure.sh will make required changes to local.conf:
-    ```yaml
-    prebuild:
-      - build_configure.sh
-      - --oe-test=with_wrlinux10
-      - --lava-test=yes
-    ```
-
-_Execution_
-1. Specify TEST_DEVICE and TEST_SUITE in YAML config file under
-configs folder, for example:
-    ```yaml
-    # Supported tests and matching devices
-    #
-    # test_suit                       | supported device
-    # --------------------------------+-------------------
-    # linaro-smoke-test               | simics or hardware
-    # linaro-busybox-test             | simics or hardware
-    # linaro-signal-test              | simics or hardware
-    # linaro-singlenode-advanced-test | simics or hardware
-    # linaro-pi-stress-test           | hardware
-    # linaro-pmq-test                 | hardware
-    # linaro-rt-migrate-test          | hardware
-    #
-    TEST_DEVICE: simics
-    TEST_SUITE: linaro-smoke-test
-    ```
-2. The LAVA job template files for Linaro tests are stored in lava-test
-git repository, above listed all supported Linaro tests and their job
-template files are:
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-busybox-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-pi-stress-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-pmq-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-rt-migrate-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-signal-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-singlenode-advanced-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_64_job_linaro-smoke-test_template.yaml (hardware)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-busybox-test_template.yaml (simics)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-pi-stress-test_template.yaml (simics)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-pmq-test_template.yaml (simics)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-rt-migrate-test_template.yaml (simics)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-signal-test_template.yaml (simics)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-singlenode-advanced-test_template.yaml (simics)
-    > jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml (simics)
-
-    If new test suites are introduced, new job template files need to be created as well.
-
-    **Note:**
-    Test suite name must be set properly and consistent in the following places:
-    *  Inside job template file, under test section, the 'name' field of 'definitions'
-    *  Job template file name contains test suite name, for example:
-        >  x86_simics_job_**linaro-smoke-test**_template.yaml
-    *  TEST_SUITE in YAML config file under configs folder
+```yaml
+- name: oeqa-default-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_options:
+  - INHERIT += "testexport"
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - TEST_TARGET_IP = "localhost"
+  - TEST_SERVER_IP = "localhost"
+  - TEST_SUITES = "ping ssh df connman syslog xorg scp vnc date pam perl python rpm ldd smart dmesg dash"
+  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_oeqa-default-test_template.yaml
+    timeout: 420
+  hardware:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml
+    timeout: 480
+```
 
 ## Modifying docker images
 

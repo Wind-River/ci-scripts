@@ -48,7 +48,7 @@ system:
 ci_config:
   # The branch to use for the ci-scripts repo. Used for local modifications.
   # Default: master
-  ci_branch: testdocs
+  ci_branch: master
   # The location of the ci-scripts repo. Override to use local mirror.
   # Default: https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git
   ci_repo: git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git
@@ -60,7 +60,7 @@ cache_sources:
 
 layerindex_overrides:
   # Specify a layer name to be modified as part of a Devbuild.
-  - layer_name: nxp-imx7
+  - layer_name:
     # Override the branch defined in the combos file.
     # Default: the same as 'branch' set in 'build' section
     branch: WRLINUX_10_17_LTS
@@ -74,7 +74,7 @@ layerindex_overrides:
     layer_vcs_subdir:
 
   # Specify a layer name to be modified as part of a Devbuild.
-  - layer_name: intel-haswell
+  - layer_name:
     # Override the branch defined in the combos file.
     # Default: the same as 'branch' set in 'build' section
     branch: WRLINUX_10_17_LTS
@@ -96,7 +96,7 @@ build:
   # Override the branch defined in the combos file.
   # Default: ''
   branch: WRLINUX_10_17_LTS
-  # builds as specified in config_file. Use all to queue
+  # builds as specified in build_configs_file. Use all to queue
   # all the configs.
   build_configs:
     - intel-x86-64_wrlinux-image-glibc-std
@@ -121,8 +121,10 @@ post_build:
   postprocess_args:
     RSYNC_SERVER: yow-lpdtest.wrs.com
     RSYNC_DEST_DIR: builds/wrlinux10
+    # HTTP_ROOT is used to get test images, it's related to RSYNC server
+    HTTP_ROOT: http://yow-lpdtest.wrs.com/tftpboot
     SMTPSERVER: prod-webmail.windriver.com
-    OE_TEST: yes
+    REPORT_SERVER: http://yow-lpdtest.wrs.com:9200
     #- EMAIL: 'user1@windriver.com user2@xxx.com'
     EMAIL: yang.wang@windriver.com
   # list of scripts in the scripts/ directory to be run after
@@ -138,12 +140,38 @@ post_build:
     - rsync
     - cleanup
     - send_mail
+    - report
 
 test_config:
-  # Switch to enable runtime testing of the build. Only two options supported:
-  # enable (run tests) or disable.
+  # Switch to enable runtime testing of the build. Available options are:
+  # test suilte name (means test is enabled) or disable.
   # Default: disable
-  test: disable
+  # ================
+  # Supported tests and matching devices
+  # LAVA test reference: https://git.linaro.org/qa/test-definitions.git
+  #
+  # test                            | supported devices
+  # --------------------------------+--------------------
+  # oeqa-default-test (default)     | simics
+  #                                 | x86_64_device
+  #                                 | intel_skylake_32_device
+  #                                 | intel_skylake_64_device
+  #                                 | intel_skylake_avx512_64_device
+  #                                 | nxp_ls20xx_device
+  # linaro-smoke-test               | simics
+  #                                 | x86_64_device
+  #                                 | intel_skylake_avx512_64_device
+  #                                 | nxp_ls20xx_device
+  # linaro-busybox-test             | simics or hardware
+  # linaro-signal-test              | simics or hardware
+  # linaro-singlenode-advanced-test | simics or hardware
+  # linaro-pi-stress-test           | hardware
+  # linaro-pmq-test                 | hardware
+  # linaro-rt-migrate-test          | hardware
+  #
+  test: oeqa-default-test
+  # Name of file that contains test configurations.
+  test_configs_file: configs/WRLinux10/test_configs.yaml
   # The Docker image used for the test stage.
   # Default: postbuild
   test_image: postbuild
@@ -154,24 +182,7 @@ test_config:
     LAVA_USER: lpdtest
     # NFS_ROOT is used to get target images (kernel and rootfs) for testing
     NFS_ROOT: /net/yow-lpdtest/var/lib/tftpboot
-    # HTTP_ROOT is used to get test images, such as testexport.tar.gz
-    HTTP_ROOT: http://128.224.56.215/tftpboot
-    # Supported tests and matching devices
-    # LAVA test reference: https://git.linaro.org/qa/test-definitions.git
-    #
-    # test_suit                       | supported device
-    # --------------------------------+-------------------
-    # oeqa-default-test (default)     | simics or hardware
-    # linaro-smoke-test               | simics or hardware
-    # linaro-busybox-test             | simics or hardware
-    # linaro-signal-test              | simics or hardware
-    # linaro-singlenode-advanced-test | simics or hardware
-    # linaro-pi-stress-test           | hardware
-    # linaro-pmq-test                 | hardware
-    # linaro-rt-migrate-test          | hardware
-    #
     TEST_DEVICE: simics
-    TEST_SUITE: oeqa-default-test
     RETRY: 1
 
 post_test:
@@ -183,8 +194,10 @@ post_test:
   # Default: none
   post_test_success:
     - send_mail
+    - report
   # list of scripts in the scripts/ directory to be run after
   # a successful test.
   # Default: none
   post_test_fail:
     - send_mail
+    - report
