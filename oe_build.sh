@@ -117,7 +117,7 @@ if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
 fi
 
 # run the setup tool
-log "${SETUP_ARGS[*]}" 2>&1 | tee "$BUILD/00-wrsetup.log"
+log "${SETUP_ARGS[*]}" 2>&1 | tee --append "$BUILD/00-wrsetup.log"
 $TIME bash -c "${SETUP_ARGS[*]}" >> "$BUILD/00-wrsetup.log" 2>&1
 RET=$?
 log_stats "Setup" "$BUILD"
@@ -152,11 +152,11 @@ else
     fi
 
     echo "Build: ${BUILD_CMD[*]}" >> "$STATFILE"
-    log "${BUILD_CMD[*]}" 2>&1 | tee "$BUILD/00-wrbuild.log"
+    log "${BUILD_CMD[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
     $TIME bash -c "${BUILD_CMD[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
 
     echo "Build for test: ${BUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
-    log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee "$BUILD/00-wrbuild.log"
+    log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
     $TIME bash -c "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
 
     RET=${PIPESTATUS[0]}

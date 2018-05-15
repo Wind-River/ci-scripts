@@ -552,7 +552,7 @@ def main():
 
                 print("Scheduled build " + str(next_build_number))
                 if output:
-                    print("Jenkins Output:" + output)
+                    print("Jenkins Output:" + str(output))
 
 
 if __name__ == "__main__":
