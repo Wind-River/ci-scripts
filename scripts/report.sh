@@ -23,7 +23,9 @@
 function get_jenkins_log () {
     local BUILD="$1"
 
-    JOB_BASE_NAME=$(basename "$WORKSPACE")
+    if [ -z "$JOB_BASE_NAME" ]; then
+        JOB_BASE_NAME='WRLinux_Build'
+    fi
     JENKINS_LOG_URL="${JENKINS_URL}job/${JOB_BASE_NAME}/${BUILD_ID}/consoleText"
     JENKINS_LOG=${BUILD}/jenkins_console.log
 

@@ -12,7 +12,6 @@ LAVA_JOB_TIMEOUT=$3
 source "$WORKSPACE"/ci-scripts/common.sh
 export HOME=/home/jenkins
 
-JOB_BASE_NAME=$(basename "$WORKSPACE")
 BUILD="$WORKSPACE/builds/builds-$BUILD_ID"
 
 TEST_MAIL=${BUILD}/mail.txt
@@ -174,7 +173,8 @@ if [ -d "$repo_folder" ]; then
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
     lava-tool auth-list |grep "$LAVA_SERVER"
     if [ $? != 0 ]; then
-        printf '    "ERROR": "lava-tool auth-add failed!"\n' >> "$TEST_STATFILE"
+        printf '    "ERROR": "LAVA Server $LAVA_SERVER is in unhealthy status."\n' >> "$TEST_STATFILE"
+        echo "LAVA Server $LAVA_SERVER is in unhealthy status, exit!"
         quit_test -1
     fi
 else
