@@ -81,6 +81,18 @@ function quit_test () {
     curl -k "$LAVA_JOB_PLAIN_LOG" -o "$LAVA_JOB_LOG"
     rsync -avL "$LAVA_JOB_LOG" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
 
+    # Get LAVA test result in csv format
+    LAVA_JOB_RESULT_CSV="http://${LAVA_SERVER}/results/${job_id}/csv"
+    LAVA_JOB_RESULT_YAML="http://${LAVA_SERVER}/results/${job_id}/yaml"
+    LAVA_JOB_REPORT_CSV="$BUILD/lava_job_result.csv"
+    LAVA_JOB_REPORT_YAML="$BUILD/lava_job_result.yaml"
+    echo "curl -k $LAVA_JOB_RESULT_CSV -o $LAVA_JOB_REPORT_CSV"
+    curl -k "$LAVA_JOB_RESULT_CSV" -o "$LAVA_JOB_REPORT_CSV"
+    echo "curl -k $LAVA_JOB_RESULT_YAML -o $LAVA_JOB_REPORT_YAML"
+    curl -k "$LAVA_JOB_RESULT_YAML" -o "$LAVA_JOB_REPORT_YAML"
+    rsync -avL "$LAVA_JOB_REPORT_CSV" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    rsync -avL "$LAVA_JOB_REPORT_YAML" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+
     generate_test_mail $STATUS
     exit "$RET"
 }
