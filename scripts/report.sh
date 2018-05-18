@@ -23,6 +23,9 @@
 function get_jenkins_log () {
     local BUILD="$1"
 
+    if [[ "$JENKINS_URL" != *"wrs.com"* ]]; then
+        JENKINS_URL=${JENKINS_URL::-9}.wrs.com/jenkins/
+    fi
     if [ -z "$JOB_BASE_NAME" ]; then
         JOB_BASE_NAME='WRLinux_Build'
     fi
