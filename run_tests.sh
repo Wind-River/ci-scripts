@@ -76,7 +76,7 @@ function quit_test () {
 
     # Get LAVA job log
     LAVA_JOB_PLAIN_LOG="http://${LAVA_SERVER}/scheduler/job/${job_id}/log_file/plain"
-    LAVA_JOB_LOG="$BUILD/lava_job.log"
+    LAVA_JOB_LOG="$BUILD/lava_job_${job_id}.log"
     echo "curl -k $LAVA_JOB_PLAIN_LOG -o $LAVA_JOB_LOG"
     curl -k "$LAVA_JOB_PLAIN_LOG" -o "$LAVA_JOB_LOG"
     rsync -avL "$LAVA_JOB_LOG" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
@@ -84,8 +84,8 @@ function quit_test () {
     # Get LAVA test result in csv format
     LAVA_JOB_RESULT_CSV="http://${LAVA_SERVER}/results/${job_id}/csv"
     LAVA_JOB_RESULT_YAML="http://${LAVA_SERVER}/results/${job_id}/yaml"
-    LAVA_JOB_REPORT_CSV="$BUILD/lava_job_result.csv"
-    LAVA_JOB_REPORT_YAML="$BUILD/lava_job_result.yaml"
+    LAVA_JOB_REPORT_CSV="$BUILD/lava_job_${job_id}_result.csv"
+    LAVA_JOB_REPORT_YAML="$BUILD/lava_job_${job_id}_result.yaml"
     echo "curl -k $LAVA_JOB_RESULT_CSV -o $LAVA_JOB_REPORT_CSV"
     curl -k "$LAVA_JOB_RESULT_CSV" -o "$LAVA_JOB_REPORT_CSV"
     echo "curl -k $LAVA_JOB_RESULT_YAML -o $LAVA_JOB_REPORT_YAML"

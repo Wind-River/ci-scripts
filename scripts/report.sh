@@ -30,7 +30,7 @@ function get_jenkins_log () {
         JOB_BASE_NAME='WRLinux_Build'
     fi
     JENKINS_LOG_URL="${JENKINS_URL}job/${JOB_BASE_NAME}/${BUILD_ID}/consoleText"
-    JENKINS_LOG=${BUILD}/jenkins_console.log
+    JENKINS_LOG=${BUILD}/jenkins_job_${BUILD_ID}_console.log
 
     # get jenkins console log
     echo "curl -k $JENKINS_LOG_URL -o $JENKINS_LOG"
