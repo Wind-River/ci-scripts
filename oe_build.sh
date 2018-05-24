@@ -140,8 +140,8 @@ else
 
     # Run prebuild command for test which may modify files like local.conf
     if [ "$PREBUILD_CMD_FOR_TEST" != 'null' ]; then
-        log "/usr/bin/python3 ${PREBUILD_CMD_FOR_TEST[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
-        $TIME bash -c "/usr/bin/python3 $WORKSPACE/ci-scripts/${PREBUILD_CMD_FOR_TEST[*]}" >> "$BUILD/00-prebuild.log" 2>&1
+        log "${PREBUILD_CMD_FOR_TEST[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
+        $TIME bash -c "$WORKSPACE/ci-scripts/${PREBUILD_CMD_FOR_TEST[*]}" >> "$BUILD/00-prebuild.log" 2>&1
         log_stats "Prebuild_for_test" "$BUILD"
         echo "Prebuild_for_test: ${PREBUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
     fi
