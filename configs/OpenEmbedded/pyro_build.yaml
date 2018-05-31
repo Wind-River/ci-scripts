@@ -51,7 +51,7 @@ ci_config:
   ci_branch: devbuild
   # The location of the ci-scripts repo. Override to use local mirror.
   # Default: https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git
-  ci_repo: git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git
+  ci_repo: git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts.git
 
 cache_sources:
   # Specify a remote for the wrlinux_update.sh script to clone or update from.

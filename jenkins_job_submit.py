@@ -363,7 +363,7 @@ def main():
     # Check existence of wrigel-configs repo
     if not os.path.exists("wrigel-configs"):
         print("wrigel-configs repo does NOT exist, clone it.")
-        git.Git(".").clone("git://ala-git.wrs.com/git/projects/wrlinux-ci/wrigel-configs.git")
+        git.Git(".").clone("git://ala-lxgit.wrs.com/git/projects/wrlinux-ci/wrigel-configs.git")
     else:
         print("wrigel-configs repo exists, pull latest changes.")
         wrigel_configs = git.cmd.Git("wrigel-configs")

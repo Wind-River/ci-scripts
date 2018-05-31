@@ -177,7 +177,7 @@
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>git://ala-git.wrs.com/projects/wrlinux-ci/ci-scripts.git</url>
+          <url>git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts.git</url>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
       <branches>
