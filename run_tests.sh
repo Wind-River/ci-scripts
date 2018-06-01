@@ -165,7 +165,7 @@ if [ -d "$repo_folder" ]; then
         echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
         lava-tool auth-list | grep "$LAVA_SERVER"
         if [ $? == 0 ]; then
-            printf '    "ERROR": "lava-tool auth-remove failed!"\n' >> "$TEST_STATFILE"
+            printf '    "ERROR": "lava-tool auth-remove failed!",\n' >> "$TEST_STATFILE"
             quit_test -1
         fi
     fi
@@ -185,12 +185,12 @@ if [ -d "$repo_folder" ]; then
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
     lava-tool auth-list |grep "$LAVA_SERVER"
     if [ $? != 0 ]; then
-        printf '    "ERROR": "LAVA Server $LAVA_SERVER is in unhealthy status."\n' >> "$TEST_STATFILE"
+        printf '    "ERROR": "LAVA Server $LAVA_SERVER is in unhealthy status.",\n' >> "$TEST_STATFILE"
         echo "LAVA Server $LAVA_SERVER is in unhealthy status, exit!"
         quit_test -1
     fi
 else
-    printf '    "ERROR": "clone git repo: %s failed!"\n' "$repo_folder" >> "$TEST_STATFILE"
+    printf '    "ERROR": "clone git repo: %s failed!",\n' "$repo_folder" >> "$TEST_STATFILE"
     quit_test -1
 fi
 
@@ -255,7 +255,7 @@ do
     job_id=${ret//submitted as job: http:\/\/${LAVA_SERVER}\/scheduler\/job\//}
 
     if [ -z "$job_id" ]; then
-        printf '    "ERROR": "job_id = %d, failed to submit LAVA job!"\n' "$job_id" >> "$TEST_STATFILE"
+        printf '    "ERROR": "job_id = %d, failed to submit LAVA job!",\n' "$job_id" >> "$TEST_STATFILE"
         quit_test -1
     else
         printf '\n    "LAVA_test_job_id": %d,\n' "$job_id" >> "$TEST_STATFILE"
@@ -288,7 +288,7 @@ do
            if [ -f "$TEST_REPORT" ]; then
                quit_test 0
            else
-               printf '    "ERROR": "Generate test report file failed!"\n' >> "$TEST_STATFILE"
+               printf '    "ERROR": "Generate test report file failed!",\n' >> "$TEST_STATFILE"
                quit_test -1
            fi
        elif [ "$job_status" == 'Incomplete' ]; then
