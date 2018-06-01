@@ -55,7 +55,7 @@ report() {
 
     # Handle build failure report
     if [ ! -f "$BUILD/teststats.json" ]; then
-        if [ "$TEST" == 'enable' ] && [ -f "$BUILD/00-PASS" ]; then
+        if [ "$TEST" != 'disable' ] && [ -f "$BUILD/00-PASS" ]; then
             echo "Report info: Build passed and teststats.json has not been generated."
             exit 0
         else
@@ -79,6 +79,8 @@ report() {
                 echo "  }"
                 echo "}"
             } >> "$REPORT_STATFILE"
+
+            rsync -avL "$REPORT_STATFILE" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
         fi
     else
         REPORT_STATFILE=${BUILD}/teststats.json
