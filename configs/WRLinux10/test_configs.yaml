@@ -11,7 +11,7 @@
   - TEST_TARGET_IP = "localhost"
   - TEST_SERVER_IP = "localhost"
   - TEST_SUITES = "ping ssh df connman syslog xorg scp vnc date pam perl python rpm ldd smart dmesg dash"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_oeqa-default-test_template.yaml
     timeout: 420
@@ -45,7 +45,7 @@
   - IMAGE_INSTALL_append += "python3-pkgutil"
   - IMAGE_INSTALL_append += "python3-unittest"
   - IMAGE_INSTALL_append += "python3-multiprocessing"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml
     timeout: 300
@@ -79,7 +79,7 @@
   - IMAGE_INSTALL_append += "python3-pkgutil"
   - IMAGE_INSTALL_append += "python3-unittest"
   - IMAGE_INSTALL_append += "python3-multiprocessing"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-singlenode-advanced-test_template.yaml
     timeout: 300
@@ -97,7 +97,7 @@
   - IMAGE_INSTALL_append += "python3-multiprocessing"
   - IMAGE_INSTALL_append += "busybox"
   - PNWHITELIST_openembedded-layer += 'busybox'
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-busybox-test_template.yaml
     timeout: 300
@@ -113,7 +113,7 @@
   - IMAGE_INSTALL_append += "python3-pkgutil"
   - IMAGE_INSTALL_append += "python3-unittest"
   - IMAGE_INSTALL_append += "python3-multiprocessing"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-signal-test_template.yaml
     timeout: 600
@@ -129,7 +129,7 @@
   - IMAGE_INSTALL_append += "python3-pkgutil"
   - IMAGE_INSTALL_append += "python3-unittest"
   - IMAGE_INSTALL_append += "python3-multiprocessing"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-pi-stress-test_template.yaml
     timeout: 600
@@ -142,7 +142,7 @@
   - IMAGE_INSTALL_append += "python3-pkgutil"
   - IMAGE_INSTALL_append += "python3-unittest"
   - IMAGE_INSTALL_append += "python3-multiprocessing"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-pmq-test_template.yaml
     timeout: 600
@@ -165,7 +165,7 @@
   - BB_NO_NETWORK_pn-fwts = '0'
   - BB_NO_NETWORK_pn-fio = '0'
   - BB_NO_NETWORK_pn-sysbench = '0'
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-rt-migrate-test_template.yaml
     timeout: 600

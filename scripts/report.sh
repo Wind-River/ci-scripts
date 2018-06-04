@@ -23,9 +23,14 @@
 function get_jenkins_log () {
     local BUILD="$1"
 
-    JOB_BASE_NAME=$(basename "$WORKSPACE")
+    if [[ "$JENKINS_URL" != *"wrs.com"* ]]; then
+        JENKINS_URL=${JENKINS_URL::-9}.wrs.com/jenkins/
+    fi
+    if [ -z "$JOB_BASE_NAME" ]; then
+        JOB_BASE_NAME='WRLinux_Build'
+    fi
     JENKINS_LOG_URL="${JENKINS_URL}job/${JOB_BASE_NAME}/${BUILD_ID}/consoleText"
-    JENKINS_LOG=${BUILD}/jenkins_console.log
+    JENKINS_LOG=${BUILD}/jenkins_job_${BUILD_ID}_console.log
 
     # get jenkins console log
     echo "curl -k $JENKINS_LOG_URL -o $JENKINS_LOG"
@@ -50,7 +55,7 @@ report() {
 
     # Handle build failure report
     if [ ! -f "$BUILD/teststats.json" ]; then
-        if [ "$TEST" == 'enable' ] && [ -f "$BUILD/00-PASS" ]; then
+        if [ "$TEST" != 'disable' ] && [ -f "$BUILD/00-PASS" ]; then
             echo "Report info: Build passed and teststats.json has not been generated."
             exit 0
         else
@@ -74,6 +79,8 @@ report() {
                 echo "  }"
                 echo "}"
             } >> "$REPORT_STATFILE"
+
+            rsync -avL "$REPORT_STATFILE" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
         fi
     else
         REPORT_STATFILE=${BUILD}/teststats.json

@@ -375,7 +375,7 @@ Here is and example:
   - TEST_TARGET_IP = "localhost"
   - TEST_SERVER_IP = "localhost"
   - TEST_SUITES = "ping ssh df connman syslog xorg scp vnc date pam perl python rpm ldd smart dmesg dash"
-  lava_test_repo: git://ala-git.wrs.com/lpd-ops/lava-test.git
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_oeqa-default-test_template.yaml
     timeout: 420

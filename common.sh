@@ -396,7 +396,7 @@ function generate_failmail
             echo This file, and more detailed log info can be found at:
             echo "$LOGLINK"
             echo "To reproduce this failure with a local docker instance, see wraxl docs:"
-            echo "  http://ala-git.wrs.com/cgi-bin/cgit.cgi/lpd-ops/wr-buildscripts.git/tree/README.md"
+            echo "  http://ala-lxgit.wrs.com/cgi-bin/cgit.cgi/lpd-ops/wr-buildscripts.git/tree/README.md"
             sed -i '/FailBranch:/d' "$STATFILE"
             echo "FailBranch: $FAIL_BRANCH" >> "$STATFILE"
             sed -i '/LogLink:/d' "$STATFILE"

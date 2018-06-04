@@ -12,7 +12,6 @@ LAVA_JOB_TIMEOUT=$3
 source "$WORKSPACE"/ci-scripts/common.sh
 export HOME=/home/jenkins
 
-JOB_BASE_NAME=$(basename "$WORKSPACE")
 BUILD="$WORKSPACE/builds/builds-$BUILD_ID"
 
 TEST_MAIL=${BUILD}/mail.txt
@@ -77,10 +76,22 @@ function quit_test () {
 
     # Get LAVA job log
     LAVA_JOB_PLAIN_LOG="http://${LAVA_SERVER}/scheduler/job/${job_id}/log_file/plain"
-    LAVA_JOB_LOG="$BUILD/lava_job.log"
+    LAVA_JOB_LOG="$BUILD/lava_job_${job_id}.log"
     echo "curl -k $LAVA_JOB_PLAIN_LOG -o $LAVA_JOB_LOG"
     curl -k "$LAVA_JOB_PLAIN_LOG" -o "$LAVA_JOB_LOG"
     rsync -avL "$LAVA_JOB_LOG" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+
+    # Get LAVA test result in csv format
+    LAVA_JOB_RESULT_CSV="http://${LAVA_SERVER}/results/${job_id}/csv"
+    LAVA_JOB_RESULT_YAML="http://${LAVA_SERVER}/results/${job_id}/yaml"
+    LAVA_JOB_REPORT_CSV="$BUILD/lava_job_${job_id}_result.csv"
+    LAVA_JOB_REPORT_YAML="$BUILD/lava_job_${job_id}_result.yaml"
+    echo "curl -k $LAVA_JOB_RESULT_CSV -o $LAVA_JOB_REPORT_CSV"
+    curl -k "$LAVA_JOB_RESULT_CSV" -o "$LAVA_JOB_REPORT_CSV"
+    echo "curl -k $LAVA_JOB_RESULT_YAML -o $LAVA_JOB_REPORT_YAML"
+    curl -k "$LAVA_JOB_RESULT_YAML" -o "$LAVA_JOB_REPORT_YAML"
+    rsync -avL "$LAVA_JOB_REPORT_CSV" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    rsync -avL "$LAVA_JOB_REPORT_YAML" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
 
     generate_test_mail $STATUS
     exit "$RET"
@@ -154,7 +165,7 @@ if [ -d "$repo_folder" ]; then
         echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
         lava-tool auth-list | grep "$LAVA_SERVER"
         if [ $? == 0 ]; then
-            printf '    "ERROR": "lava-tool auth-remove failed!"\n' >> "$TEST_STATFILE"
+            printf '    "ERROR": "lava-tool auth-remove failed!",\n' >> "$TEST_STATFILE"
             quit_test -1
         fi
     fi
@@ -174,11 +185,12 @@ if [ -d "$repo_folder" ]; then
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
     lava-tool auth-list |grep "$LAVA_SERVER"
     if [ $? != 0 ]; then
-        printf '    "ERROR": "lava-tool auth-add failed!"\n' >> "$TEST_STATFILE"
+        printf '    "ERROR": "LAVA Server $LAVA_SERVER is in unhealthy status.",\n' >> "$TEST_STATFILE"
+        echo "LAVA Server $LAVA_SERVER is in unhealthy status, exit!"
         quit_test -1
     fi
 else
-    printf '    "ERROR": "clone git repo: %s failed!"\n' "$repo_folder" >> "$TEST_STATFILE"
+    printf '    "ERROR": "clone git repo: %s failed!",\n' "$repo_folder" >> "$TEST_STATFILE"
     quit_test -1
 fi
 
@@ -243,7 +255,7 @@ do
     job_id=${ret//submitted as job: http:\/\/${LAVA_SERVER}\/scheduler\/job\//}
 
     if [ -z "$job_id" ]; then
-        printf '    "ERROR": "job_id = %d, failed to submit LAVA job!"\n' "$job_id" >> "$TEST_STATFILE"
+        printf '    "ERROR": "job_id = %d, failed to submit LAVA job!",\n' "$job_id" >> "$TEST_STATFILE"
         quit_test -1
     else
         printf '\n    "LAVA_test_job_id": %d,\n' "$job_id" >> "$TEST_STATFILE"
@@ -276,7 +288,7 @@ do
            if [ -f "$TEST_REPORT" ]; then
                quit_test 0
            else
-               printf '    "ERROR": "Generate test report file failed!"\n' >> "$TEST_STATFILE"
+               printf '    "ERROR": "Generate test report file failed!",\n' >> "$TEST_STATFILE"
                quit_test -1
            fi
        elif [ "$job_status" == 'Incomplete' ]; then
