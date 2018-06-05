@@ -96,6 +96,8 @@ if [ -z "$SOURCE_LAYOUT" ]; then
 fi
 
 CACHE_BASE="${TOP}/../wrlinux-${SOURCE_LAYOUT}-${BRANCH}"
+# Use reference clone support in repo to speed up setup.sh
+export REPO_MIRROR_LOCATION="$CACHE_BASE"
 
 # if setup_args starts with -- add the setup command
 if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
