@@ -84,6 +84,9 @@ wrl_clone_or_update()
         SETUP_REPO=wrlinux-9
     fi
 
+    # make sure to use git-repo in the same location as wrlinux-x
+    export REPO_URL="${REMOTE:(-9)}/git-repo"
+
     local CACHE_BASE="${BASE}/wrlinux-${SOURCE_LAYOUT}-${BRANCH}"
 
     # create credential file for use by git credential.helper
