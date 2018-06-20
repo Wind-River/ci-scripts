@@ -224,7 +224,7 @@ popd
 JOB_TEMPLATE="$BUILD/$LAVA_JOB_TEMPLATE"
 cp -f "$JOB_TEMPLATE" "$TEST_JOB"
 
-if [ "$TEST_DEVICE" == 'simics' ]; then
+if [[ "$TEST_DEVICE" == *"simics"* ]]; then
     sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "$TEST_JOB"
 else
     sed -i "s@KERNEL_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${KERNEL_FILE}@g; \

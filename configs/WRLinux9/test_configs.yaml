@@ -13,6 +13,15 @@
   simics:
     job_template: lava-test/jobs/templates/wrlinux-9/x86_simics_job_oeqa-default-test_template.yaml
     timeout: 420
+  baytrail_simics:
+    job_template: lava-test/jobs/templates/wrlinux-9/x86_simics_job_oeqa-default-test_template.yaml
+    timeout: 420
+  x86-x58-ich10_simics:
+    job_template: lava-test/jobs/templates/wrlinux-9/x86-x58-ich10_simics_job_oeqa-default-test_template.yaml
+    timeout: 500
+  purley_simics:
+    job_template: lava-test/jobs/templates/wrlinux-9/purley_simics_job_oeqa-default-test_template.yaml
+    timeout: 500
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-9/x86_64_job_oeqa-default-test_template.yaml
     timeout: 420
@@ -27,6 +36,15 @@
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml
     timeout: 300
+  baytrail_simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml
+    timeout: 300
+  x86-x58-ich10_simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86-x58-ich10_simics_job_linaro-smoke-test_template.yaml
+    timeout: 500
+  purley_simics:
+    job_template: lava-test/jobs/templates/wrlinux-10/purley_simics_job_linaro-smoke-test_template.yaml
+    timeout: 500
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-smoke-test_template.yaml
     timeout: 300
