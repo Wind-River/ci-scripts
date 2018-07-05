@@ -20,11 +20,11 @@
 
 FROM docker:stable
 
-ARG "version=0.1.0-dev"
-ARG "build_date=unknown"
-ARG "commit_hash=unknown"
-ARG "vcs_url=unknown"
-ARG "vcs_branch=unknown"
+ARG version=0.1.0-dev
+ARG build_date=unknown
+ARG commit_hash=unknown
+ARG vcs_url=unknown
+ARG vcs_branch=unknown
 
 LABEL maintainer="Konrad Scherer <Konrad.Scherer@windriver.com>" \
     org.label-schema.vendor="WindRiver" \
