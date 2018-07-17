@@ -61,7 +61,7 @@ node('!docker') {
         [$class: 'StringParameterValue', name: 'POSTPROCESS_ARGS', value: "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${test_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"],
         [$class: 'StringParameterValue', name: 'POST_SUCCESS', value: 'rsync,cleanup'],
         [$class: 'StringParameterValue', name: 'POST_FAIL', value: 'rsync,send_mail,report,cleanup'],
-        [$class: 'StringParameterValue', name: 'REMOTE', value: 'git://yow-git.wrs.com/wrlinux-x'],
+        [$class: 'StringParameterValue', name: 'REMOTE', value: 'git://ala-lxgit.wrs.com/wrlinux-x'],
         [$class: 'StringParameterValue', name: 'TOASTER', value: 'disable'],
         [$class: 'TextParameterValue',   name: 'DEVBUILD_ARGS', value: params.DEVBUILD_YAML],
         [$class: 'StringParameterValue', name: 'LAYERINDEX_TYPE', value: 'restapi-web'],
