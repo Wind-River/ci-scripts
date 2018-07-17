@@ -69,6 +69,7 @@ post_rsync() {
     find "$EXPORT_DIR" -name "${IMAGE_NAME}.tar.bz2" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "${IMAGE_NAME}.manifest" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "*Image" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "*rootfs.cpio.gz" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     # Get images for ARM boards
     find "$EXPORT_DIR" -name "*Image*.dtb" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "u-boot*.bin" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;

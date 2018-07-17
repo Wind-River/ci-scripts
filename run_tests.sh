@@ -213,6 +213,10 @@ echo "DTB_FILE = $DTB_FILE"
 RPM_NAME=$(ls rpm-doc*)
 echo "RPM_NAME = $RPM_NAME"
 
+# Find initramfs file name
+INITRAMFS_NAME=$(ls *rootfs.cpio.gz)
+echo "INITRAMFS_NAME = $INITRAMFS_NAME"
+
 # Set LAVA test job name
 TIME_STAMP=$(date +%Y%m%d_%H%M%S)
 TEST_JOB="$BUILD/$repo_folder/test_${TIME_STAMP}.yaml"
@@ -226,6 +230,10 @@ cp -f "$JOB_TEMPLATE" "$TEST_JOB"
 
 if [[ "$TEST_DEVICE" == *"simics"* ]]; then
     sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "$TEST_JOB"
+elif [[ "$TEST_DEVICE" == *"qemu"* ]]; then
+    sed -i "s@KERNEL_IMG@${FILE_LINK}\/${KERNEL_FILE}@g; \
+            s@HDD_IMG@${FILE_LINK}\/${IMAGE_NAME}.hddimg@g; \
+            s@INITRD_IMG@${FILE_LINK}\/${INITRAMFS_NAME}@g" "$TEST_JOB"
 else
     sed -i "s@KERNEL_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${KERNEL_FILE}@g; \
             s@ROOTFS@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.tar.bz2@g; \

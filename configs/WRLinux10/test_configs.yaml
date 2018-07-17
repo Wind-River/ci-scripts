@@ -45,6 +45,15 @@
   nxp_imx7_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_oeqa-default-test_template.yaml
     timeout: 600
+  qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
+  nxp_ls10xxardb_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls10xxardb_job_oeqa-default-test_template.yaml
+    timeout: 600
+  xilinx_zynqmp_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_oeqa-default-test_template.yaml
+    timeout: 600
 
 - name: linaro-smoke-test
   prebuild_cmd_for_test:
@@ -88,6 +97,9 @@
   nxp_imx7_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_linaro-smoke-test_template.yaml
     timeout: 600
+  qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_lava-smoke-test_template.yaml
+    timeout: 300
 
 - name: linaro-singlenode-advanced-test
   prebuild_cmd_for_test:

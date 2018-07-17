@@ -1,6 +1,7 @@
 - branch: WRLINUX_9_BASE
   build:
-  - 'bitbake wrlinux-image-glibc-std'
+  - bitbake
+  - wrlinux-image-glibc-std
   name: intel-x86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
@@ -9,6 +10,18 @@
   - --distro=wrlinux
   - --machine=intel-x86-64
   - --dl-layers
+- branch: WRLINUX_9_BASE
+  build:
+  - bitbake
+  - wrlinux-image-glibc-std
+  name: qemux86-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl9_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86-64
 - branch: WRLinux-9-Base
   build:
   - bitbake

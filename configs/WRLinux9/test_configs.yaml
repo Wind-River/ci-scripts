@@ -25,6 +25,9 @@
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-9/x86_64_job_oeqa-default-test_template.yaml
     timeout: 420
+  qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-9/x86_64_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
 
 - name: linaro-smoke-test
   prebuild_cmd_for_test:
@@ -47,4 +50,7 @@
     timeout: 500
   hardware:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_linaro-smoke-test_template.yaml
+    timeout: 300
+  qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_lava-smoke-test_template.yaml
     timeout: 300

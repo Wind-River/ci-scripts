@@ -101,3 +101,44 @@
   - --machine=nxp-ls20xx
   - --dl-layers
   - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-ls10xx_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-ls10xx
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: xilinx-zynqmp_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=xilinx-zynqmp
+  - --dl-layers
+  - --accept-eula=yes
+
+- branch: WRLINUX_10_17_LTS
+  build:
+  - 'bitbake wrlinux-image-glibc-std ; bitbake wrlinux-image-glibc-std -c testimage'
+  name: qemuarma9_wrlinux_image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --test-image=yes
+  - --enable-shared-sstate=wrl10_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarma9
+  - --dl-layers
+  - --accept-eula=yes
