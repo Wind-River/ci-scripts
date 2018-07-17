@@ -1,0 +1,81 @@
+#!/usr/bin/env groovy
+// -*- mode: groovy; tab-width: 2; groovy-indent-offset: 2 -*-
+// Copyright (c) 2017 Wind River Systems Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+import java.text.SimpleDateFormat
+
+node('!docker') {
+
+  def devbuild = ""
+  String name = ""
+
+  stage ('Create Folder') {
+
+    devbuild = readYaml text: params.DEVBUILD_YAML
+    name = devbuild.email.tokenize('@')[0]
+    // build job: 'folder_create', wait: true, parameters: [
+    //   [$class: 'StringParameterValue', name: 'NAME', value: name ],
+    // ]
+  }
+
+  stage ('Generate Job') {
+    dir('ci-scripts') {
+      git(url:params.CI_REPO, branch:params.CI_BRANCH)
+
+      Date now = new Date()
+      def dateFormat = new SimpleDateFormat('yyyy-mm-dd')
+      String today = dateFormat.format(now)
+      String dest_dir="builds/devbuild_${name}_${today}"
+
+      String test_server='yow-lpdtest.wrs.com'
+
+      build job: 'WRLinux_Build', wait: true, parameters: [
+        [$class: 'StringParameterValue', name: 'NAME', value: 'devbuild_intel86_64'],
+        [$class: 'StringParameterValue', name: 'BRANCH', value: devbuild.release],
+        [$class: 'StringParameterValue', name: 'CI_BRANCH', value: params.CI_BRANCH],
+        [$class: 'StringParameterValue', name: 'CI_REPO', value: params.CI_REPO],
+        [$class: 'StringParameterValue', name: 'SETUP_ARGS', value: '--distro=wrlinux --machine=intel-x86-64 --dl-layers --accept-eula=yes'],
+        [$class: 'StringParameterValue', name: 'PREBUILD_CMD', value: "build_configure.sh --enable-shared-sstate=sstate_cache_${devbuild.release}"],
+        [$class: 'StringParameterValue', name: 'PREBUILD_CMD_FOR_TEST', value: 'test_configure.py'],
+        [$class: 'StringParameterValue', name: 'BUILD_CMD', value: 'bitbake wrlinux-image-glibc-std'],
+        [$class: 'StringParameterValue', name: 'BUILD_CMD_FOR_TEST', value: 'bitbake wrlinux-image-glibc-std -c testexport'],
+        [$class: 'StringParameterValue', name: 'REGISTRY', value: 'windriver'],
+        [$class: 'StringParameterValue', name: 'POSTPROCESS_ARGS', value: "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${test_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"],
+        [$class: 'StringParameterValue', name: 'POST_SUCCESS', value: 'rsync,cleanup'],
+        [$class: 'StringParameterValue', name: 'POST_FAIL', value: 'rsync,send_mail,report,cleanup'],
+        [$class: 'StringParameterValue', name: 'REMOTE', value: 'git://yow-git.wrs.com/wrlinux-x'],
+        [$class: 'StringParameterValue', name: 'TOASTER', value: 'disable'],
+        [$class: 'TextParameterValue',   name: 'DEVBUILD_ARGS', value: params.DEVBUILD_YAML],
+        [$class: 'StringParameterValue', name: 'LAYERINDEX_TYPE', value: 'restapi-web'],
+        [$class: 'StringParameterValue', name: 'LAYERINDEX_SOURCE', value: 'http://layers.wrs.com/layerindex/api/'],
+        [$class: 'StringParameterValue', name: 'BITBAKE_REPO_URL', value: 'git://lxgit.wrs.com/bitbake'],
+        [$class: 'StringParameterValue', name: 'TEST', value: 'oeqa-default-test'],
+        [$class: 'StringParameterValue', name: 'TEST_CONFIGS_FILE', value: 'configs/WRLinux10/test_configs.yaml'],
+        [$class: 'StringParameterValue', name: 'RUNTIME_TEST_CMD', value: 'run_tests.sh git://ala-lxgit.wrs.com/lpd-ops/lava-test.git lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml 480'],
+        [$class: 'StringParameterValue', name: 'TEST_IMAGE', value: 'postbuild'],
+        [$class: 'StringParameterValue', name: 'POST_TEST_IMAGE', value: 'postbuild'],
+        [$class: 'StringParameterValue', name: 'TEST_ARGS', value: "LAVA_USER=lpdtest,RETRY=1,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,TEST_DEVICE=x86_64_device,LAVA_SERVER=${test_server}:8080"],
+        [$class: 'StringParameterValue', name: 'POST_TEST_SUCCESS', value: 'send_mail,report'],
+        [$class: 'StringParameterValue', name: 'POST_TEST_FAIL', value: 'send_mail,report'],
+      ]
+    }
+  }
+}

@@ -24,9 +24,21 @@ FROM jenkins/jenkins:lts-alpine
 ENV CURL_CONNECTION_TIMEOUT 60
 
 # split the plugin installation into multiple stages to reduce chance of download failure
-RUN /usr/local/bin/install-plugins.sh git workflow-aggregator docker-workflow swarm greenballs matrix-auth leastload
+RUN /usr/local/bin/install-plugins.sh git workflow-aggregator docker-workflow swarm greenballs matrix-auth leastload pipeline-utility-steps job-dsl authorize-project
 
 # init script written in groovy to setup Jenkins on startup
 COPY init_scripts/ /usr/share/jenkins/ref/init.groovy.d/
+
+# Install initial job to automate creation of folders
+COPY jobs/folder_create.xml /usr/share/jenkins/ref/jobs/folder_create/config.xml
+
+# Install folder that will hold devbuild job with library config
+COPY jobs/devbuilds.xml /usr/share/jenkins/ref/jobs/devbuilds/config.xml
+
+# Install initial job to start devbuilds
+COPY jobs/devbuild.xml /usr/share/jenkins/ref/jobs/devbuilds/jobs/devbuild/config.xml
+
+# Install initial job to build WRLinux
+COPY jobs/WRLinux_Build.xml /usr/share/jenkins/ref/jobs/WRLinux_Build/config.xml
 
 RUN echo 2.5 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state

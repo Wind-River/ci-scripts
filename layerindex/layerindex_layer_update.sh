@@ -6,7 +6,7 @@ if [ -z "$DEVBUILD_LAYER_NAME" ]; then
     exit 1
 fi
 
-if [ -z "$DEVBUILD_BRANCH" ]; then
+if [ -z "$BRANCH" ]; then
     echo "Without a branch to use for updates, there is nothing to do"
     exit 1
 fi
@@ -21,7 +21,7 @@ fi
 # Support only changing the actual branch or just the vcs_url.
 # If neither is provided, the layer will be updated for nothing
 
-ARGS=(--name $DEVBUILD_LAYER_NAME --branch $DEVBUILD_BRANCH)
+ARGS=(--name $DEVBUILD_LAYER_NAME --branch $BRANCH)
 
 if [ -n "$DEVBUILD_LAYER_VCS_URL" ]; then
     ARGS+=(--vcs_url $DEVBUILD_LAYER_VCS_URL)
@@ -37,7 +37,7 @@ fi
 
 DOCKER_EXEC=(docker-compose exec -T)
 
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py layer_update ${ARGS[*]}"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -xc "cd /opt/layerindex; python3 manage.py layer_update ${ARGS[*]}"
 
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$DEVBUILD_BRANCH -l $DEVBUILD_LAYER_NAME --fullreload"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex/layerindex; ./update.py --branch=$BRANCH -l $DEVBUILD_LAYER_NAME --fullreload"
 

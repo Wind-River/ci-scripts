@@ -21,18 +21,28 @@
 version: '3.1'
 services:
   layerindex:
+    hostname: layerindex
+    image: windriver/layerindex
+    # ports:
+    #   - '5000:5000'
     environment:
+      LAYERINDEX_ADMIN: "admin"
+      LAYERINDEX_ADMIN_EMAIL: "admin@localhost"
+      LAYERINDEX_ADMIN_PASS: "admin"
       GUNICORN_NUM_WORKERS: '1'
       GUNICORN_BIND: '0.0.0.0:5000'
       CELERY_NUM_WORKERS: 1
-    # ports:
-    #   - '5000:5000'
-    hostname: layerindex
-    image: windriver/layerindex
+      STARTUP_DELAY: 5
     depends_on:
+      - mariadb
+      - rabbit
+    links:
+      - rabbit
       - mariadb
     tmpfs:
       - /tmp:exec
+    volumes:
+      - /opt/layers
 
   mariadb:
     image: mariadb
@@ -44,6 +54,12 @@ services:
       MYSQL_USER: 'oelayer'
       MYSQL_PASSWORD: 'oelayer'
       LANG: 'en_US.UTF-8'
-      LC_ALL: 'en_US.UTF-8'
     tmpfs:
       - /tmp:exec
+
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.6-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass

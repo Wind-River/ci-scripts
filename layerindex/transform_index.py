@@ -135,6 +135,10 @@ def create_parser():
                     default='django', choices=['django', 'restapi'],
                     help="Format of the transform output.")
 
+    op.add_argument("--split", dest="split", required=False,
+                    action='store_true', default=False,
+                    help="Whether to split the transform output.")
+
     return op
 
 
@@ -146,8 +150,8 @@ opts = parser.parse_args(sys.argv[1:])
 REPLACE = []
 if opts.base_url:
     REPLACE = [
-        ('git://git.wrs.com/', '#BASE_URL#'),
-        ('http://git.wrs.com/cgit/', '#BASE_WEB#'),
+        ('git://lxgit.wrs.com/', '#BASE_URL#'),
+        ('http://lxgit.wrs.com/cgit/', '#BASE_WEB#'),
         ('#BASE_URL#', opts.base_url),
         ('#BASE_WEB#', opts.base_url),
     ]
@@ -157,7 +161,7 @@ if opts.base_url:
 # on other input formats.)
 INDEXES = [
     {
-        'DESCRIPTION': 'import',
+        'DESCRIPTION' : 'layerindex',
         'TYPE': opts.input,
         'URL': opts.source,
         'CACHE': None,
@@ -167,7 +171,7 @@ INDEXES = [
 
 OUTPUT = opts.output
 OUTPUT_FMT = opts.output_format
-SPLIT = False
+SPLIT = opts.split
 
 MIRROR_INDEX = None
 if opts.input == 'restapi-files':

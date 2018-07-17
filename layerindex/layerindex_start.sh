@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Copyright (c) 2017 Wind River Systems Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,6 +33,8 @@
 #    --base_url=https://github.com/WindRiver-Labs/ \
 #    --source=https://github.com/WindRiver-Labs/mirror-index.git
 
+set -e
+
 COMPOSE_PROJECT_NAME=${PWD##*/}
 if [ -n "$BUILD_ID" ]; then
     export COMPOSE_PROJECT_NAME="build$BUILD_ID"
@@ -48,10 +49,8 @@ else
     SOURCE="$LAYERINDEX_SOURCE"
 fi
 
-if [ -z "$DEVBUILD_BRANCH" ]; then
+if [ -z "$BRANCH" ]; then
     BRANCH=WRLINUX_9_BASE
-else
-    BRANCH="$DEVBUILD_BRANCH"
 fi
 
 if [ -z "$REMOTE" ]; then
@@ -75,7 +74,7 @@ do
     shift
 done
 
-if [ "$TYPE" == '' ]; then
+if [ -z "$TYPE" ]; then
     TYPE=restapi-web
 fi
 
@@ -89,28 +88,26 @@ if [ "$TYPE" == 'restapi-files' ] && [ -z "$BASE_URL" ]; then
     exit 1
 fi
 
-# create and star the layerindex and mariadb containers
-docker-compose create
+# create and start the layerindex and mariadb containers
 docker-compose up -d
 
 # hack to wait for db to come online
 echo
 echo "Waiting for database to come online"
-for i in {11..1};do echo -n "$i." && sleep 1; done; echo
+for i in $(seq 1 1 "${STARTUP_DELAY:-15}");do echo -n "$i." && sleep 1; done; echo
 
 DOCKER_EXEC=(docker-compose exec -T)
 
-# replace BITBAKE_REPO_URL in settings.py if it's been set
-if [ "$BITBAKE_REPO_URL" != '' ]; then
-    replace_line="BITBAKE_REPO_URL = \"$BITBAKE_REPO_URL\""
-    sed -i "/^BITBAKE_REPO_URL/c ${replace_line}" settings.py
-    cat settings.py | grep BITBAKE_REPO_URL
-fi
-
 # override settings.py and tell gunicorn to reload
 docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/
-docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/layerindex
-PID=$("${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cat /opt/layerindex/gunicorn.pid')
+
+# replace BITBAKE_REPO_URL in settings.py if it's been set
+if [ -n "$BITBAKE_REPO_URL" ]; then
+    replace_line="BITBAKE_REPO_URL = \'$BITBAKE_REPO_URL\'"
+    "${DOCKER_EXEC[@]}" layerindex /bin/bash -c "sed -i \"/^BITBAKE_REPO_URL/c ${replace_line}\" /opt/layerindex/settings.py"
+fi
+
+PID=$("${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cat /tmp/gunicorn.pid')
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c "kill -HUP $PID"
 
 # Initialize the db without an admin user
@@ -118,11 +115,14 @@ echo
 echo "Initializing database"
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py migrate'
 
+# Ensure that /opt is writeable
+docker-compose exec -T -u 0 layerindex /bin/bash -c 'chown user:user /opt'
+
 # clone repos that will be used to generate initial layerindex state
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/; git clone --depth=1 $REMOTE"
 
 # copy script that transforms mirror-index into django format
-docker cp ./transform_index.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/"$SETUPTOOLS"/bin
+docker cp ./transform_index.py "${COMPOSE_PROJECT_NAME}_layerindex_1:/opt/${SETUPTOOLS}/bin"
 
 declare -a TRANSFORM_CMD
 
@@ -140,12 +140,12 @@ TRANSFORM_CMD+=(--input "$TYPE" --branch "$BRANCH" --output "$OUTPUT" --source "
 # transform mirror-index to django format
 echo
 echo "Transforming database"
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/"$SETUPTOOLS"/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/${SETUPTOOLS}/bin; ./transform_index.py ${TRANSFORM_CMD[*]}"
 
 # import initial layerindex state.
 echo
 echo "Importing transformed database"
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py loaddata import.json"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py loaddata layerindex.json"
 
 # setup django command directory
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/layerindex/layerindex; mkdir -p management; touch management/__init__.py; mkdir -p management/commands; touch management/commands/__init__.py'

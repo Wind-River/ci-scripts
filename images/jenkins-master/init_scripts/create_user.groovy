@@ -29,9 +29,13 @@ def alphabet = (('a'..'z')+('0'..'9')).join()
 String adminUser = 'admin'
 def adminPassword = randomStringGenerator(alphabet, 10)
 
-if (System.env.JENKINS_INIT_DEBUG) {
+if (System.env.JENKINS_INIT_DEBUG == "true") {
     println("Admin password: ${adminPassword}")
 }
+
+// Create a build user for triggering builds
+String buildUser = 'build'
+String buildPassword = randomStringGenerator(alphabet, 10)
 
 String agentUser = 'agent'
 String agentPassword = randomStringGenerator(alphabet, 10)
@@ -51,6 +55,7 @@ def instance = Jenkins.getInstance()
 // Set up admin & agent accounts to jenkins
 def hudsonRealm = new HudsonPrivateSecurityRealm(false)
 hudsonRealm.createAccount(adminUser, adminPassword)
+hudsonRealm.createAccount(buildUser, buildPassword)
 hudsonRealm.createAccount(agentUser, agentPassword)
 instance.setSecurityRealm(hudsonRealm)
 
@@ -60,11 +65,13 @@ globalStrategy.add(Jenkins.ADMINISTER, adminUser)
 
 // full access for authenticated users
 globalStrategy.add(Jenkins.READ, 'authenticated')
+globalStrategy.add(Item.BUILD, 'authenticated')
 globalStrategy.add(Item.READ, 'authenticated')
-globalStrategy.add(Item.DISCOVER, 'authenticated')
-globalStrategy.add(Item.CANCEL, 'authenticated')
 globalStrategy.add(Item.CREATE, 'authenticated')
 globalStrategy.add(Item.DELETE, 'authenticated')
+globalStrategy.add(Item.DISCOVER, 'authenticated')
+globalStrategy.add(Item.CANCEL, 'authenticated')
+globalStrategy.add(Computer.BUILD, 'authenticated')
 
 // read only access and ability to cancel running jobs for anonymous users
 globalStrategy.add(Jenkins.READ,'anonymous')
@@ -99,13 +106,19 @@ def authPath = new File("/var/jenkins_home/auth/")
 if (!authPath.exists()) {
     authPath.mkdirs()
 }
-def authFile = new File("/var/jenkins_home/auth/jenkins_auth.txt")
-if (authFile.exists()) {
-    authFile.delete()
+
+def setupAuthFile(String userName, String fileName) {
+    def authFile = new File(fileName)
+    if (authFile.exists()) {
+        authFile.delete()
+    }
+    User user = User.get(userName)
+    ApiTokenProperty token = user.getProperty(ApiTokenProperty.class)
+    def apiToken = token.getApiToken()
+    authFile << userName
+    authFile << ":"
+    authFile << "${apiToken}"
 }
-User user = User.get(adminUser)
-ApiTokenProperty token = user.getProperty(ApiTokenProperty.class)
-def apiToken = token.getApiToken()
-authFile << adminUser
-authFile << ":"
-authFile << "${apiToken}"
+
+setupAuthFile(adminUser, "/var/jenkins_home/auth/jenkins_auth.txt")
+setupAuthFile(buildUser, "/var/jenkins_home/auth/build_auth.txt")

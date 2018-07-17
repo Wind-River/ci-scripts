@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.11">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>NAME</name>
+          <description>Name given to build</description>
+          <defaultValue>unamed</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>Which release to build</description>
+          <defaultValue>WRLinux-9-Base</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CI_BRANCH</name>
+          <description>Branch of the ci-scripts repository to use</description>
+          <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CI_REPO</name>
+          <description>Localtion of the ci-scripts repository</description>
+          <defaultValue>https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SETUP_ARGS</name>
+          <description>List of args to pass to setup.sh</description>
+          <defaultValue>--distro=wrlinux --machine=qemux86-64</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PREBUILD_CMD</name>
+          <description>Command to be run before build commonly used to modify local.conf</description>
+          <defaultValue>build_configure.sh</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PREBUILD_CMD_FOR_TEST</name>
+          <description>Command to be run before build commonly used to modify local.conf</description>
+          <defaultValue>test_configure.py</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_CMD</name>
+          <description>The full build command</description>
+          <defaultValue>bitbake wrlinux-image-glibc-core</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_CMD_FOR_TEST</name>
+          <description>The full build command for test</description>
+          <defaultValue>bitbake wrlinux-image-glibc-core -c testexport</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>IMAGE</name>
+          <description>The docker image to run the build inside</description>
+          <defaultValue>ubuntu1604_64</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY</name>
+          <description>Docker registry to pull images from</description>
+          <defaultValue>windriver</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POSTPROCESS_IMAGE</name>
+          <description>The docker image to run the build post process steps</description>
+          <defaultValue>postbuild</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POSTPROCESS_ARGS</name>
+          <description>Comma separated list of form KEY=VAL which will be injected into post process script environment</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_SUCCESS</name>
+          <description>Comma separated list of scripts from scripts dir to run after successful build</description>
+          <defaultValue>cleanup</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_FAIL</name>
+          <description>Comma separated list of scripts from scripts dir to run after failed build</description>
+          <defaultValue>cleanup,send_email</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>NETWORK</name>
+          <description>The switch for network access</description>
+          <defaultValue>bridge</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TOASTER</name>
+          <description>The switch for using Toaster for build</description>
+          <defaultValue>enable</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REMOTE</name>
+          <description>Specify a remote for wrlinux_update.sh script to clone or update from</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>DEVBUILD_ARGS</name>
+          <description>Yaml structure with layers used to setup devbuilds</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYERINDEX_TYPE</name>
+          <description>Specify the type of layer index</description>
+          <defaultValue>restapi-web</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYERINDEX_SOURCE</name>
+          <description>Specify the source URL of layer index</description>
+          <defaultValue>https://layers.openembedded.org/layerindex/api/</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BITBAKE_REPO_URL</name>
+          <description>Specify the URL of bitbake repo</description>
+          <defaultValue>git://git.openembedded.org/bitbake</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST</name>
+          <description>Perform runtime tests if the build succeeds, it's suite name or disable</description>
+          <defaultValue>disable</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST_CONFIGS_FILE</name>
+          <description>Test configuration file for build and runtime tests</description>
+          <defaultValue>configs/test_configs.yaml</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RUNTIME_TEST_CMD</name>
+          <description>The command to do runtime test</description>
+          <defaultValue>run_tests.sh</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST_IMAGE</name>
+          <description>Docker image used to run tests</description>
+          <defaultValue>postbuild</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_TEST_IMAGE</name>
+          <description>Docker image used to post test processing scripts</description>
+          <defaultValue>postbuild</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TEST_ARGS</name>
+          <description>Comma separated list of env vars passed to test and post test scripts</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_TEST_SUCCESS</name>
+          <description>Comma separated list of scripts from scripts dir to run after successful tests</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POST_TEST_FAIL</name>
+          <description>Comma separated list of scripts from scripts dir to run after failed tests</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_CREDENTIAL</name>
+          <description>Using credentials stored in Jenkins to access git server</description>
+          <defaultValue>disable</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_CREDENTIAL_ID</name>
+          <description>ID of Git Credentials stored in Jenkins</description>
+          <defaultValue>git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.35">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@3.3.0">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts.git</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/master</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>Jenkinsfile</scriptPath>
+    <lightweight>false</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><com.cloudbees.hudson.plugins.folder.Folder>
+    <actions/>
+    <properties>
+        <org.jenkinsci.plugins.workflow.libs.FolderLibraries plugin="workflow-cps-global-lib@2.9">
+            <libraries>
+                <org.jenkinsci.plugins.workflow.libs.LibraryConfiguration>
+                    <name>wrigel</name>
+                    <retriever class="org.jenkinsci.plugins.workflow.libs.SCMSourceRetriever">
+                        <scm plugin="git@3.9.1" class="jenkins.plugins.git.GitSCMSource">
+                            <id>wrigel</id>
+                            <remote>git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts</remote>
+                            <traits>
+                                <jenkins.plugins.git.traits.BranchDiscoveryTrait/>
+                            </traits>
+                        </scm>
+                    </retriever>
+                    <implicit>false</implicit>
+                    <allowVersionOverride>true</allowVersionOverride>
+                    <includeInChangesets>true</includeInChangesets>
+                </org.jenkinsci.plugins.workflow.libs.LibraryConfiguration>
+            </libraries>
+        </org.jenkinsci.plugins.workflow.libs.FolderLibraries>
+    </properties>
+    <icon class="com.cloudbees.hudson.plugins.folder.icons.StockFolderIcon"/>
+    <folderViews class="com.cloudbees.hudson.plugins.folder.views.DefaultFolderViewHolder">
+        <views>
+            <hudson.model.AllView>
+                <owner class="com.cloudbees.hudson.plugins.folder.Folder" reference="../../../.."/>
+                <name>All</name>
+                <filterExecutors>false</filterExecutors>
+                <filterQueue>false</filterQueue>
+                <properties class="hudson.model.View$PropertyList"/>
+            </hudson.model.AllView>
+        </views>
+        <tabBar class="hudson.views.DefaultViewsTabBar"/>
+        <primaryView>All</primaryView>
+    </folderViews>
+    <healthMetrics>
+        <com.cloudbees.hudson.plugins.folder.health.WorstChildHealthMetric/>
+    </healthMetrics>
+    <displayName>devbuilds</displayName>
+</com.cloudbees.hudson.plugins.folder.Folder>

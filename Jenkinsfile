@@ -70,29 +70,47 @@ node('docker') {
     }
   }
 
-  try {
-    stage('Layerindex Setup') {
-      // if devbuilds are enabled, start build in same network as layerindex
-      if (params.DEVBUILD_ARGS != "") {
-        dir('ci-scripts') {
-          git(url:params.CI_REPO, branch:params.CI_BRANCH)
-        }
-        devbuild_args = params.DEVBUILD_ARGS.tokenize(',')
-        devbuild_args = devbuild_args + ["LAYERINDEX_SOURCE=${LAYERINDEX_SOURCE}"]
-        devbuild_args = devbuild_args + ["BITBAKE_REPO_URL=${BITBAKE_REPO_URL}"]
-        withEnv(devbuild_args) {
-          dir('ci-scripts/layerindex') {
-            sh "printenv"
+  stage('Layerindex Setup') {
+    // if devbuilds are enabled, start build in same network as layerindex
+    if (params.DEVBUILD_ARGS != "") {
+      dir('ci-scripts') {
+        git(url:params.CI_REPO, branch:params.CI_BRANCH)
+      }
+      devbuild = readYaml text: params.DEVBUILD_ARGS
+      devbuild_env = ["LAYERINDEX_SOURCE=${LAYERINDEX_SOURCE}"]
+      devbuild_env = devbuild_env + ["BITBAKE_REPO_URL=${BITBAKE_REPO_URL}"]
+      withEnv(devbuild_env) {
+        dir('ci-scripts/layerindex') {
+          try {
             sh "./layerindex_start.sh --type=${LAYERINDEX_TYPE}"
-            sh "./layerindex_layer_update.sh"
+            for ( repo in devbuild.repos ) {
+              for ( layer in repo.layers ) {
+                layer_args = [
+                  "DEVBUILD_LAYER_NAME=${layer}",
+                  "DEVBUILD_LAYER_VCS_URL=${repo.repo}",
+                  "DEVBUILD_LAYER_ACTUAL_BRANCH=${repo.branch}"]
+                if (!repo.repo.endsWith(layer)) {
+                  layer_args = layer_args + ["DEVBUILD_LAYER_VCS_SUBDIR=${layer}"]
+                }
+                withEnv(layer_args) {
+                  sh "./layerindex_layer_update.sh"
+                }
+              }
+            }
+            sh "./layerindex_export.sh --branch=${BRANCH}"
+            sh "mv -f layerindex.json ${WORKSPACE}"
+          } finally {
+            sh "./layerindex_stop.sh"
           }
         }
       }
-      else {
-        println("Not starting local LayerIndex")
-      }
     }
+    else {
+      println("Not starting local LayerIndex")
+    }
+  }
 
+  try {
     stage('Build') {
       dir('ci-scripts') {
         git(url:params.CI_REPO, branch:params.CI_BRANCH)
@@ -103,11 +121,6 @@ node('docker') {
       if (params.TOASTER == "enable") {
         docker_params = docker_params + ' --expose=8800 -P '
         env_args = env_args + ["SERVICE_NAME=toaster", "SERVICE_CHECK_HTTP=/health"]
-      }
-
-      if (params.DEVBUILD_ARGS != "") {
-        docker_params = docker_params + ' --network=build${BUILD_ID}_default'
-        env_args = env_args + params.DEVBUILD_ARGS.tokenize(',')
       }
 
       env_args = env_args + ["NAME=${NAME}", "BRANCH=${BRANCH}"]
@@ -135,20 +148,6 @@ node('docker') {
       }
     }
   } finally {
-    stage('Layerindex Cleanup') {
-      if (params.DEVBUILD_ARGS != "") {
-        dir('ci-scripts') {
-          git(url:params.CI_REPO, branch:params.CI_BRANCH)
-        }
-        dir('ci-scripts/layerindex') {
-          sh "./layerindex_stop.sh"
-        }
-      }
-      else {
-        println("No LayerIndex Cleanup necessary")
-      }
-    }
-  
     stage('Post Process') {
       dir('ci-scripts') {
         git(url:params.CI_REPO, branch:params.CI_BRANCH)

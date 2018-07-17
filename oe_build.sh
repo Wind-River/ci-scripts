@@ -118,6 +118,23 @@ if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
     SETUP_ARGS=("$BUILD/${WRLINUX:(-9)}/setup.sh" "${SETUP_ARGS[@]}")
 fi
 
+if [ -f "${TOP}/layerindex.json" ]; then
+    log "Found serialized layerindex data for layerindex override"
+
+    # modify settings.py to force setup to use local layerindex
+    # until I can figure out how to use the local json file
+    SETTINGS="$BUILD/${WRLINUX:(-9)}/bin/settings.py"
+    sed -i -e 's#http://layers.wrs.com#http://does_not_exist.wrs.com#' \
+        -e "s/'TYPE' : 'restapi-web'/'TYPE' : 'export'/" \
+        "$SETTINGS"
+
+    mkdir -p "$BUILD"/config/index-cache
+    cp "${TOP}/layerindex.json" "${BUILD}/config/index-cache/layers_wrs_com.json"
+
+    # HACK: remove mirror-index from cache to prevent setup from loading it
+    rm -rf "${CACHE_BASE}/mirror-index"
+fi
+
 # run the setup tool
 log "${SETUP_ARGS[*]}" 2>&1 | tee --append "$BUILD/00-wrsetup.log"
 $TIME bash -c "${SETUP_ARGS[*]}" >> "$BUILD/00-wrsetup.log" 2>&1

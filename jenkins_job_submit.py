@@ -536,7 +536,6 @@ def main():
                                            'TOASTER': opts.toaster,
                                            'GIT_CREDENTIAL': opts.git_credential,
                                            'GIT_CREDENTIAL_ID': opts.git_credential_id,
-                                           'DEVBUILD_ARGS': opts.devbuild_args,
                                            'LAYERINDEX_TYPE': opts.layerindex_type,
                                            'LAYERINDEX_SOURCE': opts.layerindex_source,
                                            'BITBAKE_REPO_URL': opts.bitbake_repo_url,

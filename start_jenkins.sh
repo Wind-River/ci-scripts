@@ -59,10 +59,12 @@ export RPROXY_TAG=latest
 export BUILDER_TAG=latest
 export TOASTER_TAG=latest
 export POSTBUILD_TAG=latest
-export CONSUL_TAG=0.9.3
+export CONSUL_TAG=1.2.0
 # Default to using Docker Hub
 export REGISTRY=windriver
+export JENKINS_MASTER_NUM_EXECUTORS=0
 export JENKINS_AGENT_NUM_EXECUTORS=2
+export JENKINS_INIT_DEBUG="false"
 
 usage() {
     cat <<EOF
@@ -86,6 +88,9 @@ Usage $0 [--registry] [--file] [--rm] [--with-lava]
   --jenkins-agent-num-executors: Number of executors to run on each Jenkins Agent.
     Default: 2
 
+  --jenkins-master-num-executors: Number of executors to run on the Jenkins Master.
+    Default: 0
+
   --builder-tag: Set the tag for the ubuntu1604_64 builder image
     Defaults to latest
 
@@ -100,6 +105,8 @@ Usage $0 [--registry] [--file] [--rm] [--with-lava]
 
   --no-pull: Do not attempt to pull images from Registry. Useful when testing
      new versions of the images.
+
+  --debug: Enable debugging output
 EOF
     exit 1
 }
@@ -126,7 +133,9 @@ while [ "$#" -gt 0 ]; do
         --consul-tag=*)   CONSUL_TAG="${1#*=}"; shift 1;;
         --no-pull)        PULL_IMAGES=0; shift 1;;
         --swarm)          SWARM=1; shift 1;;
-        --jenkins-agent-num-executors=*) JENKINS_AGENT_NUM_EXECUTORS="${1#*=}"; shift 1;;
+        --debug)          JENKINS_INIT_DEBUG="true"; shift 1;;
+        --jenkins-agent-num-executors=*)  JENKINS_AGENT_NUM_EXECUTORS="${1#*=}"; shift 1;;
+        --jenkins-master-num-executors=*) JENKINS_MASTER_NUM_EXECUTORS="${1#*=}"; shift 1;;
         *)            usage ;;
     esac
 done

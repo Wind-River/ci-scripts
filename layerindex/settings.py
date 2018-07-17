@@ -94,13 +94,6 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '740b3412-3aeb-4480-98a4-bc1530c0da8e'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -121,20 +114,30 @@ CORS_URLS_REGEX = r'.*/api/.*';
 # Clickjacking protection
 X_FRAME_OPTIONS = 'DENY'
 
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-    'layerindex.context_processors.layerindex_context',
-)
-
 ROOT_URLCONF = 'urls'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    BASE_DIR + "/templates",
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            BASE_DIR + "/templates",
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+                'layerindex.context_processors.layerindex_context',
+            ],
+        },
+    },
+]
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -208,7 +211,6 @@ LAYER_FETCH_DIR = "/opt/layers"
 TEMP_BASE_DIR = "/tmp"
 
 # Fetch URL of the BitBake repository for the update script
-# BITBAKE_REPO_URL = "https://github.com/WindRiver-Labs/bitbake.git"
 BITBAKE_REPO_URL = "git://git.openembedded.org/bitbake"
 
 # Core layer to be used by the update script for basic BitBake configuration
@@ -229,5 +231,12 @@ SUBMIT_EMAIL_FROM = 'noreply@example.com'
 SUBMIT_EMAIL_SUBJECT = 'OE Layerindex layer submission'
 
 # RabbitMQ settings
-RABBIT_BROKER = 'amqp://'
+RABBIT_BROKER = 'amqp://admin:mypass@rabbit:5672'
 RABBIT_BACKEND = 'rpc://'
+
+# Used for fetching repo
+PARALLEL_JOBS = "4"
+
+# Full path to directory where rrs tools stores logs
+TOOLS_LOG_DIR = ""
+
