@@ -198,6 +198,18 @@ main()
                 fi
                 lock_and_update "$BRANCH" "$REMOTE"
                 ;;
+            WRLINUX_10_18*)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE="https://windshare.windriver.com/ondemand/remote.php/gitsmart/$BRANCH/wrlinux-x"
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
+                ;;
+            master-wr)
+                if [ -z "$REMOTE" ]; then
+                    REMOTE="https://github.com/WindRiver-OpenSourceLabs/wrlinux-x"
+                fi
+                lock_and_update "$BRANCH" "$REMOTE"
+                ;;
         esac
     done
     echo "Finished update"

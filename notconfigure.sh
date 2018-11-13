@@ -27,6 +27,7 @@ if [ ! -f "$LOCALCONF" ]; then
     exit 1
 fi
 
+KERNEL_TYPE=
 RM_WORK=yes
 PKG_JOBS=
 JOBS=
@@ -37,6 +38,7 @@ BUILDTYPE=
 SYSTEM_INIT=
 PKGS=
 WHITELIST_PKGS=
+WHITELIST_INTEL_PKGS=
 PKG_MANAGER=
 LICENSE_BLACKLIST=
 DEBUGINFO_SPLIT=
@@ -53,6 +55,7 @@ SHARED_SSTATE_DIR=
 for i in "$@"
 do
     case $i in
+        --kernel-type=*)        KERNEL_TYPE="${i#*=}" ;;
         --rm_work=*)            RM_WORK="${i#*=}" ;;
         --parallel_pkgbuilds=*) PKG_JOBS="${i#*=}" ;;
         --jobs=*)               JOBS="${i#*=}" ;;
@@ -63,6 +66,7 @@ do
         --with-init=*)          SYSTEM_INIT="${i#*=}" ;;
         --with-package=*)       PKGS="${i#*=}" ;;
         --whitelist-package=*)  WHITELIST_PKGS="${i#*=}" ;;
+        --whitelist-intel-package=*)         WHITELIST_INTEL_PKGS="${i#*=}" ;;
         --enable-package-manager=*)          PKG_MANAGER="${i#*=}" ;;
         --with-license-flags-blacklist=*)    LICENSE_BLACKLIST="${i#*=}" ;;
         --with-license-blacklist=*)          LICENSE_BLACKLIST="${i#*=}" ;;
@@ -127,6 +131,9 @@ process_bootimage(){
         hdd)
             echo "IMAGE_FSTYPES += \"ext3\""
             ;;
+        hddimg)
+            echo "IMAGE_FSTYPES += \"hddimg\""
+            ;;
         ext2|ext3|ext4)
             echo "IMAGE_FSTYPES += \"${i}\""
             ;;
@@ -167,7 +174,18 @@ process_whitelist(){
     done
 }
 
+process_whitelist_intel(){
+    local packages=$1
+    for i in ${packages//,/ } ; do
+        echo "PNWHITELIST_intel += \"$i\""
+    done
+}
+
 {
+    if [ -n "$KERNEL_TYPE" ]; then
+        echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\""
+    fi
+
     if [ "$RM_WORK" == "yes" ]; then
         echo "INHERIT += \"rm_work\""
     fi
@@ -202,6 +220,10 @@ process_whitelist(){
 
     if [ -n "$WHITELIST_PKGS" ]; then
         process_whitelist "$WHITELIST_PKGS"
+    fi
+
+    if [ -n "$WHITELIST_INTEL_PKGS" ]; then
+        process_whitelist_intel "$WHITELIST_INTEL_PKGS"
     fi
 
     if [ -n "$DEBUGINFO_SPLIT" ] && [ "$DEBUGINFO_SPLIT" == "no" ]; then

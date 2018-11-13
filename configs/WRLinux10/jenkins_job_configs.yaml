@@ -193,7 +193,7 @@ post_test:
   # a successful test.
   # Default: none
   post_test_success:
-    - send_mail
+    #- send_mail
     - report
   # list of scripts in the scripts/ directory to be run after
   # a successful test.

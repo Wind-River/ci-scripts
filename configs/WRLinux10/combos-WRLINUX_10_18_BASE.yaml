@@ -1,0 +1,254 @@
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-x86-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --machine=intel-x86-64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-x86-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-x86-32
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-corei7-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --kernel-type=linux-yocto
+  - --enable-bootimage=hddimg
+  - --whitelist-intel-package='linux-intel,thermald'
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  - --no-network=0
+  setup:
+  - --machine=intel-corei7-64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-core2-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --kernel-type=linux-yocto
+  - --whitelist-intel-package='linux-intel,thermald,gma500-gfx-check'
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  - --no-network=0
+  setup:
+  - --machine=intel-core2-32
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-32
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-avx512-32_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-avx512-32
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-skylake-avx512-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-skylake-avx512-64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-imx7_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-imx7
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-ls20xx_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-ls20xx
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-ls10xx_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-ls10xx
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: xilinx-zynqmp_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=xilinx-zynqmp
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemuarma9_wrlinux_image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarma9
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemuarm64_wrlinux_image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarm64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemux86-64_wrlinux_image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86-64
+  - --dl-layers
+  - --templates=feature/ptest
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-small'
+  name: qemux86-64_wrlinux_image-glibc-small
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemux86-64
+  - --dl-layers
+  - --templates=feature/ptest
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-cgl'
+  name: qemux86-64_wrlinux_image-glibc-cgl
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  - --no-network=0
+  setup:
+  - --distro=wrlinux-cgl
+  - --machine=qemux86-64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemuppc_wrlinux_image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuppc
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemumips64_wrlinux_image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips64
+  - --dl-layers
+
+- branch: WRLINUX_10_18_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-small'
+  name: qemumips64_wrlinux_image-glibc-small
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1018_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips64
+  - --dl-layers

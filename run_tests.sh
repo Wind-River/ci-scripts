@@ -39,7 +39,7 @@ create_report_statfile "$TEST_STATFILE" "$JENKINS_URL" "$JOB_BASE_NAME"
 function generate_test_mail () {
     STATUS=$1
 
-    echo "Subject: [ci-scripts][$STATUS] Test $NAME on $TEST_DEVICE finished" > "$TEST_MAIL"
+    echo "Subject: [wrigel][$STATUS] Test $NAME on $TEST_DEVICE finished" > "$TEST_MAIL"
     echo "" >> "$TEST_MAIL"
     cat "$TEST_STATFILE" >> "$TEST_MAIL"
 }
@@ -66,7 +66,7 @@ function quit_test () {
         printf '  },\n'
 
         printf '\n  "test_report": {\n'
-        awk -F "," '{if (NR!=1 && (NF-1)>0) {print "   ", $(NF-1), ":", $3, ","}}' "$TEST_REPORT"
+        awk -F "," '{if (NR!=1 && (NF-1)>0) {print "   ", $(NF-3), ":", $3, ","}}' "$TEST_REPORT"
         printf '    "eof": ""\n'
         printf '  }\n'
         printf '}'
@@ -196,7 +196,11 @@ fi
 
 # Find kernel file name
 pushd "$BUILD/rsync/$NAME"
-KERNEL_FILE=$(ls ./*Image)
+if [ "$TEST_DEVICE" == "mxe5400-qemu-ppc" ] || [ "$TEST_DEVICE" == "mxe5400-qemu-mips64" ]; then
+    KERNEL_FILE=$(ls ./vmlinux)
+else
+    KERNEL_FILE=$(ls ./*Image)
+fi
 echo "KERNEL_FILE = $KERNEL_FILE"
 
 # Find image name
@@ -230,10 +234,17 @@ cp -f "$JOB_TEMPLATE" "$TEST_JOB"
 
 if [[ "$TEST_DEVICE" == *"simics"* ]]; then
     sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "$TEST_JOB"
-elif [[ "$TEST_DEVICE" == *"qemu"* ]]; then
+elif [[ "$TEST_DEVICE" == "qemu-x86_64" ]]; then
     sed -i "s@KERNEL_IMG@${FILE_LINK}\/${KERNEL_FILE}@g; \
             s@HDD_IMG@${FILE_LINK}\/${IMAGE_NAME}.hddimg@g; \
             s@INITRD_IMG@${FILE_LINK}\/${INITRAMFS_NAME}@g" "$TEST_JOB"
+elif [[ "$TEST_DEVICE" == *"qemu-arm"* ]] || \
+     [ "$TEST_DEVICE" == "mxe5400-qemu-x86_64" ] || \
+     [ "$TEST_DEVICE" == "mxe5400-qemu-ppc" ] || \
+     [ "$TEST_DEVICE" == "mxe5400-qemu-mips64" ]; then
+    sed -i "s@KERNEL_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${KERNEL_FILE}@g; \
+            s@EXT4_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.ext4@g; \
+            s@DTB_FILE@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${DTB_FILE}@g" "$TEST_JOB"
 else
     sed -i "s@KERNEL_IMG@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${KERNEL_FILE}@g; \
             s@ROOTFS@${NFS_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.tar.bz2@g; \

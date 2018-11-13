@@ -48,12 +48,115 @@
   qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_oeqa-default-test_template.yaml
     timeout: 420
+  mxe5400-qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
+  mxe5400-qemu-ppc:
+    job_template: lava-test/jobs/templates/wrlinux-10/ppc_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
+  mxe5400-qemu-mips64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mips64_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
   nxp_ls10xxardb_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls10xxardb_job_oeqa-default-test_template.yaml
     timeout: 600
   xilinx_zynqmp_device:
     job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_oeqa-default-test_template.yaml
     timeout: 600
+
+- name: oeqa-ptest
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  - bitbake wrlinux-image-glibc-std -c testexport
+  build_options:
+  - INHERIT += "testexport"
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - TEST_TARGET_IP = "localhost"
+  - TEST_SERVER_IP = "localhost"
+  - TEST_SUITES = "ping ssh ptest"
+  - IMAGE_FSTYPES += "ext4"
+  - DISTRO_FEATURES_append = " ptest"
+  - EXTRA_IMAGE_FEATURES += "ptest-pkgs"
+  - CORE_IMAGE_EXTRA_INSTALL += "e2fsprogs-ptest zlib-ptest"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  x86_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-ptest_template.yaml
+    timeout: 24000
+
+- name: lsb-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - WRTEMPLATE = "feature/lsbtesting"
+  - IMAGE_INSTALL_append += " rsync"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  x86_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_lsb-test_template.yaml
+    timeout: 28800
+
+- name: oeqa-qemuarm-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  - bitbake wrlinux-image-glibc-std -c testexport
+  build_options:
+  - INHERIT += "testexport"
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - TEST_TARGET_IP = "localhost"
+  - TEST_SERVER_IP = "localhost"
+  - TEST_SUITES = "ping ssh df connman syslog xorg scp vnc date pam perl python rpm ldd smart dmesg dash"
+  - IMAGE_FSTYPES += "ext4"
+  - INHERIT += "testimage"
+  - TEST_IMAGE = "1"
+  - TEST_QEMUBOOT_TIMEOUT = "1500"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  qemu-arm:
+    job_template: lava-test/jobs/templates/wrlinux-10/arm_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
+  qemu-arm64:
+    job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_oeqa-default-test_template.yaml
+    timeout: 420
+
+- name: cgl-oeqa-default-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  - bitbake wrlinux-image-glibc-cgl -c testexport
+  build_options:
+  - INHERIT += "testexport"
+  - IMAGE_INSTALL_append += "python3-pkgutil"
+  - IMAGE_INSTALL_append += "python3-unittest"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - TEST_TARGET_IP = "localhost"
+  - TEST_SERVER_IP = "localhost"
+  - TEST_SUITES = "ping ssh df connman syslog xorg scp vnc date pam perl python rpm ldd smart dmesg dash"
+  - INHERIT += "testimage"
+  - TEST_IMAGE = "1"
+  - TEST_QEMUBOOT_TIMEOUT = "1500"
+  - WRTEMPLATE = "feature/gdb"
+  - IMAGE_INSTALL_append += "expect"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  mxe5400-qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_cgl-oeqa-default-test_template.yaml
+    timeout: 1800
+
+- name: cgl-vrf-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - WRTEMPLATE = "feature/gdb"
+  - IMAGE_INSTALL_append += "expect"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  mxe5400-qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_cgl-vrf-test_template.yaml
+    timeout: 1800
 
 - name: linaro-smoke-test
   prebuild_cmd_for_test:
@@ -63,6 +166,10 @@
   - IMAGE_INSTALL_append += "python3-pkgutil"
   - IMAGE_INSTALL_append += "python3-unittest"
   - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - IMAGE_FSTYPES += "ext4"
+  - INHERIT += "testimage"
+  - TEST_IMAGE = "1"
+  - TEST_QEMUBOOT_TIMEOUT = "1500"
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_simics_job_linaro-smoke-test_template.yaml
@@ -99,6 +206,21 @@
     timeout: 600
   qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_lava-smoke-test_template.yaml
+    timeout: 300
+  qemu-arm:
+    job_template: lava-test/jobs/templates/wrlinux-10/arm_qemu_job_lava-smoke-test_template.yaml
+    timeout: 300
+  qemu-arm64:
+    job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_lava-smoke-test_template.yaml
+    timeout: 300
+  mxe5400-qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_lava-smoke-test_template.yaml
+    timeout: 300
+  mxe5400-qemu-ppc:
+    job_template: lava-test/jobs/templates/wrlinux-10/ppc_qemu_job_lava-smoke-test_template.yaml
+    timeout: 300
+  mxe5400-qemu-mips64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mips64_qemu_job_lava-smoke-test_template.yaml
     timeout: 300
 
 - name: linaro-singlenode-advanced-test

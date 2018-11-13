@@ -49,17 +49,14 @@ post_rsync() {
 
     # Decide tmp folder based on different WRLinux version
     WRL_VER=$(get_wrlinux_version "$BUILD")
-    if [ "$WRL_VER" == "10" ]; then
+    if [[ "$WRL_VER" = *"10"* ]]; then
         TMP_DIR=tmp-glibc
     else
         TMP_DIR=tmp
     fi
 
-    # compress the ext3/ext4 images which have lots of empty space
     local EXPORT_DIR=
     EXPORT_DIR=$(readlink -f "${NAME}/${TMP_DIR}/deploy/images")
-    find "$EXPORT_DIR" -type f -name "*ext[34]" \
-         -exec /bin/bash -c "bzip2 '{}'" \;
 
     # Get image name
     IMAGE_NAME=$(find "$EXPORT_DIR" -type l -name '*.tar.bz2' -printf '%f' |sed 's/.tar.bz2//g')
@@ -69,10 +66,13 @@ post_rsync() {
     find "$EXPORT_DIR" -name "${IMAGE_NAME}.tar.bz2" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "${IMAGE_NAME}.manifest" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "*Image" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "vmlinux" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "*rootfs.cpio.gz" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     # Get images for ARM boards
-    find "$EXPORT_DIR" -name "*Image*.dtb" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$EXPORT_DIR" -name "*.dtb" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "u-boot*.bin" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    # Get images for QEMU BSPs
+    find "$EXPORT_DIR" -name "${IMAGE_NAME}.ext4" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
     # "Copy" all conf files to rsync dir
     ln -sfrL "${BUILD}/${NAME}/conf" "$RSYNC_SOURCE_DIR/conf"
@@ -103,7 +103,7 @@ post_rsync() {
 
     # Initial rsync copies symlinks to destination
     echo "Rsyncing objects to rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
-    rsync -avL "$RSYNC_SOURCE_DIR" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    rsync -azvL "$RSYNC_SOURCE_DIR" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
 
     # Notify that rsync is complete
     local RSYNC_STAMP="$BUILD/00-RSYNC-$NAME"
