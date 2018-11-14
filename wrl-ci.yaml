@@ -75,7 +75,7 @@ services:
       SERVER1REVERSE_PROXY_DIRECTIVE4FIELD1: 'alias /var/lib/nginx/html/jenkins_home/auth/'
       SERVER1REVERSE_PROXY_DIRECTIVE4FIELD2: 'autoindex on'
       NGINX_REDIRECT_PORT80: "true"
-      SERVER1CERTIFICATE_DNAME: "/CN=WindRiver/OU=Linux/O=windriver.com/L=Alameda/C=US/emailAddress=root@localhost"
+      SERVER1CERTIFICATE_DNAME: "/CN=*.wrs.com/OU=Linux/O=Windriver/L=Alameda/C=US/emailAddress=root@localhost"
       DISABLE_ACCESS_LOG: "true"
       LOG_LEVEL: "warn"
     networks:
