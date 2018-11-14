@@ -61,6 +61,22 @@ get_layer_repos()
     echo "${REPO_LAYERS[*]}"
 }
 
+# From inside a git repo, retrieve the repo path on the git server
+get_remote_repo_path()
+{
+    local REMOTE=
+    REMOTE=$(git remote | tail -n 1)
+    local URL=
+    URL=$(git remote get-url "$REMOTE")
+    if [ "${URL:0:6}" == 'git://' ]; then
+        echo "${URL#git://*/}"
+    elif [ "${URL:0:6}" == 'ssh://' ]; then
+        echo "${URL#git://*/}"
+    elif [ "${URL:0:4}" == 'git@' ]; then
+        echo "${URL#*:}"
+    fi
+}
+
 run_cmd()
 {
     local CMD=($@)
@@ -189,9 +205,13 @@ main()
     NOW=$(date +%Y%m%d-%H%M)
 
     for PUSH_LAYER in "${PUSH_LAYERS[@]}"; do
-        run_cmd ssh git@ala-lxgit.wrs.com wrfork "$PUSH_LAYER"
         (
             cd "$PUSH_LAYER"
+
+            local SERVER_REPO_PATH=
+            SERVER_REPO_PATH=$(get_remote_repo_path)
+            run_cmd ssh git@ala-lxgit.wrs.com wrfork "$SERVER_REPO_PATH"
+
             local BRANCH=
             BRANCH=$(get_current_branch)
 
@@ -226,6 +246,14 @@ main()
 
             if [ "${#LAYERS[@]}" -eq 0 ]; then
                 LAYERS+=(${PUSH_LAYER##*/})
+            fi
+
+            # special case for oe-core which is a layer in a meta directory but has a
+            # different name in the layerindex
+            if [ "${PUSH_LAYER##*/}" == 'oe-core' ]; then
+                LAYERS+=('openembedded-core')
+                # setup assumes bitbake and oe-core are on the same server
+                run_cmd ssh git@ala-lxgit.wrs.com wrfork bitbake
             fi
 
             # remove duplicate layers
