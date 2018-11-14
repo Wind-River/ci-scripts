@@ -158,7 +158,7 @@ else
     echo "Prebuild: ${PREBUILD_CMD[*]}" >> "$STATFILE"
 
     # Run prebuild command for test which may modify files like local.conf
-    if [ "$PREBUILD_CMD_FOR_TEST" != 'null' ]; then
+    if [ "${PREBUILD_CMD_FOR_TEST[*]}" != 'null' ]; then
         log "${PREBUILD_CMD_FOR_TEST[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
         $TIME bash -c "$WORKSPACE/ci-scripts/${PREBUILD_CMD_FOR_TEST[*]}" >> "$BUILD/00-prebuild.log" 2>&1
         log_stats "Prebuild_for_test" "$BUILD"
@@ -174,23 +174,26 @@ else
     log "${BUILD_CMD[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
     $TIME bash -c "${BUILD_CMD[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
 
-    echo "Build for test: ${BUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
-    log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
-    $TIME bash -c "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
-
     RET=${PIPESTATUS[0]}
 
-    # If build failed but all images got generated, don't exit 1
-    if [ "$RET" != 0 ]; then
-        DETECT_IMAGES=$(detect_built_images "$BUILD" "$NAME")
-        DETECT_IMAGES=${DETECT_IMAGES// /;/}
-        IFS=' ; ' read -ra IMAGES <<< "$DETECT_IMAGES"
+    if [ "$RET" == 0 ]; then
+        echo "Build for test: ${BUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
+        log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
+        $TIME bash -c "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
+        RET=${PIPESTATUS[0]}
 
-        if [ -z "${IMAGES[3]}" ]; then
-            log "Detect built images: At least one of the images doesn't exist!"
-        else
-            log "Detect built images: Build failed but all images got generated"
-            RET=2 # used by Jenkins to mark build as UNSTABLE but continue to run tests
+        # If build failed but all images got generated, don't exit 1
+        if [ "$RET" != 0 ]; then
+            DETECT_IMAGES=$(detect_built_images "$BUILD" "$NAME")
+            DETECT_IMAGES=${DETECT_IMAGES// /;/}
+            IFS=' ; ' read -ra IMAGES <<< "$DETECT_IMAGES"
+
+            if [ -z "${IMAGES[3]}" ]; then
+                log "Detect built images: At least one of the images doesn't exist!"
+            else
+                log "Detect built images: Build failed but all images got generated"
+                RET=2 # used by Jenkins to mark build as UNSTABLE but continue to run tests
+            fi
         fi
     fi
 
