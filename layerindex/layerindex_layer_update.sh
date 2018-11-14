@@ -32,7 +32,12 @@ if [ -n "$DEVBUILD_LAYER_ACTUAL_BRANCH" ]; then
 fi
 
 if [ -n "$DEVBUILD_LAYER_VCS_SUBDIR" ]; then
-    ARGS+=(--vcs_subdir $DEVBUILD_LAYER_VCS_SUBDIR)
+    # workaround for oe-core which has layer contents in meta subdir
+    if [ "$DEVBUILD_LAYER_VCS_SUBDIR" != "openembedded-core" ]; then
+        ARGS+=(--vcs_subdir $DEVBUILD_LAYER_VCS_SUBDIR)
+    else
+        ARGS+=(--vcs_subdir meta)
+    fi
 fi
 
 DOCKER_EXEC=(docker-compose exec -T)

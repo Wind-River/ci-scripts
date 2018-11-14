@@ -116,10 +116,10 @@ echo "Initializing database"
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py migrate'
 
 # Ensure that /opt is writeable
-docker-compose exec -T -u 0 layerindex /bin/bash -c 'chown user:user /opt'
+docker-compose exec -T -u 0 layerindex /bin/bash -c 'chown layers /opt'
 
 # clone repos that will be used to generate initial layerindex state
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/; git clone --depth=1 $REMOTE"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/; git clone --depth=1 --branch=master-wr --single-branch $REMOTE"
 
 # copy script that transforms mirror-index into django format
 docker cp ./transform_index.py "${COMPOSE_PROJECT_NAME}_layerindex_1:/opt/${SETUPTOOLS}/bin"
@@ -145,7 +145,7 @@ echo "Transforming database"
 # import initial layerindex state.
 echo
 echo "Importing transformed database"
-"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex; python3 manage.py loaddata layerindex.json"
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/layerindex; sed -i 's/YPCompatibleVersions/YPCompatibleVersion/g' layerindex.json; python3 manage.py loaddata layerindex.json"
 
 # setup django command directory
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/layerindex/layerindex; mkdir -p management; touch management/__init__.py; mkdir -p management/commands; touch management/commands/__init__.py'
