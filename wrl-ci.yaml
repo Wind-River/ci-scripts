@@ -122,17 +122,9 @@ services:
         constraints:
           - "node.labels.type == master"
     environment:
-      - "CONSUL_LOCAL_CONFIG={\"disable_update_check\": true}"
-      - "CONSUL_BIND_INTERFACE=eth0"
-      - "CONSUL_HTTP_ADDR=0.0.0.0"
-    entrypoint:
-      - consul
-      - agent
-      - -server
-      - -bootstrap-expect=1
-      - -data-dir=/tmp/consuldata
-      - -bind={{ GetInterfaceIP "eth0" }}
-      - -client=0.0.0.0
+      CONSUL_LOCAL_CONFIG: '{"disable_update_check": true}'
+      CONSUL_BIND_INTERFACE: "eth0"
+    command: "consul agent -server -bootstrap-expect=1 -data-dir=/tmp/consuldata -config-dir=/consul/config -client=0.0.0.0"
     networks:
       - net
     volumes:
