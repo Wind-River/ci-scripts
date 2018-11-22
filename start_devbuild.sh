@@ -131,21 +131,23 @@ main()
     CURRENT_DIR=$(readlink -f "$PWD")
     export PUSH_LAYERS=()
 
-    local TOP=
-    if [ -f "${PWD}/oe-init-build-env" ]; then
-        TOP="$(readlink -f "${PWD}/")"
-    elif [ -f "${PWD}/../oe-init-build-env" ]; then
-        TOP="$(readlink -f "${PWD}/..")"
-    elif [ -f "${BUILDDIR}/../oe-init-build-env" ]; then
-        TOP="$(readlink -f "${BUILDDIR}/..")"
-    else
-        echo "Unable to find top level of workarea."
-        echo "Run this script in the workarea or after sourcing oe-init-build-env."
-        exit 1
-    fi
+    local BITBAKE_PATH=
+    BITBAKE_PATH=$(which bitbake)
+    BITBAKE_PATH=${BITBAKE_PATH%/*}
 
-    local RELEASE=
-    RELEASE=$(cat "$TOP"/wrlinux-[9x]/.git/HEAD | cut -d'/' -f 3)
+    # Since setup.sh will always put bitbake in a known location, use that to figure out
+    # where wrlinux-x and the top of the source tree is
+    local TOP=
+    TOP=$(readlink -f "${BITBAKE_PATH}/../../../../")
+
+    if [ "${RELEASE:-unset}" == 'unset' ]; then
+        if [ ! -d "$TOP/wrlinux-x" ]; then
+            echo "Unable to find wrlinux-x repo and could not determine release. Please set $RELEASE env variable"
+            exit 1
+        fi
+        RELEASE=$(cut -d'/' -f 3 < "$TOP"/wrlinux-x/.git/HEAD)
+    fi
+    echo "Using release $RELEASE"
 
     echo "Searching layers in $TOP for local commits"
     local REPO=
