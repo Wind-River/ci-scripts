@@ -113,11 +113,11 @@ def setupAuthFile(String userName, String fileName) {
         authFile.delete()
     }
     User user = User.get(userName)
-    ApiTokenProperty token = user.getProperty(ApiTokenProperty.class)
-    def apiToken = token.getApiToken()
+    ApiTokenProperty tokenProperty = user.getProperty(ApiTokenProperty.class)
+    ApiTokenStore.TokenUuidAndPlainValue tokenUuidAndPlainValue = tokenProperty.tokenStore.generateNewToken(token);
     authFile << userName
     authFile << ":"
-    authFile << "${apiToken}"
+    authFile << tokenUuidAndPlainValue.plainValue
 }
 
 setupAuthFile(adminUser, "/var/jenkins_home/auth/jenkins_auth.txt")
