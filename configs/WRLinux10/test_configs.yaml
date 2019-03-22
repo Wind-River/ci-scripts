@@ -24,9 +24,6 @@
   purley_simics:
     job_template: lava-test/jobs/templates/wrlinux-10/purley_simics_job_oeqa-default-test_template.yaml
     timeout: 600
-  hardware:
-    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml
-    timeout: 480
   x86_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml
     timeout: 900
@@ -44,6 +41,12 @@
     timeout: 600
   nxp_imx7_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_oeqa-default-test_template.yaml
+    timeout: 600
+  mpc8315_rdb_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/mpc8315_rdb_job_oeqa-default-test_template.yaml
+    timeout: 600
+  beaglebone_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/beaglebone_job_oeqa-default-test_template.yaml
     timeout: 600
   qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_oeqa-default-test_template.yaml
