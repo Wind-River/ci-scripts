@@ -29,7 +29,7 @@
     timeout: 480
   x86_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml
-    timeout: 480
+    timeout: 900
   intel_skylake_32_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_32_job_oeqa-default-test_template.yaml
     timeout: 480
