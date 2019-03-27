@@ -46,6 +46,7 @@
   - --whitelist-intel-package='linux-intel,thermald,gma500-gfx-check'
   - --enable-shared-sstate=wrl1019_sstate_cache
   - --no-network=0
+  - --enable-bootimage=ext4
   setup:
   - --machine=intel-core2-32
   - --dl-layers
