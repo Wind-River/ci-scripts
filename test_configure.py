@@ -52,7 +52,7 @@ def main():
         print("Test configuration file exists: " + TEST_CONFIGS_FILE)
 
         with open(TEST_CONFIGS_FILE) as test_configs_file:
-            test_configs = yaml.load(test_configs_file)
+            test_configs = yaml.safe_load(test_configs_file)
             if test_configs is None:
                 sys.exit(1)
 

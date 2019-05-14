@@ -25,7 +25,7 @@ GET_PIP = $(VENV)/bin/get-pip.py
 PIP = $(VENV)/bin/pip3
 PEX = $(VENV)/bin/pex
 
-.PHONY: build image setup clean test help
+.PHONY: build image toaster_aggregator setup clean test help
 
 .DEFAULT_GOAL := help
 
@@ -34,21 +34,17 @@ help:
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-$(PEX): $(VENV)
-
-toaster_aggregator: ## Use multi-stage docker build to build pex and final toaster aggregator image
+image: ## Use multi-stage docker build to build pex and final toaster aggregator image
 ifndef TAG
 	$(eval TAG=latest)
 endif
 ifndef REGISTRY
 	$(eval REGISTRY=windriver)
 endif
-	docker pull alpine:3.6 # bug in multi-stage does not allow docker build --pull
+	docker pull alpine:3.9 # bug in multi-stage does not allow docker build --pull
 	docker build --rm=true -t $(REGISTRY)/$@:$(TAG) -f Dockerfile .
 
-image: toaster_aggregator ## Build a pex file and docker image of the toaster aggregator app
-
-dist/toaster_aggregator: $(DEPS) $(PEX)
+dist/toaster_aggregator: $(DEPS) $(VENV)
 	rm -f $(PWD)/.pex/build/toaster*; \
 	export PEX_ROOT=$(PWD)/.pex; \
 	$(VENV)/bin/python setup.py bdist_pex --bdist-all --pex-args="-v --pex-root=$(PWD)/.pex"
@@ -70,4 +66,4 @@ dev: $(DEPS) $(VENV) ## Run a local development version of the app
 	$(VENV)/bin/gunicorn --paste development.ini
 
 clean: ## Delete virtualenv and all build directories
-	rm -rf $(VENV) *.egg-info build dist
+	rm -rf $(VENV) *.egg-info build dist .pex

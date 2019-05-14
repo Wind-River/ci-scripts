@@ -1,4 +1,4 @@
-FROM blacklabelops/alpine:3.5
+FROM alpine:3.9
 
 # Build time arguments
 #Values: latest or version number (e.g. 1.8.1-r0)
@@ -17,7 +17,7 @@ RUN export CONTAINER_USER=nginx && \
     # Add user
     addgroup -g $CONTAINER_GID $CONTAINER_GROUP && \
     adduser -u $CONTAINER_UID -G $CONTAINER_GROUP -h /home/$CONTAINER_USER -s /bin/bash -S $CONTAINER_USER && \
-    apk add --update \
+    apk add --update bash tini \
       ca-certificates \
       curl \
       openssl \
@@ -39,11 +39,12 @@ RUN export CONTAINER_USER=nginx && \
     chown -R $CONTAINER_UID:$CONTAINER_GID ${NGINX_DIRECTORY} /run/nginx && \
     rm -rf /var/cache/apk/* && rm -rf /tmp/*
 
-# Image Metadata
-LABEL com.blacklabelops.application.nginx.version=$NGINX_VERSION \
-      com.blacklabelops.application.nginx.userid=$CONTAINER_UID \
-      com.blacklabelops.application.nginx.groupid=$CONTAINER_GID \
-      com.blacklabelops.image.builddate.nginx=${BUILD_DATE}
+RUN apk update && \
+    mkdir /license-report && \
+    cd /license-report && \
+    curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh && \
+    sh generate_report.sh > report && \
+    rm /license-report/generate_report.sh
 
 EXPOSE 80 443
 

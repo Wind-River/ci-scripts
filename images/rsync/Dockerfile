@@ -18,13 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM alpine:3.6
+FROM alpine:3.9
 
 MAINTAINER Konrad Scherer <Konrad.Scherer@windriver.com>
 
-RUN apk add --update --no-cache rsync \
+RUN apk add --update --no-cache rsync curl \
     && mkdir -p /builds \
     && chown -R nobody:nobody /builds
+
+RUN mkdir /license-report  && cd /license-report \
+    && curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh \
+    && apk update && sh generate_report.sh > report \
+    && rm -rf /var/cache/apk/* && rm /license-report/generate_report.sh
 
 COPY conf/rsyncd.conf /etc/
 

@@ -42,3 +42,12 @@ COPY jobs/devbuild.xml /usr/share/jenkins/ref/jobs/devbuilds/jobs/devbuild/confi
 COPY jobs/WRLinux_Build.xml /usr/share/jenkins/ref/jobs/WRLinux_Build/config.xml
 
 RUN echo 2.5 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
+
+USER root
+
+RUN mkdir /license-report  && cd /license-report \
+    && curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh \
+    && apk update && sh generate_report.sh > report \
+    && rm -rf /var/cache/apk/* && rm /license-report/generate_report.sh
+
+USER jenkins

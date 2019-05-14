@@ -18,9 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM alpine:3.6 as builder
+FROM alpine:3.9 as builder
 
-RUN apk add --update --no-cache python3 make bash openssl ca-certificates && \
+RUN apk add --update --no-cache python3 make bash openssl ca-certificates gcc python3-dev musl-dev curl && \
     addgroup -g 1000 toaster && \
     adduser -h /home/toaster -u 1000 -G toaster -s /bin/bash -D toaster
 
@@ -34,12 +34,24 @@ RUN chown -R toaster:toaster /home/toaster
 
 USER toaster
 
+# Generate the license report for the python packages used by toaster_aggregator
 RUN cd /home/toaster/ && make dist/toaster_aggregator
 
-FROM alpine:3.6
+USER root
 
-RUN apk add --update --no-cache python3 tini && \
-    rm -rf /usr/lib/python*/ensurepip && \
+RUN cd /home/toaster && curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh && \
+    apk update && bash generate_report.sh --pip /home/toaster/.venv/bin/pip > /home/toaster/report && rm -rf /var/cache/apk/*
+
+FROM alpine:3.9
+
+COPY --from=builder /home/toaster/report /license-report/report
+COPY --from=builder /home/toaster/generate_report.sh /license-report/generate_report.sh
+
+# Append alpine package data to the python package data
+RUN apk add --update python3 tini && \
+    cd /license-report && \
+    sh /license-report/generate_report.sh -a report >> report && \
+    rm -rf /var/cache/apk/* && \
     addgroup -g 1000 toaster && \
     adduser -h /home/toaster -u 1000 -G toaster -s /bin/ash -D toaster
 

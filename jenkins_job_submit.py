@@ -300,7 +300,7 @@ def parse_configs_from_yaml(configs_file):
 
     with open(configs_file) as yaml_configs_file:
 
-        yaml_configs = yaml.load(yaml_configs_file)
+        yaml_configs = yaml.safe_load(yaml_configs_file)
 
         if yaml_configs is None:
             print("No configurations were found in " + configs_file)
@@ -472,7 +472,7 @@ def main():
         server.create_job(opts.job, xml_config)
 
     with open(opts.build_configs_file) as build_configs_file:
-        configs = yaml.load(build_configs_file)
+        configs = yaml.safe_load(build_configs_file)
         if configs is None:
             sys.exit(1)
 
@@ -493,7 +493,7 @@ def main():
                 runtime_test_cmd = 'null'
                 if opts.test != 'disable' and opts.test != '' and opts.test is not None:
                     with open(opts.test_configs_file) as test_configs_file:
-                        test_configs = yaml.load(test_configs_file)
+                        test_configs = yaml.safe_load(test_configs_file)
                         if test_configs is None:
                             print('ERROR: Test is enabled but test configs file is empty.')
                             sys.exit(1)

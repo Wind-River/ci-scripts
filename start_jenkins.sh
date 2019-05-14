@@ -186,7 +186,6 @@ if [ "$PULL_IMAGES" == '1' ]; then
     ${DOCKER_CMD[*]} pull "${REGISTRY}/postbuild:${POSTBUILD_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/toaster_aggregator:${TOASTER_TAG}"
     ${DOCKER_CMD[*]} pull "consul:${CONSUL_TAG}"
-    ${DOCKER_CMD[*]} pull "blacklabelops/nginx:${RPROXY_TAG}"
     ${DOCKER_CMD[*]} pull gliderlabs/registrator:latest
 fi
 

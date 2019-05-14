@@ -1,5 +1,6 @@
 import jenkins.model.*
 import jenkins.security.*
+import jenkins.security.apitoken.*
 import hudson.model.*
 import hudson.security.*
 import hudson.security.csrf.DefaultCrumbIssuer
@@ -114,7 +115,7 @@ def setupAuthFile(String userName, String fileName) {
     }
     User user = User.get(userName)
     ApiTokenProperty tokenProperty = user.getProperty(ApiTokenProperty.class)
-    ApiTokenStore.TokenUuidAndPlainValue tokenUuidAndPlainValue = tokenProperty.tokenStore.generateNewToken(token);
+    ApiTokenStore.TokenUuidAndPlainValue tokenUuidAndPlainValue = tokenProperty.tokenStore.generateNewToken("Initial");
     authFile << userName
     authFile << ":"
     authFile << tokenUuidAndPlainValue.plainValue

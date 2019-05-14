@@ -44,12 +44,17 @@ RUN addgroup -g 1000 jenkins && addgroup -g 997 docker && addgroup -g 996 docker
     && adduser -u 1000 -G jenkins -D -s /sbin/nologin jenkins \
     && adduser jenkins docker2 && adduser jenkins docker3 && adduser jenkins docker4 \
     && adduser jenkins ping && adduser jenkins jenkins \
-    && apk --update --no-cache add tini openjdk8-jre python git openssh openssl bash sudo py-pip \
+    && apk --update --no-cache add tini openjdk8-jre python git openssh openssl bash sudo py-pip curl python-dev libc-dev libffi-dev openssl-dev gcc make \
     && pip install docker-compose \
     && echo "jenkins ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-ENV SWARM_CLIENT_VERSION="3.4" \
-    SWARM_SHA="ef74404b14710491ca7e416bb9bed29f7f5236db" \
+RUN mkdir /license-report  && cd /license-report \
+    && curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh \
+    && apk update && sh generate_report.sh > report \
+    && rm -rf /var/cache/apk/* && rm /license-report/generate_report.sh
+
+ENV SWARM_CLIENT_VERSION="3.15" \
+    SWARM_SHA="4b34cc6ece59b533ff99b2a788bc60c6f21d44dc" \
     SWARM_HOME="/home/jenkins" \
     SWARM_DELAYED_START="" \
     SWARM_AGENT_USER="agent" \

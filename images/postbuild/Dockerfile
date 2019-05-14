@@ -33,6 +33,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mkdir /license-report && \
+    cd /license-report && \
+    curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh && \
+    sh generate_report.sh > report && \
+    rm /license-report/generate_report.sh
+
 CMD ["/bin/bash"]
 
 USER wrlbuild

@@ -25,7 +25,7 @@ MAINTAINER Konrad Scherer <Konrad.Scherer@windriver.com>
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -qy install --no-install-recommends \
-    libc6:i386 libc6-dev-i386 libncurses5:i386 texi2html chrpath \
+    libc6:i386 libc6-dev-i386 libncurses5:i386 texi2html chrpath curl \
     diffstat subversion libgl1-mesa-dev libglu1-mesa-dev libsdl1.2-dev \
     texinfo gawk gcc gcc-multilib help2man g++ git-core python-gtk2 bash cpio \
     diffutils xz-utils make file screen wget time patch openssh-client \
@@ -33,7 +33,6 @@ RUN dpkg --add-architecture i386 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/man && \
-    rm -rf /usr/share/doc && \
     rm -rf /usr/share/grub2 && \
     rm -rf /usr/share/texmf/fonts && \
     rm -rf /usr/share/texmf/doc && \
@@ -46,6 +45,12 @@ RUN dpkg --add-architecture i386 && \
 RUN useradd --home-dir /home/wrlbuild --uid 1000 --gid 100 --shell /bin/bash wrlbuild && \
     echo '#!/bin/sh' > /tmp/iptables && echo 'exit 0' >> /tmp/iptables && chmod +x /tmp/iptables && \
     mv /tmp/iptables /sbin/iptables
+
+RUN mkdir /license-report && \
+    cd /license-report && \
+    curl --silent --remote-name https://raw.githubusercontent.com/WindRiver-OpenSourceLabs/license-report/master/generate_report.sh && \
+    sh generate_report.sh > report && \
+    rm /license-report/generate_report.sh
 
 ENTRYPOINT ["/bin/dumb-init"]
 
