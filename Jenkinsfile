@@ -38,7 +38,7 @@ node('docker') {
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
   def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -i --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins --ulimit nofile=1024:1024 "
-  common_env_args = ["LANG=en_US.UTF-8", "BUILD_ID=${BUILD_ID}", "WORKSPACE=${WORKSPACE}", "JENKINS_URL=${JENKINS_URL}" ]
+  common_env_args = ["LANG=en_US.UTF-8", "BUILD_ID=${BUILD_ID}", "WORKSPACE=${WORKSPACE}", "JENKINS_URL=${JENKINS_URL}", "BUILD_GROUP_ID=" + params.BUILD_GROUP_ID ]
   common_docker_params = add_env( common_docker_params, common_env_args )
 
   stage('Docker Run Check') {

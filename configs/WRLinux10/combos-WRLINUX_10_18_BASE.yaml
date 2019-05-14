@@ -152,7 +152,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemuarma9_wrlinux_image-glibc-std
+  name: qemuarma9_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1018_sstate_cache
@@ -164,7 +164,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemuarm64_wrlinux_image-glibc-std
+  name: qemuarm64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1018_sstate_cache
@@ -176,7 +176,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemux86-64_wrlinux_image-glibc-std
+  name: qemux86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -190,7 +190,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-small'
-  name: qemux86-64_wrlinux_image-glibc-small
+  name: qemux86-64_wrlinux-image-glibc-small
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -204,7 +204,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-cgl'
-  name: qemux86-64_wrlinux_image-glibc-cgl
+  name: qemux86-64_wrlinux-image-glibc-cgl
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -218,7 +218,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemuppc_wrlinux_image-glibc-std
+  name: qemuppc_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -231,7 +231,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemumips64_wrlinux_image-glibc-std
+  name: qemumips64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -244,7 +244,7 @@
 - branch: WRLINUX_10_18_BASE
   build:
   - 'bitbake wrlinux-image-glibc-small'
-  name: qemumips64_wrlinux_image-glibc-small
+  name: qemumips64_wrlinux-image-glibc-small
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4

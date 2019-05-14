@@ -133,7 +133,7 @@
 - branch: WRLINUX_10_17_LTS
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemuarma9_wrlinux_image-glibc-std
+  name: qemuarma9_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl10_sstate_cache
@@ -146,7 +146,7 @@
 - branch: WRLINUX_10_17_LTS
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemuarm64_wrlinux_image-glibc-std
+  name: qemuarm64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl10_sstate_cache
@@ -159,7 +159,7 @@
 - branch: WRLINUX_10_17_LTS
   build:
   - 'bitbake wrlinux-image-glibc-std'
-  name: qemux86-64_wrlinux_image-glibc-std
+  name: qemux86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4

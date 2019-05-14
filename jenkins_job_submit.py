@@ -195,6 +195,9 @@ def create_parser():
     op.add_argument("--remote", dest="remote", required=False,
                     help="Specify a remote for the wrlinux_update.sh script to clone or update from.")
 
+    op.add_argument("--build_group_id", dest="build_group_id", required=False,
+                    help="Specify a build group id after launching a Devbuild, it will be used for report.")
+
     op.add_argument("--devbuild_layer_name", dest="devbuild_layer_name", required=False,
                     help="Specify a layer name to be modified as part of a Devbuild.")
 
@@ -522,6 +525,7 @@ def main():
                                            'IMAGE': opts.image,
                                            'BRANCH': branch,
                                            'REMOTE': opts.remote,
+                                           'BUILD_GROUP_ID': opts.build_group_id,
                                            'SETUP_ARGS': ' '.join(config['setup']),
                                            'PREBUILD_CMD': ' '.join(config['prebuild']),
                                            'PREBUILD_CMD_FOR_TEST': prebuild_cmd_for_test,

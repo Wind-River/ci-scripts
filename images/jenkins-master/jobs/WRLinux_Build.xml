@@ -32,6 +32,11 @@
           <defaultValue>--distro=wrlinux --machine=qemux86-64</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>BUILD_GROUP_ID</name>
+          <description>Specify a build group id after launching a Devbuild, it will be used for report.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>PREBUILD_CMD</name>
           <description>Command to be run before build commonly used to modify local.conf</description>
           <defaultValue>build_configure.sh</defaultValue>

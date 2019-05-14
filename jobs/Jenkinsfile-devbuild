@@ -53,6 +53,7 @@ node('!docker') {
         [$class: 'StringParameterValue', name: 'CI_BRANCH', value: params.CI_BRANCH],
         [$class: 'StringParameterValue', name: 'CI_REPO', value: params.CI_REPO],
         [$class: 'StringParameterValue', name: 'SETUP_ARGS', value: '--distro=wrlinux --machine=intel-x86-64 --dl-layers --accept-eula=yes'],
+        [$class: 'StringParameterValue', name: 'BUILD_GROUP_ID', value: params.BUILD_GROUP_ID],
         [$class: 'StringParameterValue', name: 'PREBUILD_CMD', value: "build_configure.sh --enable-shared-sstate=sstate_cache_${devbuild.release}"],
         [$class: 'StringParameterValue', name: 'PREBUILD_CMD_FOR_TEST', value: 'test_configure.py'],
         [$class: 'StringParameterValue', name: 'BUILD_CMD', value: 'bitbake wrlinux-image-glibc-std'],

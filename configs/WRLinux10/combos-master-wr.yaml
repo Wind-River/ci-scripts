@@ -6,8 +6,10 @@
   - build_configure.sh
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
+  - --distro=wrlinux
   - --machine=intel-x86-64
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -20,6 +22,7 @@
   - --distro=wrlinux
   - --machine=intel-x86-32
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -35,6 +38,7 @@
   setup:
   - --machine=intel-corei7-64
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -62,6 +66,7 @@
   setup:
   - --machine=genericx86
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -74,6 +79,7 @@
   setup:
   - --machine=genericx86-64
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -85,6 +91,7 @@
   setup:
   - --machine=intel-haswell-64
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -97,6 +104,7 @@
   - --distro=wrlinux
   - --machine=intel-skylake-64
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -158,6 +166,7 @@
   - --distro=wrlinux
   - --machine=nxp-ls10xx
   - --dl-layers
+  - --templates=feature/target-toolchain
 
 - branch: master-wr
   build:
@@ -199,6 +208,30 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-glibc-std'
+  name: qemuarm_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarm
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemuarmv5_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemuarmv5
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
   name: qemux86_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
@@ -221,7 +254,6 @@
   - --distro=wrlinux
   - --machine=qemux86-64
   - --dl-layers
-  - --templates=feature/ptest
 
 - branch: master-wr
   build:
@@ -235,7 +267,6 @@
   - --distro=wrlinux
   - --machine=qemux86-64
   - --dl-layers
-  - --templates=feature/ptest
 
 - branch: master-wr
   build:
@@ -279,6 +310,19 @@
 
 - branch: master-wr
   build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: qemumips_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=qemumips
+  - --dl-layers
+
+- branch: master-wr
+  build:
   - 'bitbake wrlinux-image-glibc-small'
   name: qemumips64_wrlinux-image-glibc-small
   prebuild:
@@ -314,5 +358,19 @@
   setup:
   - --distro=wrlinux
   - --machine=beaglebone-yocto
+  - --dl-layers
+  - --templates=feature/target-toolchain
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: edgerouter_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=edgerouter
   - --dl-layers
 

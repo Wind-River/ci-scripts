@@ -597,12 +597,13 @@ create_report_statfile() {
         fi
         if [ -n "$BUILD_ID" ]; then
             echo "    \"build_id\": \"$BUILD_ID\","
+            echo "    \"build_group_id\": \"$BUILD_GROUP_ID\","
             if [ -z "$JOB_BASE_NAME" ]; then
                 JOB_BASE_NAME='WRLinux_Build'
             fi
             echo "    \"job_console_log\": \""$JENKINS_URL"job/"$JOB_BASE_NAME"/"$BUILD_ID"/console\","
         fi
-    } >> "$STATFILE"
+    } > "$STATFILE"
 }
 
 function get_wrlinux_version() {

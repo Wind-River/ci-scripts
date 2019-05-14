@@ -34,7 +34,7 @@ help:
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-image: ## Use multi-stage docker build to build pex and final toaster aggregator image
+toaster_aggregator: ## Use multi-stage docker build to build pex and final toaster aggregator image
 ifndef TAG
 	$(eval TAG=latest)
 endif
