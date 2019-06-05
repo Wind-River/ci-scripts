@@ -59,10 +59,10 @@ export RPROXY_TAG=latest
 export BUILDER_TAG=latest
 export TOASTER_TAG=latest
 export POSTBUILD_TAG=latest
-export CONSUL_TAG=1.2.0
+export CONSUL_TAG=1.5.0
 # Default to using Docker Hub
 export REGISTRY=windriver
-export JENKINS_MASTER_NUM_EXECUTORS=0
+export JENKINS_MASTER_NUM_EXECUTORS=1
 export JENKINS_AGENT_NUM_EXECUTORS=2
 export JENKINS_INIT_DEBUG="false"
 
@@ -191,7 +191,7 @@ fi
 
 get_primary_ip_address() {
     # show which device internet connection would use and extract ip of that device
-    ip=$(ip -4 route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+    ip=$(ip -4 route get 8.8.8.8 | awk 'NR==1 {print $7}')
     echo "$ip"
 }
 
@@ -260,6 +260,9 @@ if [ "$SWARM" == "0" ]; then
     export NETWORK_TYPE=bridge
     echo "Starting CI with: docker-compose ${FILES[*]} up"
     docker-compose "${FILES[@]}" up --abort-on-container-exit
+
+    # if the Ctrl-C did not stop the containers properly
+    docker-compose "${FILES[@]}" down
 
     if [ "$CLEANUP" == '1' ]; then
         echo "Cleaning up stopped containers"

@@ -33,7 +33,7 @@ services:
       JENKINS_OPTS: '--httpPort=8080 --httpListenAddress=0.0.0.0 --prefix=/jenkins'
       JENKINS_UI_URL: "https://$HOST/jenkins/"
       JENKINS_AGENT_PASSWORD: "${JENKINS_AGENT_PASSWORD}"
-      JENKINS_MASTER_NUM_EXECUTORS: "${JENKINS_MASTER_NUM_EXECUTORS:-0}"
+      JENKINS_MASTER_NUM_EXECUTORS: "${JENKINS_MASTER_NUM_EXECUTORS:-1}"
       JENKINS_INIT_DEBUG: "${JENKINS_INIT_DEBUG}"
     deploy:
       replicas: 1
@@ -115,7 +115,7 @@ services:
       - agent_password
 
   consul:
-    image: consul:${CONSUL_TAG:-1.2.0}
+    image: consul:${CONSUL_TAG:-1.5.0}
     deploy:
       replicas: 1
       placement:
