@@ -118,6 +118,7 @@ node('!docker') {
                         'qemumips64': 'oeqa-auto-qemuall-test']
 
       String lava_server='yow-lab-simics16.wrs.com'
+      String report_server='yow-lab-simics16.wrs.com'
       String common_test_params = "LAVA_SERVER=${lava_server}:8080,LAVA_USER=lpdtest,RETRY=1,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,TEST_DEVICE="
       String template_path = 'lava-test/jobs/templates/wrlinux-10/'
       def test_params = [
@@ -148,7 +149,7 @@ node('!docker') {
       defaults['BUILD_CMD_FOR_TEST'] = ''
 
       defaults['REGISTRY'] = 'windriver'
-      defaults['POSTPROCESS_ARGS'] = "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${test_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"
+      defaults['POSTPROCESS_ARGS'] = "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${report_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"
       defaults['POST_SUCCESS'] = 'rsync,cleanup'
       defaults['POST_FAIL'] = 'rsync,send_mail,report,cleanup'
       defaults['REMOTE'] = "git://${git_server}/wrlinux-x"
