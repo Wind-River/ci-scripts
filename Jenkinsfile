@@ -40,6 +40,8 @@ node('docker') {
   def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -i --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins --ulimit nofile=1024:1024 "
   common_env_args = ["LANG=en_US.UTF-8", "BUILD_ID=${BUILD_ID}", "WORKSPACE=${WORKSPACE}", "JENKINS_URL=${JENKINS_URL}", "BUILD_GROUP_ID=" + params.BUILD_GROUP_ID ]
   common_docker_params = add_env( common_docker_params, common_env_args )
+  def BUILD_DIR="${WORKSPACE}/builds/builds-${BUILD_ID}"
+
 
   stage('Docker Run Check') {
     dir('ci-scripts') {
@@ -98,7 +100,8 @@ node('docker') {
               }
             }
             sh "./layerindex_export.sh --branch=${BRANCH}"
-            sh "mv -f layerindex.json ${WORKSPACE}"
+            sh "mkdir -p ${BUILD_DIR}"
+            sh "mv -f layerindex.json ${BUILD_DIR}"
           } finally {
             sh "./layerindex_stop.sh"
           }
@@ -129,8 +132,19 @@ node('docker') {
       env_args = env_args + ["TEST=${TEST}", "TEST_CONFIGS_FILE=${TEST_CONFIGS_FILE}"]
       env_args = env_args + ["BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
       env_args = env_args + ["BUILD_CMD_FOR_TEST=\'${BUILD_CMD_FOR_TEST}\'"]
+      if (params.MACHINE != "") {
+        env_args = env_args + ["MACHINE=\'${MACHINE}\'"]
+      }
+      if (params.DISTRO != "") {
+        env_args = env_args + ["DISTRO=\'${DISTRO}\'"]
+      }
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/jenkins_build.sh"
+
+      if (params.LOCALCONF != "") {
+        sh "mkdir -p ${BUILD_DIR}"
+        writeFile file: "${BUILD_DIR}/local.conf", text: params.LOCALCONF
+      }
 
       try {
         sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"

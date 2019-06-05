@@ -9,7 +9,13 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.TextParameterDefinition>
-          <name>DEVBUILD_YAML</name>
+          <name>DEVBUILD_ARGS</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>LOCALCONF</name>
           <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>

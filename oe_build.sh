@@ -112,13 +112,19 @@ if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
         exit 1
     fi
 
+    # devbuild only works when patches are on same server as repos
+    # due to way repo sets up the remotes
+    if [ -f "${BUILD}/layerindex.json" ]; then
+        WRLINUX="$REMOTE"
+    fi
+
     # Make a clone of local mirror so setup will use local mirror
     wrlinux_setup_clone "$WRLINUX" "$BUILD" "$BRANCH" "$TOP"
 
     SETUP_ARGS=("$BUILD/${WRLINUX:(-9)}/setup.sh" "${SETUP_ARGS[@]}")
 fi
 
-if [ -f "${TOP}/layerindex.json" ]; then
+if [ -f "${BUILD}/layerindex.json" ]; then
     log "Found serialized layerindex data for layerindex override"
 
     # modify settings.py to force setup to use local layerindex
@@ -129,7 +135,7 @@ if [ -f "${TOP}/layerindex.json" ]; then
         "$SETTINGS"
 
     mkdir -p "$BUILD"/config/index-cache
-    cp "${TOP}/layerindex.json" "${BUILD}/config/index-cache/layers_wrs_com.json"
+    cp "${BUILD}/layerindex.json" "${BUILD}/config/index-cache/layers_wrs_com.json"
 
     # HACK: remove mirror-index from cache to prevent setup from loading it
     rm -rf "${CACHE_BASE}/mirror-index"
@@ -151,6 +157,11 @@ else
     . ./environment-setup-x86_64-wrlinuxsdk-linux > "$BUILD/00-prebuild.log" 2>&1
     . ./oe-init-build-env "$BUILD_NAME" > "$BUILD/00-prebuild.log" 2>&1
 
+    # if there is a local.conf in $TOP, override the default local.conf
+    if [ -f "$BUILD/local.conf" ]; then
+        cp "$BUILD/local.conf" conf/local.conf
+    fi
+
     # Run prebuild command which may modify files like local.conf
     log "${PREBUILD_CMD[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
     $TIME bash -c "${PREBUILD_CMD[*]}" >> "$BUILD/00-prebuild.log" 2>&1
@@ -158,7 +169,7 @@ else
     echo "Prebuild: ${PREBUILD_CMD[*]}" >> "$STATFILE"
 
     # Run prebuild command for test which may modify files like local.conf
-    if [ "${PREBUILD_CMD_FOR_TEST[*]}" != 'null' ]; then
+    if [ ${#PREBUILD_CMD_FOR_TEST[@]} -ne 0 ]; then
         log "${PREBUILD_CMD_FOR_TEST[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
         $TIME bash -c "$WORKSPACE/ci-scripts/${PREBUILD_CMD_FOR_TEST[*]}" >> "$BUILD/00-prebuild.log" 2>&1
         log_stats "Prebuild_for_test" "$BUILD"
@@ -176,7 +187,7 @@ else
 
     RET=${PIPESTATUS[0]}
 
-    if [ "$RET" == 0 ]; then
+    if [ "$RET" == 0 ] && [ ${#BUILD_CMD_FOR_TEST[@]} -ne 0 ]; then
         echo "Build for test: ${BUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
         log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
         $TIME bash -c "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"

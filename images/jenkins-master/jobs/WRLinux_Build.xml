@@ -107,6 +107,12 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>LOCALCONF</name>
+          <description>Contents of a local.conf file that will override the default local.conf</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>LAYERINDEX_TYPE</name>
           <description>Specify the type of layer index</description>
@@ -171,6 +177,21 @@
           <name>GIT_CREDENTIAL_ID</name>
           <description>ID of Git Credentials stored in Jenkins</description>
           <defaultValue>git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MACHINE</name>
+          <description>Override default machine</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SDK_MACHINE</name>
+          <description>Override default sdk machine</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DISTRO</name>
+          <description>Override default distro</description>
+          <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>

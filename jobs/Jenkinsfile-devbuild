@@ -27,9 +27,51 @@ node('!docker') {
   def devbuild = ""
   String name = ""
 
+  def trigger_build = {
+    Map param ->
+    param.each { key, value ->
+      echo "${key}: ${value}"
+    }
+
+    build job: 'WRLinux_Build', wait: false, parameters: [
+      string( name: 'NAME', value: param['NAME'] ),
+      string( name: 'BRANCH', value: param['BRANCH'] ),
+      string( name: 'CI_BRANCH', value: param['CI_BRANCH'] ),
+      string( name: 'CI_REPO', value: param['CI_REPO'] ),
+      string( name: 'SETUP_ARGS', value: param['SETUP_ARGS'] ),
+      string( name: 'BUILD_GROUP_ID', value: param['BUILD_GROUP_ID'] ),
+      string( name: 'PREBUILD_CMD', value: param['PREBUILD_CMD'] ),
+      string( name: 'PREBUILD_CMD_FOR_TEST', value: param['PREBUILD_CMD_FOR_TEST'] ),
+      string( name: 'BUILD_CMD', value: param['BUILD_CMD'] ),
+      string( name: 'BUILD_CMD_FOR_TEST', value: param['BUILD_CMD_FOR_TEST'] ),
+      string( name: 'REMOTE', value: param['REMOTE'] ),
+      string( name: 'POSTPROCESS_ARGS', value: param['POSTPROCESS_ARGS'] ),
+      string( name: 'POST_SUCCESS', value: param['POST_SUCCESS'] ),
+      string( name: 'POST_FAIL', value: param['POST_FAIL'] ),
+      string( name: 'REGISTRY', value: param['REGISTRY'] ),
+      string( name: 'TOASTER', value: param['TOASTER'] ),
+      string( name: 'LAYERINDEX_TYPE', value: param['LAYERINDEX_TYPE'] ),
+      string( name: 'LAYERINDEX_SOURCE', value: param['LAYERINDEX_SOURCE'] ),
+      string( name: 'BITBAKE_REPO_URL', value: param['BITBAKE_REPO_URL'] ),
+      string( name: 'TEST', value: param['TEST'] ),
+      string( name: 'TEST_ARGS', value: param['TEST_ARGS'] ),
+      string( name: 'POST_TEST_SUCCESS', value: param['POST_TEST_SUCCESS'] ),
+      string( name: 'POST_TEST_FAIL', value: param['POST_TEST_FAIL'] ),
+      string( name: 'TEST_CONFIGS_FILE', value: param['TEST_CONFIGS_FILE'] ),
+      string( name: 'RUNTIME_TEST_CMD', value: param['RUNTIME_TEST_CMD'] ),
+      string( name: 'TEST_IMAGE', value: param['TEST_IMAGE'] ),
+      string( name: 'POST_TEST_IMAGE', value: param['POST_TEST_IMAGE'] ),
+      string( name: 'DISTRO', value: param['DISTRO'] ),
+      string( name: 'MACHINE', value: param['MACHINE'] ),
+      string( name: 'SDK_MACHINE', value: param['SDK_MACHINE'] ),
+      text( name: 'DEVBUILD_ARGS', value: param['DEVBUILD_ARGS'] ),
+      text( name: 'LOCALCONF', value: param['LOCALCONF'] ),
+    ]
+  }
+
   stage ('Create Folder') {
 
-    devbuild = readYaml text: params.DEVBUILD_YAML
+    devbuild = readYaml text: params.DEVBUILD_ARGS
     name = devbuild.email.tokenize('@')[0]
     // build job: 'folder_create', wait: true, parameters: [
     //   [$class: 'StringParameterValue', name: 'NAME', value: name ],
@@ -41,42 +83,156 @@ node('!docker') {
       git(url:params.CI_REPO, branch:params.CI_BRANCH)
 
       Date now = new Date()
-      def dateFormat = new SimpleDateFormat('yyyy-mm-dd')
+      def dateFormat = new SimpleDateFormat('yyyy-MM-dd')
       String today = dateFormat.format(now)
       String dest_dir="builds/devbuild_${name}_${today}"
 
       String test_server='yow-lpdtest.wrs.com'
+      String git_server='ala-lxgit.wrs.com'
 
-      build job: 'WRLinux_Build', wait: true, parameters: [
-        [$class: 'StringParameterValue', name: 'NAME', value: 'devbuild_intel86_64'],
-        [$class: 'StringParameterValue', name: 'BRANCH', value: devbuild.release],
-        [$class: 'StringParameterValue', name: 'CI_BRANCH', value: params.CI_BRANCH],
-        [$class: 'StringParameterValue', name: 'CI_REPO', value: params.CI_REPO],
-        [$class: 'StringParameterValue', name: 'SETUP_ARGS', value: '--distro=wrlinux --machine=intel-x86-64 --dl-layers --accept-eula=yes'],
-        [$class: 'StringParameterValue', name: 'BUILD_GROUP_ID', value: params.BUILD_GROUP_ID],
-        [$class: 'StringParameterValue', name: 'PREBUILD_CMD', value: "build_configure.sh --enable-shared-sstate=sstate_cache_${devbuild.release}"],
-        [$class: 'StringParameterValue', name: 'PREBUILD_CMD_FOR_TEST', value: 'test_configure.py'],
-        [$class: 'StringParameterValue', name: 'BUILD_CMD', value: 'bitbake wrlinux-image-glibc-std'],
-        [$class: 'StringParameterValue', name: 'BUILD_CMD_FOR_TEST', value: 'bitbake wrlinux-image-glibc-std -c testexport'],
-        [$class: 'StringParameterValue', name: 'REGISTRY', value: 'windriver'],
-        [$class: 'StringParameterValue', name: 'POSTPROCESS_ARGS', value: "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${test_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"],
-        [$class: 'StringParameterValue', name: 'POST_SUCCESS', value: 'rsync,cleanup'],
-        [$class: 'StringParameterValue', name: 'POST_FAIL', value: 'rsync,send_mail,report,cleanup'],
-        [$class: 'StringParameterValue', name: 'REMOTE', value: 'git://ala-lxgit.wrs.com/wrlinux-x'],
-        [$class: 'StringParameterValue', name: 'TOASTER', value: 'disable'],
-        [$class: 'TextParameterValue',   name: 'DEVBUILD_ARGS', value: params.DEVBUILD_YAML],
-        [$class: 'StringParameterValue', name: 'LAYERINDEX_TYPE', value: 'restapi-web'],
-        [$class: 'StringParameterValue', name: 'LAYERINDEX_SOURCE', value: 'http://layers.wrs.com/layerindex/api/'],
-        [$class: 'StringParameterValue', name: 'BITBAKE_REPO_URL', value: 'git://lxgit.wrs.com/bitbake'],
-        [$class: 'StringParameterValue', name: 'TEST', value: 'oeqa-default-test'],
-        [$class: 'StringParameterValue', name: 'TEST_CONFIGS_FILE', value: 'configs/WRLinux10/test_configs.yaml'],
-        [$class: 'StringParameterValue', name: 'RUNTIME_TEST_CMD', value: 'run_tests.sh git://ala-lxgit.wrs.com/lpd-ops/lava-test.git lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-default-test_template.yaml 480'],
-        [$class: 'StringParameterValue', name: 'TEST_IMAGE', value: 'postbuild'],
-        [$class: 'StringParameterValue', name: 'POST_TEST_IMAGE', value: 'postbuild'],
-        [$class: 'StringParameterValue', name: 'TEST_ARGS', value: "LAVA_USER=lpdtest,RETRY=1,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,TEST_DEVICE=x86_64_device,LAVA_SERVER=${test_server}:8080"],
-        [$class: 'StringParameterValue', name: 'POST_TEST_SUCCESS', value: 'send_mail,report'],
-        [$class: 'StringParameterValue', name: 'POST_TEST_FAIL', value: 'send_mail,report'],
+      String setup_args = '--all-layers --dl-layers --accept-eula=yes'
+      String[] distros = ['wrlinux-graphics']
+      if ( devbuild.distros ) {
+        distros = devbuild.distros
+      }
+
+      // bsps used for devbuilds, leave out qemuppc and qemumips64 while in development
+      String[] machines = ['qemux86', 'qemux86-64', 'qemuarm64', 'qemuarm']
+      if ( devbuild.machines ) {
+        machines = devbuild.machines
+      }
+
+      // mapping of valid image types for each distro. First image is the one built for test image
+      def default_images = ['wrlinux-graphics': 'wrlinux-image-glibc-std wrlinux-image-glibc-small wrlinux-image-glibc-core wrlinux-image-glibc-std-sato',
+                            'wrlinux': 'wrlinux-image-glibc-std wrlinux-image-glibc-small wrlinux-image-glibc-core',
+                            'wrlinux-small': 'wrlinux-image-glibc-small']
+
+      def build_group_id = UUID.randomUUID().toString()
+
+      // mapping of bsp to test suite used
+      def test_suite = ['qemux86': 'oeqa-auto-qemuall-test',
+                        'qemux86-64': 'oeqa-auto-qemuall-test',
+                        'qemuarm64': 'oeqa-auto-qemuall-test',
+                        'qemuarm': 'oeqa-qemuarm-test',
+                        'qemuppc': 'oeqa-auto-qemuall-test',
+                        'qemumips64': 'oeqa-auto-qemuall-test']
+
+      String lava_server='yow-lab-simics16.wrs.com'
+      String common_test_params = "LAVA_SERVER=${lava_server}:8080,LAVA_USER=lpdtest,RETRY=1,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,TEST_DEVICE="
+      String template_path = 'lava-test/jobs/templates/wrlinux-10/'
+      def test_params = [
+        'qemux86': [ template: template_path + 'mxe5400-x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+                    params: common_test_params + 'mxe5400-qemu-x86_64', timeout: '1200'],
+        'qemux86-64': [ template: template_path + 'mxe5400-x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+                       params: common_test_params + 'mxe5400-qemu-x86_64', timeout: '1200' ],
+        'qemuarm64': [ template: template_path + 'arm64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+                      params: common_test_params + 'qemu-arm64', timeout: '1200' ],
+        'qemuarm': [ template: template_path + 'arma15_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+                    params: common_test_params + 'qemu-arma15', timeout: '1200' ],
+        'qemuppc': [ template: template_path + 'ppc_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+                    params: common_test_params + 'mxe5400-qemu-ppc', timeout: '1200' ],
+        'qemumips64': [ template: template_path + 'mips64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+                       params: common_test_params + 'mxe5400-qemu-mips64', timeout: '1200' ],
       ]
+
+      def defaults = [:]
+      defaults['BRANCH'] = devbuild.release
+      defaults['CI_BRANCH'] = params.CI_BRANCH
+      defaults['CI_REPO'] = params.CI_REPO
+      defaults['SETUP_ARGS'] = setup_args
+      defaults['BUILD_GROUP_ID'] = build_group_id
+      defaults['DISTRO'] = 'wrlinux-graphics'
+      defaults['MACHINE'] = ''
+      defaults['SDK_MACHINE'] = ''
+      defaults['PREBUILD_CMD_FOR_TEST'] = ''
+      defaults['BUILD_CMD_FOR_TEST'] = ''
+
+      defaults['REGISTRY'] = 'windriver'
+      defaults['POSTPROCESS_ARGS'] = "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${test_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"
+      defaults['POST_SUCCESS'] = 'rsync,cleanup'
+      defaults['POST_FAIL'] = 'rsync,send_mail,report,cleanup'
+      defaults['REMOTE'] = "git://${git_server}/wrlinux-x"
+      defaults['TOASTER'] = 'disable'
+      defaults['LAYERINDEX_TYPE'] = 'restapi-web'
+      defaults['LAYERINDEX_SOURCE'] = 'http://layers.wrs.com/layerindex/api/'
+      defaults['BITBAKE_REPO_URL'] = 'git://lxgit.wrs.com/bitbake'
+      defaults['TEST'] = 'disable'
+      defaults['TEST_ARGS'] = "--disabled"
+      defaults['RUNTIME_TEST_CMD'] = 'disabled'
+
+      defaults['POST_TEST_SUCCESS'] = 'report'
+      defaults['POST_TEST_FAIL'] = 'send_mail,report'
+      defaults['TEST_CONFIGS_FILE'] = 'configs/WRLinux10/test_configs.yaml'
+      defaults['TEST_IMAGE'] = 'postbuild'
+      defaults['POST_TEST_IMAGE'] = 'postbuild'
+      defaults['DEVBUILD_ARGS'] = params.DEVBUILD_ARGS
+      defaults['LOCALCONF'] = params.LOCALCONF
+
+      for ( distro in distros ) {
+        for ( machine in machines ) {
+          def param = defaults
+          param['NAME'] = "devbuild_${name}_${distro}_${machine}_${build_group_id}"
+          param['DISTRO'] = distro
+          param['MACHINE'] = machine
+          param['PREBUILD_CMD'] = 'build_configure.sh  --enable-bootimage=ext4 --enable-shared-sstate=master_wr_sstate_cache'
+
+          // override default images if images are defined
+          String images = default_images[distro]
+          if ( devbuild.images ) {
+            images = devbuild.images.join(' ')
+          }
+
+          // override images if recipes are defined
+          if ( devbuild.recipes ) {
+            images = devbuild.recipes.join(' ')
+          }
+          param['BUILD_CMD'] = "bitbake ${images}"
+
+          // only do the test export if bitbake is actually building an image
+          String test_image = images.split(' ')[0]
+          if ( test_image.startsWith('wrlinux-') ) {
+            param['BUILD_CMD_FOR_TEST'] = "bitbake ${test_image} -c testexport"
+            param['PREBUILD_CMD_FOR_TEST'] = 'test_configure.py'
+          }
+
+          // only enable the tests if the machine is qemu and the build has an image
+          if ( test_params.containsKey(machine) && test_image.startsWith('wrlinux-') ) {
+            param['TEST'] = test_suite[machine]
+            param['TEST_ARGS'] = test_params[machine]['params']
+            param['RUNTIME_TEST_CMD'] = 'run_tests.sh git://ala-lxgit.wrs.com/lpd-ops/lava-test.git ' + test_params[machine]['template'] + ' ' + test_params[machine]['timeout']
+          }
+
+          trigger_build param
+        }
+      }
+
+      if ( devbuild.sdk == 'yes' ) {
+        for ( machine in machines ) {
+          def param = defaults
+          param['NAME'] = "devbuild_${name}_${distro}_${machine}_sdk_${build_group_id}"
+          param['DISTRO'] = 'wrlinux-graphics'
+          param['MACHINE'] = machine
+          param['SDK_MACHINE'] = devbuild.sdk_machine
+          param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=master_wr_sstate_cache'
+          param['BUILD_CMD'] = "bitbake wrlinux-image-glibc-small wrlinux-image-glibc-std wrlinux-image-glibc-core wrlinux-image-glibc-std-sato -cpopulate_sdk"
+
+          trigger_build param
+        }
+      }
+
+      if ( devbuild.sdk_ext == 'yes' ) {
+        for ( machine in machines ) {
+          def param = defaults
+          param['NAME'] = "devbuild_${name}_${distro}_${machine}_sdkext_${build_group_id}"
+          param['DISTRO'] = 'wrlinux-graphics'
+          param['MACHINE'] = machine
+          param['SDK_MACHINE'] = devbuild.sdk_machine
+          param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=master_wr_sstate_cache'
+          param['BUILD_CMD'] = "bitbake wrlinux-image-glibc-small wrlinux-image-glibc-std wrlinux-image-glibc-core wrlinux-image-glibc-std-sato -cpopulate_sdk_ext"
+
+          trigger_build param
+        }
+      }
     }
   }
 }

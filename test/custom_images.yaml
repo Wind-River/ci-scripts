@@ -1,0 +1,19 @@
+---
+release: master-wr
+email: Konrad.Scherer@windriver.com
+distros:
+machines:
+- qemux86-64
+images:
+- wrlinux-image-glibc-core
+- wrlinux-image-glibc-std
+recipes:
+sdk: no
+sdk_ext: no
+sdk_machine: i686-mingw32
+repos:
+- dir: layers/meta-virtualization
+  repo: git://ala-lxgit.wrs.com/wrpush/kscherer/meta-virtualization
+  branch: pull-meta-virtualization-devbuild-20190604-1011-N2oltUQak0
+  layers:
+    - meta-virtualization

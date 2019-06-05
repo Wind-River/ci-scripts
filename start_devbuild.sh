@@ -9,22 +9,6 @@ set -euo pipefail
 
 DRY_RUN=no
 
-if [ "${SERVER:-unset}" == 'unset' ]; then
-    SERVER=https://ala-blade21.wrs.com
-fi
-
-if [ "${SERVER:0:8}" != 'https://' ]; then
-    SERVER="https://$SERVER"
-fi
-
-if [ "${CI_REPO:-unset}" == 'unset' ]; then
-    CI_REPO=git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts
-fi
-
-if [ "${CI_BRANCH:-unset}" == 'unset' ]; then
-    CI_BRANCH=master
-fi
-
 get_current_branch()
 {
     git rev-parse --abbrev-ref HEAD
@@ -33,10 +17,6 @@ get_current_branch()
 # Ask bitbake for all the enabled layers in the project
 get_bb_layers()
 {
-    if [ -z "$BBPATH" ]; then
-        echo "Bitbake not enabled. Run oe-init-build-env."
-        exit 1
-    fi
     bitbake -e | grep BBLAYERS= | cut -d= -f 2 | tr -d '"'
 }
 
@@ -77,36 +57,84 @@ get_remote_repo_path()
     fi
 }
 
-run_cmd()
-{
-    local CMD=($@)
-    if [ "$DRY_RUN" == "yes" ]; then
-        echo "Would run: ${CMD[*]}"
-    else
-        echo "Running ${CMD[*]}"
-        "${CMD[@]}"
-    fi
-}
-
-run_mktemp()
-{
-    local CMD=($@)
-    if [ "$DRY_RUN" == "yes" ]; then
-        mktemp --dry-run "${CMD[@]}"
-    else
-        mktemp "${CMD[@]}"
-    fi
-}
-
 main()
 {
     # Must be able to run bitbake to get the active layers
     command -v bitbake >/dev/null 2>&1 || { echo >&2 "Could not find bitbake. Aborting."; exit 0; }
 
+    if [ -z "$BBPATH" ]; then
+        echo "Bitbake not enabled. Run oe-init-build-env."
+        exit 1
+    fi
+
+    local SERVER=https://ala-blade21.wrs.com
+    local CI_REPO=git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts
+    local CI_BRANCH=master
     local USER_EMAIL=
     USER_EMAIL=$(git config --global --get user.email)
+
+    local DISTROS=()
+    local MACHINES=()
+    local IMAGES=()
+    local SDK=no
+    local SDK_MACHINE=i686-mingw32
+    local SDK_EXT=no
+    local RECIPES=()
+    local LOCALCONF=no
+    local ARG=
+
+    while [ $# -gt 0 ]; do
+        echo "Arg: $1"
+        case "$1" in
+            --server=*)               SERVER=${1#*=} ;;
+            --server)                 SERVER=$2; shift ;;
+            --ci[-_]repo=*)           CI_REPO=${1#*=} ;;
+            --ci[-_]repo)             CI_REPO=$2; shift ;;
+            --ci[-_]branch=*)         CI_BRANCH=${1#*=} ;;
+            --ci[-_]branch)           CI_BRANCH=$2; shift ;;
+            --email=*)                USER_EMAIL=${1#*=} ;;
+            --email)                  USER_EMAIL=$2; shift ;;
+            --distro=*|--distros=*)   ARG=${1#*=}; DISTROS=(${ARG/,/ }) ;;
+            --distro|--distros)       ARG=$2; DISTROS=(${ARG/,/ }); shift ;;
+            --machine=*|--machines=*) ARG=${1#*=}; MACHINES=(${ARG/,/ }) ;;
+            --machine|--machines)     ARG=$2; MACHINES=(${ARG/,/ }); shift ;;
+            --image=*|--images=*)     ARG=${1#*=}; IMAGES=(${ARG/,/ }) ;;
+            --image|--images)         ARG=$2; IMAGES=(${ARG/,/ }); shift ;;
+            --recipe=*|--recipes=*)   ARG=${1#*=}; RECIPES=(${ARG/,/ }) ;;
+            --recipe|--recipes)       ARG=$2; RECIPES=(${ARG/,/ }); shift ;;
+            --dry[-_]run)             DRY_RUN=yes ;;
+            --sdk)                    SDK=yes ;;
+            --sdk[-_]ext)             SDK_EXT=yes ;;
+            --sdk[-_]machine=*)       SDK_MACHINE=${1#*=} ;;
+            --sdk[-_]machine)         SDK_MACHINE=$2; shift ;;
+            --localconf=*)            LOCALCONF=${1#*=} ;;
+            --localconf)              LOCALCONF=$2; shift ;;
+            *)                        echo "Unrecognized arg $1. Exiting"; exit 1 ;;
+        esac
+        shift
+    done
+
+    if [ "${SERVER:0:8}" != 'https://' ]; then
+        SERVER="https://$SERVER"
+    fi
+
+    if [ "$SDK" == 'yes' ] && [ -z "$MACHINE" ]; then
+        echo "SDK selected without specifying machine so qemux86 selected as SDK_MACHINE"
+        MACHINE=qemux86
+    fi
+
+    if [ "$SDK_EXT" == 'yes' ] && [ -z "$MACHINE" ]; then
+        echo "Extended SDK selected without specifying machine so qemux86 selected as SDK_MACHINE"
+        MACHINE=qemux86
+    fi
+
+    if [ "$LOCALCONF" != 'no' ] && [ ! -f "$LOCALCONF" ]; then
+        LOCALCONF="$BBPATH/conf/local/conf"
+        echo "Could not find valid local.conf at $LOCALCONF. Using project $LOCALCONF"
+    fi
+
     if [ -z "$USER_EMAIL" ]; then
-        echo "Git config user.email is not set."
+        echo "Git config user.email is not set. Use --email to set email address to send results"
         echo "Since I don't know where to send results, dev build is cancelled."
         exit 1
     fi
@@ -191,18 +219,37 @@ main()
         exit 1
     fi
 
-    local DEVBUILD_YAML=
-    DEVBUILD_YAML=$(run_mktemp --tmpdir devbuild-XXXXXXXXX)
+    local DEVBUILD_ARGS=
+    DEVBUILD_ARGS=$(mktemp --tmpdir devbuild-XXXXXXXXX)
 
     {
         echo "---"
         echo "release: $RELEASE"
         echo "email: $USER_EMAIL"
+        echo "distros:"
+        for DISTRO in "${DISTROS[@]}"; do
+            echo "- $DISTRO"
+        done
+        echo "machines:"
+        for MACHINE in "${MACHINES[@]}"; do
+            echo "- $MACHINE"
+        done
+        echo "images:"
+        for IMAGE in "${IMAGES[@]}"; do
+            echo "- $IMAGE"
+        done
+        echo "recipes:"
+        for RECIPE in "${RECIPES[@]}"; do
+            echo "- $RECIPE"
+        done
+        echo "sdk: $SDK"
+        echo "sdk_ext: $SDK_EXT"
+        echo "sdk_machine: $SDK_MACHINE"
         echo "repos:"
-    } >> "$DEVBUILD_YAML"
+    } >> "$DEVBUILD_ARGS"
 
     local PULL_TOP=
-    PULL_TOP=$(run_mktemp --tmpdir -d "pull-requests-${GITOLITE_USER}.XXXXXXXXXX")
+    PULL_TOP=$(mktemp --tmpdir -d "pull-requests-${GITOLITE_USER}.XXXXXXXXXX")
     local NOW=
     NOW=$(date +%Y%m%d-%H%M)
 
@@ -212,18 +259,18 @@ main()
 
             local SERVER_REPO_PATH=
             SERVER_REPO_PATH=$(get_remote_repo_path)
-            run_cmd ssh git@ala-lxgit.wrs.com wrfork "$SERVER_REPO_PATH"
+            ssh git@ala-lxgit.wrs.com wrfork "$SERVER_REPO_PATH"
 
             local BRANCH=
             BRANCH=$(get_current_branch)
 
             local PULL_REQ_FILE=
-            PULL_REQ_FILE=$(run_mktemp -p "${PULL_TOP}" "pull-${PUSH_LAYER##*/}-$BRANCH-$NOW-XXXXXXXXXX")
+            PULL_REQ_FILE=$(mktemp -p "${PULL_TOP}" "pull-${PUSH_LAYER##*/}-$BRANCH-$NOW-XXXXXXXXXX")
             local PULL_REQ=${PULL_REQ_FILE##*/}
 
             local PUSH_RANGE="${BRANCH}:refs/heads/$PULL_REQ"
 
-            run_cmd git push git@ala-lxgit.wrs.com:wrpush/"$GITOLITE_USER/${PUSH_LAYER##*/}" "$PUSH_RANGE"
+            git push git@ala-lxgit.wrs.com:wrpush/"$GITOLITE_USER/${PUSH_LAYER##*/}" "$PUSH_RANGE"
 
             local UPSTREAM=
             local RANGE=
@@ -236,17 +283,18 @@ main()
             fi
             local PR_REPO=git://ala-lxgit.wrs.com/wrpush/"$GITOLITE_USER/${PUSH_LAYER##*/}"
 
-            run_cmd git request-pull "$UPSTREAM" "$PR_REPO" \
+            git request-pull "$UPSTREAM" "$PR_REPO" \
                     "$PUSH_RANGE" > "$PULL_REQ_FILE"
 
             # if the git repo contains multiple layers then _all_ the layers in that repo
             # need to be updated on the layerindex
-            # This command will find all the sublayers starting with meta- in the current
-            # git repo
             local LAYERS=()
-            LAYERS=($(find . -maxdepth 1 -type d -name 'meta-*' -printf '%P '))
 
-            if [ "${#LAYERS[@]}" -eq 0 ]; then
+            # look for more layer.conf files in subdirectory and use the base as the layer name
+            LAYERS=($(find . -maxdepth 3 -path './*/conf/layer.conf' -printf '%P ' | sed 's#/conf/layer.conf##g'))
+
+            # if there is a conf/layer.conf file, then the current dir is a layer
+            if [ -f 'conf/layer.conf' ]; then
                 LAYERS+=(${PUSH_LAYER##*/})
             fi
 
@@ -255,7 +303,7 @@ main()
             if [ "${PUSH_LAYER##*/}" == 'oe-core' ]; then
                 LAYERS+=('openembedded-core')
                 # setup assumes bitbake and oe-core are on the same server
-                run_cmd ssh git@ala-lxgit.wrs.com wrfork bitbake
+                ssh git@ala-lxgit.wrs.com wrfork bitbake
             fi
 
             # remove duplicate layers
@@ -270,26 +318,37 @@ main()
                 for LAYER in "${LAYERS[@]}"; do
                     echo "    - $LAYER"
                 done
-            } >> "$DEVBUILD_YAML"
+            } >> "$DEVBUILD_ARGS"
         )
         echo
     done
 
-    # cat "$DEVBUILD_YAML"
-
     if [ "$DRY_RUN" == 'no' ]; then
+        local APITOKEN=
         APITOKEN=$(curl -k -s "$SERVER/auth/build_auth.txt" | tr -d '\n')
 
+        local CRUMB=
         CRUMB=$(curl -k -s --user "$APITOKEN" \
                      "$SERVER"/jenkins/crumbIssuer/api/xml?xpath='concat(//crumbRequestField,":",//crumb)' )
 
+        local LOCALCONF_UPLOAD=LOCALCONF@/dev/null
+        if [ -n "$LOCALCONF" ]; then
+            LOCALCONF_UPLOAD=LOCALCONF@"$LOCALCONF"
+        fi
+
+        local PARAMS="token=devbuild&CI_REPO=$CI_REPO&CI_BRANCH=$CI_BRANCH"
+
         echo "Starting devbuild on $SERVER/jenkins"
         curl -X POST -k -H "$CRUMB" --user "$APITOKEN" \
-             --data-urlencode DEVBUILD_YAML@"$DEVBUILD_YAML" \
-             "$SERVER/jenkins/job/devbuilds/job/devbuild/buildWithParameters?token=devbuild&CI_REPO=$CI_REPO&CI_BRANCH=$CI_BRANCH"
+             --data-urlencode DEVBUILD_ARGS@"$DEVBUILD_ARGS" \
+             --data-urlencode "$LOCALCONF_UPLOAD" \
+             "$SERVER/jenkins/job/devbuilds/job/devbuild/buildWithParameters?$PARAMS"
+    else
+        echo "Dry run: copying devbuild config to devbuild.yaml"
+        cp -f "$DEVBUILD_ARGS" devbuild.yaml
     fi
 
-    rm -f "$DEVBUILD_YAML"
+    rm -f "$DEVBUILD_ARGS"
 }
 
 main "$@"
