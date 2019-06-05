@@ -60,7 +60,7 @@ report() {
             exit 0
         else
             REPORT_STATFILE=${BUILD}/buildstats.json
-            create_report_statfile "$REPORT_STATFILE" "$JENKINS_URL" "$JOB_BASE_NAME"
+            create_report_statfile "$REPORT_STATFILE" "$JENKINS_URL" "$JOB_BASE_NAME" "$BUILD"
 
             if [ -f "$BUILD/00-PASS" ]; then
                 echo "    \"build_result\": \"PASSED\"" >> "$REPORT_STATFILE"

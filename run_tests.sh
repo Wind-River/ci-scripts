@@ -20,7 +20,7 @@ OEQA_TEST_IMAGE=testexport.tar.gz
 
 # Create teststats.json file
 TEST_STATFILE=${BUILD}/teststats.json
-create_report_statfile "$TEST_STATFILE" "$JENKINS_URL" "$JOB_BASE_NAME"
+create_report_statfile "$TEST_STATFILE" "$JENKINS_URL" "$JOB_BASE_NAME" "$BUILD"
 
 {
     if [ -f "$BUILD/00-PASS" ]; then

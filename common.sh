@@ -587,6 +587,15 @@ create_report_statfile() {
     local STATFILE=$1
     local JENKINS_URL=$2
     local JOB_BASE_NAME=$3
+    local BUILD=$4
+
+    # Catch number of setscene and scratch in 'do_populate_sysroot: ##.#% sstate' line
+    sstate_reuse=$(cat "$BUILD"/00-wrbuild.log | grep 'NOTE:   do_populate_sysroot:' | head -n 1)
+    array=(${sstate_reuse// / })
+    sstate_reuse_percent="${array[4]}"
+    sstate_reuse_setscene=$(echo "${array[6]}" | sed 's/reuse(//g')
+    #sstate_reuse_scratch="${array[8]}"
+
     {
         echo "{"
         echo "  \"build_info\": {"
@@ -598,6 +607,8 @@ create_report_statfile() {
         if [ -n "$BUILD_ID" ]; then
             echo "    \"build_id\": \"$BUILD_ID\","
             echo "    \"build_group_id\": \"$BUILD_GROUP_ID\","
+            echo "    \"sysroot_sstate_reuse_percent\": \"$sstate_reuse_percent\","
+            echo "    \"sysroot_sstate_reuse_setscene\": \"$sstate_reuse_setscene\","
             if [ -z "$JOB_BASE_NAME" ]; then
                 JOB_BASE_NAME='WRLinux_Build'
             fi
