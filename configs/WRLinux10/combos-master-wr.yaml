@@ -257,6 +257,85 @@
 
 - branch: master-wr
   build:
+  - 'bitbake wrlinux-image-glibc-std-sato'
+  name: qemux86-64_wrlinux-graphics-image-glibc-std-sato
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-graphics
+  - --machine=qemux86-64
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std-sato'
+  name: qemux86_wrlinux-graphics-image-glibc-std-sato
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-graphics
+  - --machine=qemux86
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std-sato'
+  name: qemuarm_wrlinux-graphics-image-glibc-std-sato
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-graphics
+  - --machine=qemuarm
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std-sato'
+  name: qemuarm64_wrlinux-graphics-image-glibc-std-sato
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-graphics
+  - --machine=qemuarm64
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std-sato'
+  name: qemuppc_wrlinux-graphics-image-glibc-std-sato
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-graphics
+  - --machine=qemuppc
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std-sato'
+  name: qemumips64_wrlinux-graphics-image-glibc-std-sato
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-graphics
+  - --machine=qemumips64
+  - --dl-layers
+>>>>>>> origin/master-wr_1019
+
+- branch: master-wr
+  build:
   - 'bitbake wrlinux-image-glibc-small'
   name: qemux86-64_wrlinux-image-glibc-small
   prebuild:
@@ -264,8 +343,60 @@
   - --enable-bootimage=ext4
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
-  - --distro=wrlinux
+  - --distro=wrlinux-small
   - --machine=qemux86-64
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-small'
+  name: qemux86_wrlinux-image-glibc-small
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemux86
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-small'
+  name: qemuppc_wrlinux-image-glibc-small
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuppc
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-small'
+  name: qemuarm_wrlinux-image-glibc-small
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuarm
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-small'
+  name: qemuarm64_wrlinux-image-glibc-small
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux-small
+  - --machine=qemuarm64
   - --dl-layers
 
 - branch: master-wr
@@ -330,7 +461,7 @@
   - --enable-bootimage=ext4
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
-  - --distro=wrlinux
+  - --distro=wrlinux-small
   - --machine=qemumips64
   - --dl-layers
 
