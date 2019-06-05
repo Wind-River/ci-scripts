@@ -53,8 +53,8 @@ RUN mkdir /license-report  && cd /license-report \
     && apk update && sh generate_report.sh > report \
     && rm -rf /var/cache/apk/* && rm /license-report/generate_report.sh
 
-ENV SWARM_CLIENT_VERSION="3.15" \
-    SWARM_SHA="4b34cc6ece59b533ff99b2a788bc60c6f21d44dc" \
+ENV SWARM_CLIENT_VERSION="3.17" \
+    SWARM_SHA="96dfbf0ceda7a380fb94df449ddaeddec686f800" \
     SWARM_HOME="/home/jenkins" \
     SWARM_DELAYED_START="" \
     SWARM_AGENT_USER="agent" \
