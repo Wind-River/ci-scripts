@@ -129,7 +129,11 @@ main()
     fi
 
     if [ "$LOCALCONF" != 'no' ] && [ ! -f "$LOCALCONF" ]; then
-        LOCALCONF="$BBPATH/conf/local/conf"
+        LOCALCONF="$BBPATH/conf/local.conf"
+        if [ ! -f "$LOCALCONF" ]; then
+            echo "Could not find valid local.conf at $LOCALCONF."
+            exit 1
+        fi
         echo "Could not find valid local.conf at $LOCALCONF. Using project $LOCALCONF"
     fi
 
@@ -332,7 +336,7 @@ main()
                      "$SERVER"/jenkins/crumbIssuer/api/xml?xpath='concat(//crumbRequestField,":",//crumb)' )
 
         local LOCALCONF_UPLOAD=LOCALCONF@/dev/null
-        if [ -n "$LOCALCONF" ]; then
+        if [ -f "$LOCALCONF" ]; then
             LOCALCONF_UPLOAD=LOCALCONF@"$LOCALCONF"
         fi
 

@@ -32,6 +32,10 @@ main()
         exit 1
     fi
 
+    if [ ! -f "$LOCALCONF" ]; then
+        echo "Invalid conf file: $LOCALCONF"
+        exit 1
+    fi
 
     local APITOKEN=
     APITOKEN=$(curl -k -s "$SERVER/auth/build_auth.txt" | tr -d '\n')
@@ -41,7 +45,7 @@ main()
                  "$SERVER"/jenkins/crumbIssuer/api/xml?xpath='concat(//crumbRequestField,":",//crumb)' )
 
     local LOCALCONF_UPLOAD=LOCALCONF@/dev/null
-    if [ -n "$LOCALCONF" ]; then
+    if [ -f "$LOCALCONF" ]; then
         LOCALCONF_UPLOAD=LOCALCONF@"$LOCALCONF"
     fi
 
