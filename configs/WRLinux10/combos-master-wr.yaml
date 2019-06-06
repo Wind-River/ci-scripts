@@ -332,7 +332,6 @@
   - --distro=wrlinux-graphics
   - --machine=qemumips64
   - --dl-layers
->>>>>>> origin/master-wr_1019
 
 - branch: master-wr
   build:
