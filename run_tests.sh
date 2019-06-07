@@ -216,7 +216,11 @@ DTB_FILE=$(ls ./*.dtb | tail -1)
 echo "DTB_FILE = $DTB_FILE"
 
 # Find rpm-doc file name
-RPM_NAME=$(ls rpm-doc*)
+if [[ "$WRL_VER" = "10.19" ]]; then
+    RPM_NAME=$(ls base-passwd-doc*)
+else
+    RPM_NAME=$(ls rpm-doc*)
+fi
 echo "RPM_NAME = $RPM_NAME"
 
 # Find initramfs file name
