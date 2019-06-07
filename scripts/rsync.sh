@@ -98,7 +98,11 @@ post_rsync() {
         # Get rpm package for OE test
         local DEPLOY_DIR=
         DEPLOY_DIR=$(readlink -f "${BUILD}/${NAME}/${TMP_DIR}/deploy/rpm")
+        # for WRLinux 9, 10.17 and 10.18
         find "$DEPLOY_DIR" -name "rpm-doc*" \
+             -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+        # for WRLinux 10.19
+        find "$DEPLOY_DIR" -name "base-passwd-doc*" \
              -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
         # Get OE test package

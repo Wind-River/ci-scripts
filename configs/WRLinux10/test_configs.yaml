@@ -95,9 +95,9 @@
   - IMAGE_INSTALL_append += "rpm opkg"
   - IMAGE_INSTALL_append += "connman"
   - IMAGE_INSTALL_append += "apt opkg"
-  - IMAGE_INSTALL_append += "gcc g++ make"
   - IMAGE_CLASSES += "testimage testsdk"
   - IMAGE_INSTALL_append += "openssh-sshd openssh-scp"
+  - WRTEMPLATE += "feature/dev-pkgs feature/target-toolchain"
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   purley_simics:
     job_template: lava-test/jobs/templates/wrlinux-10/purley_simics_job_oeqa-auto-qemuall-test_template.yaml
@@ -119,7 +119,7 @@
     timeout: 900
   mpc8315_rdb_device:
     job_template: lava-test/jobs/templates/wrlinux-10/mpc8315_rdb_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 900
+    timeout: 1500
   beaglebone_device:
     job_template: lava-test/jobs/templates/wrlinux-10/beaglebone_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 1200
