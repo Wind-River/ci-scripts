@@ -101,61 +101,61 @@
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   purley_simics:
     job_template: lava-test/jobs/templates/wrlinux-10/purley_simics_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   x86_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 900
+    timeout: 2100
   genericx86_device:
     job_template: lava-test/jobs/templates/wrlinux-10/genericx86_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 900
+    timeout: 2100
   intel_skylake_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_64_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 900
+    timeout: 2100
   intel_skylake_avx512_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_avx512_64_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 900
+    timeout: 2100
   intel_haswell_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_haswell_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 900
+    timeout: 2100
   mpc8315_rdb_device:
     job_template: lava-test/jobs/templates/wrlinux-10/mpc8315_rdb_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1500
+    timeout: 2100
   beaglebone_device:
     job_template: lava-test/jobs/templates/wrlinux-10/beaglebone_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   mxe5400-qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   mxe5400-qemu-ppc:
     job_template: lava-test/jobs/templates/wrlinux-10/ppc_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   mxe5400-qemu-mips:
     job_template: lava-test/jobs/templates/wrlinux-10/mips_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   mxe5400-qemu-mips64:
     job_template: lava-test/jobs/templates/wrlinux-10/mips64_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   edgerouter_device:
     job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   qemu-arm:
     job_template: lava-test/jobs/templates/wrlinux-10/arm_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   qemu-arma9:
     job_template: lava-test/jobs/templates/wrlinux-10/arm_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   qemu-armv5:
     job_template: lava-test/jobs/templates/wrlinux-10/arm_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   qemu-arma15:
     job_template: lava-test/jobs/templates/wrlinux-10/arma15_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   qemu-armv5:
     job_template: lava-test/jobs/templates/wrlinux-10/armv5_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
   qemu-arm64:
     job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_oeqa-auto-qemuall-test_template.yaml
-    timeout: 1200
+    timeout: 2100
 
 - name: oeqa-ptest
   prebuild_cmd_for_test:
