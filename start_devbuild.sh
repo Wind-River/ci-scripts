@@ -7,7 +7,103 @@ set -euo pipefail
 # sent to Jenkins
 # Currently specific to WR
 
+usage()
+{
+    cat <<USAGE
+Usage: start_devbuild.sh [OPTIONS]
+
+Detect local patches, upload those patches to lxgit and trigger builds
+and runtime tests on Wrigel using those patches.
+
+See: http://lpd-web.wrs.com/wr-process/master/WRLinux_CI_design.html
+
+Build Customization Options:
+
+     --distros=<comma separated list of distros>
+
+        Select the distros used for the builds
+        Default: wrlinux-graphics
+
+    --machines=<comma separated list of machines>
+
+        Select the machine types built for each distro
+        Default: qemux86, qemux86-64, qemuarm64, qemuarm
+
+   --images=<comma separated list of images>
+
+       Select the image types for each build. The first image type
+       will be used for runtime tests.
+       Default depends on distro
+
+   --recipes=<comma separated list of recipes>
+
+       Select the recipes for each build. Note this overrides any
+       images and disables runtime testing.
+
+   --sdk-machine=<machine>
+
+       Select the machine type used for the SDK build.
+       Default: qemux86
+
+   --sdk
+
+       Build the SDK. No runtime tests or other builds are done
+
+   --sdk-ext
+
+       Build the extended SDK. No runtime tests or other builds are done
+
+   --localconf=<file>
+
+       Override the default local.conf with provided one. If the file
+       cannot be found the local.conf from the buildarea will be
+       used. Note that the build_configure.sh script will still be run.
+
+Development Options:
+
+    --email=<email>
+
+       Set the email address where build failure emails should be sent
+       Default: git user.email config setting
+
+    --server=<jenkins>
+
+       Select the Wrigel Jenkins server for the devbuilds.
+       Default: ala-blade21.wrs.com
+
+    --ci-repo=<git repo>
+
+       Select the ci-scripts git repo used for the devbuild setup
+       Default: git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts
+
+    --ci-branch=<branch>
+
+       Select the ci-scripts branch to be used.
+       Default: master
+
+    --dry-run
+
+        Save the yaml file that would be sent to Jenkins to devbuild.yaml
+
+Miscellaneous:
+
+    -v, --verbose
+
+        Enable more logging
+
+    -h, --help
+
+        Display this message and exit
+USAGE
+}
+
 DRY_RUN=no
+VERBOSE=0
+
+log()
+{
+    if [ "$VERBOSE" -ne  0 ]; then echo "$@"; fi
+}
 
 get_current_branch()
 {
@@ -59,13 +155,7 @@ get_remote_repo_path()
 
 main()
 {
-    # Must be able to run bitbake to get the active layers
-    command -v bitbake >/dev/null 2>&1 || { echo >&2 "Could not find bitbake. Aborting."; exit 0; }
-
-    if [ -z "$BBPATH" ]; then
-        echo "Bitbake not enabled. Run oe-init-build-env."
-        exit 1
-    fi
+    echo "Script Version: $(git --git-dir "$(readlink -f "${0%/*}"/.git)" rev-parse HEAD)"
 
     local SERVER=https://ala-blade21.wrs.com
     local CI_REPO=git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts
@@ -84,7 +174,6 @@ main()
     local ARG=
 
     while [ $# -gt 0 ]; do
-        echo "Arg: $1"
         case "$1" in
             --server=*)               SERVER=${1#*=} ;;
             --server)                 SERVER=$2; shift ;;
@@ -109,10 +198,20 @@ main()
             --sdk[-_]machine)         SDK_MACHINE=$2; shift ;;
             --localconf=*)            LOCALCONF=${1#*=} ;;
             --localconf)              LOCALCONF=$2; shift ;;
-            *)                        echo "Unrecognized arg $1. Exiting"; exit 1 ;;
+            -v|--verbose)             VERBOSE=1 ;;
+            -h|--help)                usage; exit 0 ;;
+            *)                        echo "Unrecognized arg $1."; usage; exit 1 ;;
         esac
         shift
     done
+
+    # Must be able to run bitbake to get the active layers
+    command -v bitbake >/dev/null 2>&1 || { echo >&2 "Could not find bitbake. Aborting."; exit 0; }
+
+    if [ -z "$BBPATH" ]; then
+        echo "Bitbake not enabled. Run oe-init-build-env."
+        exit 1
+    fi
 
     if [ "${SERVER:0:8}" != 'https://' ]; then
         SERVER="https://$SERVER"
@@ -164,7 +263,7 @@ main()
     export PUSH_LAYERS=()
 
     local BITBAKE_PATH=
-    BITBAKE_PATH=$(which bitbake)
+    BITBAKE_PATH=$(command -v bitbake)
     BITBAKE_PATH=${BITBAKE_PATH%/*}
 
     # Since setup.sh will always put bitbake in a known location, use that to figure out
@@ -185,6 +284,7 @@ main()
     local REPO=
     for REPO in $REPOS; do
         cd "$REPO"
+        log "Checking $REPO for commits"
 
         local COMMITS=
         local BRANCH=
@@ -260,6 +360,7 @@ main()
     for PUSH_LAYER in "${PUSH_LAYERS[@]}"; do
         (
             cd "$PUSH_LAYER"
+            log "Creating fork $PUSH_LAYER on lxgit"
 
             local SERVER_REPO_PATH=
             SERVER_REPO_PATH=$(get_remote_repo_path)
