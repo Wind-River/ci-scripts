@@ -34,6 +34,36 @@ node('docker') {
     return command
   }
 
+  // function to run docker command after ensuring the image is up to date
+  def docker_run = {
+    String params, String image, String cmd ->
+    imageId = sh(returnStdout: true, script: "docker image inspect --format='{{json .Id}}' ${image} | tr -d '\"'").trim()
+    if ( imageId.startsWith('sha256') ) {
+      ret = sh(returnStatus: true, script: "docker pull ${image}")
+      if ( ret != 0 ) {
+        echo "Docker pull failed. Using local version of image: ${imageId}"
+      } else {
+        echo "Docker image ${image} is up to date"
+      }
+    } else {
+      def counter = 10
+      while ( counter > 0 ) {
+        ret = sh(returnStatus: true, script: "docker pull ${image}")
+        if ( ret == 0 ) {
+          break
+        }
+        echo "Docker pull of ${image} failed. Waiting 60 seconds"
+        sleep 60
+        counter = counter - 1
+      }
+      if ( counter == 0 ) {
+        error "Unable to pull ${image}. Please check image name and registry availablity. Cannot continue."
+      }
+    }
+    echo "Using image ${image} with ID: ${imageId}"
+    sh "docker run ${params} ${image} ${cmd}"
+  }
+
   // Node name is from docker swarm is hostname + dash + random string. Remove random part of recover hostname
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
@@ -63,8 +93,8 @@ node('docker') {
       }
     }
 
-    def cmd="${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
-    sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
+    String cmd="${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
+    docker_run("${docker_params}", "${REGISTRY}/ubuntu1604_64", "${cmd}")
 
     // cleanup credentials
     if (params.GIT_CREDENTIAL == "enable") {
@@ -147,7 +177,11 @@ node('docker') {
       }
 
       try {
-        sh "docker run ${docker_params} ${REGISTRY}/${IMAGE} ${cmd}"
+        String image = "${REGISTRY}/${IMAGE}"
+        if ( params.IMAGE.contains('/') ) {
+          image = params.IMAGE
+        }
+        docker_run("${docker_params}", "${image}", "${cmd}")
       } catch (err) {
         def err_message = err.getMessage()
         if (err_message == "script returned exit code 2") {
@@ -172,7 +206,7 @@ node('docker') {
       env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/build_postprocess.sh"
-      sh "docker run --init ${docker_params} ${REGISTRY}/${POSTPROCESS_IMAGE} ${cmd}"
+      docker_run("${docker_params}", "${REGISTRY}/${POSTPROCESS_IMAGE}", "${cmd}")
     }
   }
 
@@ -189,7 +223,7 @@ node('docker') {
         env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
         docker_params = add_env( docker_params, env_args )
         def cmd="${WORKSPACE}/ci-scripts/${RUNTIME_TEST_CMD}"
-        sh "docker run --init ${docker_params} ${REGISTRY}/${TEST_IMAGE} ${cmd}"
+        docker_run("${docker_params}", "${REGISTRY}/${TEST_IMAGE}", "${cmd}")
       } else {
         println("Test is disabled, ignore 'Test' stage.")
       }
@@ -207,7 +241,7 @@ node('docker') {
         env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
         docker_params = add_env( docker_params, env_args )
         def cmd="${WORKSPACE}/ci-scripts/test_postprocess.sh"
-        sh "docker run --init ${docker_params} ${REGISTRY}/${POST_TEST_IMAGE} ${cmd}"
+        docker_run("${docker_params}", "${REGISTRY}/${POST_TEST_IMAGE}", "${cmd}")
       } else {
         println("Test is disabled, ignore 'Post Test' stage.")
       }

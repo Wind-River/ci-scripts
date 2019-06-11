@@ -59,6 +59,11 @@ Build Customization Options:
        cannot be found the local.conf from the buildarea will be
        used. Note that the build_configure.sh script will still be run.
 
+   --build_image=<image>
+
+       Select the container image used for the build stage.
+       Default: windriver/ubuntu1604_64
+
 Development Options:
 
     --email=<email>
@@ -171,6 +176,7 @@ main()
     local SDK_EXT=no
     local RECIPES=()
     local LOCALCONF=no
+    local BUILD_IMAGE=
     local ARG=
 
     while [ $# -gt 0 ]; do
@@ -198,6 +204,8 @@ main()
             --sdk[-_]machine)         SDK_MACHINE=$2; shift ;;
             --localconf=*)            LOCALCONF=${1#*=} ;;
             --localconf)              LOCALCONF=$2; shift ;;
+            --build[-_]image=*)       BUILD_IMAGE=${1#*=} ;;
+            --build[-_]image)         BUILD_IMAGE=$2; shift ;;
             -v|--verbose)             VERBOSE=1 ;;
             -h|--help)                usage; exit 0 ;;
             *)                        echo "Unrecognized arg $1."; usage; exit 1 ;;
@@ -349,6 +357,7 @@ main()
         echo "sdk: $SDK"
         echo "sdk_ext: $SDK_EXT"
         echo "sdk_machine: $SDK_MACHINE"
+        echo "build_image: $BUILD_IMAGE"
         echo "repos:"
     } >> "$DEVBUILD_ARGS"
 
