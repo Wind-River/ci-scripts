@@ -1,6 +1,17 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+    echo "This script requires bash version 4+"
+    exit 1
+fi
+
+# workaround bash bug in <4.4 where empty array is considered unbound
+# https://git.savannah.gnu.org/cgit/bash.git/tree/CHANGES?id=3ba697465bc74fab513a26dea700cc82e9f4724e#n878
+if [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -lt 4 ]; then
+    set +u
+fi
+
 # In a yocto buildarea, use bitbake to query active layers and
 # determine if there are new commits on any of those layers. The new
 # commits are staged on lxgit and a yaml structure with the info is
@@ -300,12 +311,14 @@ main()
 
         local RANGE=
         if [ "$BRANCH" == "HEAD" ]; then
+            set +e # need to check the return code
             if git rev-parse --abbrev-ref m/master &> /dev/null; then
                 RANGE=m/master..HEAD
             else
                 echo "$REPO has detached HEAD and repository wasn't setup with repo. Exiting"
                 exit 1
             fi
+            set -e
         else
             RANGE=$(git status -sb | cut -d' ' -f 2)
         fi
@@ -333,6 +346,10 @@ main()
 
     local DEVBUILD_ARGS=
     DEVBUILD_ARGS=$(mktemp --tmpdir devbuild-XXXXXXXXX)
+    function finish {
+        rm -f "$DEVBUILD_ARGS"
+    }
+    trap finish EXIT
 
     {
         echo "---"
@@ -363,6 +380,11 @@ main()
 
     local PULL_TOP=
     PULL_TOP=$(mktemp --tmpdir -d "pull-requests-${GITOLITE_USER}.XXXXXXXXXX")
+    function finish2 {
+        rm -rf "$PULL_TOP"
+    }
+    trap finish2 EXIT
+
     local NOW=
     NOW=$(date +%Y%m%d-%H%M)
 

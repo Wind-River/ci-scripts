@@ -7,7 +7,7 @@ main()
     local CI_REPO=git://ala-lxgit.wrs.com/projects/wrlinux-ci/ci-scripts
     local CI_BRANCH=master
     local DEVBUILD_ARGS=
-    local LOCALCONF=
+    local LOCALCONF=no
 
     for i in "$@"
     do
@@ -32,7 +32,7 @@ main()
         exit 1
     fi
 
-    if [ ! -f "$LOCALCONF" ]; then
+    if [ "$LOCALCONF" != 'no' ] && [ ! -f "$LOCALCONF" ]; then
         echo "Invalid conf file: $LOCALCONF"
         exit 1
     fi
