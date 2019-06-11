@@ -49,6 +49,7 @@ node('!docker') {
       string( name: 'POST_SUCCESS', value: param['POST_SUCCESS'] ),
       string( name: 'POST_FAIL', value: param['POST_FAIL'] ),
       string( name: 'REGISTRY', value: param['REGISTRY'] ),
+      string( name: 'IMAGE', value: param['IMAGE'] ),
       string( name: 'TOASTER', value: param['TOASTER'] ),
       string( name: 'LAYERINDEX_TYPE', value: param['LAYERINDEX_TYPE'] ),
       string( name: 'LAYERINDEX_SOURCE', value: param['LAYERINDEX_SOURCE'] ),
@@ -149,6 +150,10 @@ node('!docker') {
       defaults['BUILD_CMD_FOR_TEST'] = ''
 
       defaults['REGISTRY'] = 'windriver'
+      defaults['IMAGE'] = 'ubuntu1604_64'
+      if ( devbuild.build_image ) {
+        defaults['IMAGE'] = devbuild.build_image
+      }
       defaults['POSTPROCESS_ARGS'] = "RSYNC_DEST_DIR=${dest_dir},REPORT_SERVER=http://${report_server}:9200,EMAIL=${devbuild.email},RSYNC_SERVER=${test_server},SMTPSERVER=prod-webmail.windriver.com,HTTP_ROOT=http://${test_server}/tftpboot"
       defaults['POST_SUCCESS'] = 'rsync,cleanup'
       defaults['POST_FAIL'] = 'rsync,send_mail,report,cleanup'

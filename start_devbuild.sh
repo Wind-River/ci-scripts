@@ -1,6 +1,17 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+    echo "This script requires bash version 4+"
+    exit 1
+fi
+
+# workaround bash bug in <4.4 where empty array is considered unbound
+# https://git.savannah.gnu.org/cgit/bash.git/tree/CHANGES?id=3ba697465bc74fab513a26dea700cc82e9f4724e#n878
+if [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -lt 4 ]; then
+    set +u
+fi
+
 # In a yocto buildarea, use bitbake to query active layers and
 # determine if there are new commits on any of those layers. The new
 # commits are staged on lxgit and a yaml structure with the info is
@@ -58,6 +69,11 @@ Build Customization Options:
        Override the default local.conf with provided one. If the file
        cannot be found the local.conf from the buildarea will be
        used. Note that the build_configure.sh script will still be run.
+
+   --build_image=<image>
+
+       Select the container image used for the build stage.
+       Default: windriver/ubuntu1604_64
 
 Development Options:
 
@@ -171,6 +187,7 @@ main()
     local SDK_EXT=no
     local RECIPES=()
     local LOCALCONF=no
+    local BUILD_IMAGE=
     local ARG=
 
     while [ $# -gt 0 ]; do
@@ -198,6 +215,8 @@ main()
             --sdk[-_]machine)         SDK_MACHINE=$2; shift ;;
             --localconf=*)            LOCALCONF=${1#*=} ;;
             --localconf)              LOCALCONF=$2; shift ;;
+            --build[-_]image=*)       BUILD_IMAGE=${1#*=} ;;
+            --build[-_]image)         BUILD_IMAGE=$2; shift ;;
             -v|--verbose)             VERBOSE=1 ;;
             -h|--help)                usage; exit 0 ;;
             *)                        echo "Unrecognized arg $1."; usage; exit 1 ;;
@@ -292,12 +311,14 @@ main()
 
         local RANGE=
         if [ "$BRANCH" == "HEAD" ]; then
+            set +e # need to check the return code
             if git rev-parse --abbrev-ref m/master &> /dev/null; then
                 RANGE=m/master..HEAD
             else
                 echo "$REPO has detached HEAD and repository wasn't setup with repo. Exiting"
                 exit 1
             fi
+            set -e
         else
             RANGE=$(git status -sb | cut -d' ' -f 2)
         fi
@@ -325,6 +346,10 @@ main()
 
     local DEVBUILD_ARGS=
     DEVBUILD_ARGS=$(mktemp --tmpdir devbuild-XXXXXXXXX)
+    function finish {
+        rm -f "$DEVBUILD_ARGS"
+    }
+    trap finish EXIT
 
     {
         echo "---"
@@ -349,11 +374,17 @@ main()
         echo "sdk: $SDK"
         echo "sdk_ext: $SDK_EXT"
         echo "sdk_machine: $SDK_MACHINE"
+        echo "build_image: $BUILD_IMAGE"
         echo "repos:"
     } >> "$DEVBUILD_ARGS"
 
     local PULL_TOP=
     PULL_TOP=$(mktemp --tmpdir -d "pull-requests-${GITOLITE_USER}.XXXXXXXXXX")
+    function finish2 {
+        rm -rf "$PULL_TOP"
+    }
+    trap finish2 EXIT
+
     local NOW=
     NOW=$(date +%Y%m%d-%H%M)
 

@@ -1,0 +1,18 @@
+---
+release: master-wr
+email: Konrad.Scherer@windriver.com
+distros:
+machines:
+- qemux86-64
+images:
+recipes:
+sdk: no
+sdk_ext: no
+sdk_machine: i686-mingw32
+build_image: wr-docker-registry:5000/fedora29_64
+repos:
+- dir: layers/meta-virtualization
+  repo: git://ala-lxgit.wrs.com/wrpush/kscherer/meta-virtualization
+  branch: pull-meta-virtualization-devbuild-20190611-1109-g5ToijPkxK
+  layers:
+    - meta-virtualization
