@@ -322,13 +322,13 @@
     timeout: 300
   qemu-arma15:
     job_template: lava-test/jobs/templates/wrlinux-10/arma15_qemu_job_lava-smoke-test_template.yaml
-    timeout: 300
+    timeout: 600
   qemu-arm64:
     job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_lava-smoke-test_template.yaml
     timeout: 300
   mxe5400-qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_lava-smoke-test_template.yaml
-    timeout: 300
+    timeout: 600
   mxe5400-qemu-ppc:
     job_template: lava-test/jobs/templates/wrlinux-10/ppc_qemu_job_lava-smoke-test_template.yaml
     timeout: 300
