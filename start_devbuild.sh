@@ -320,7 +320,7 @@ main()
             fi
             set -e
         else
-            RANGE=$(git status -sb | cut -d' ' -f 2)
+            RANGE=$(git status --short --branch --untracked-files=no | cut -d' ' -f 2)
         fi
 
         COMMITS=$(git log --pretty=oneline "$RANGE" 2> /dev/null)
