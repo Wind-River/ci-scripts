@@ -309,7 +309,6 @@ function generate_failmail
         echo ""
         echo "Build in $MACHINE $ARCH"
         echo "Branch being built is $BRANCH"
-        echo Logfiles are 00-wrconfig.log and 00-wrbuild.log
         echo Relevant bits of the config were:
         if [ -n "${CONFIGARGS[*]}" ]; then
             echo "    ${CONFIGARGS[*]}"
@@ -319,6 +318,9 @@ function generate_failmail
             echo "    ${BUILD_CMD[*]}"
         fi
         echo ""
+        echo "Jenkins logs: ${JENKINS_URL}/job/WRLinux_Build/${BUILD_ID}/console"
+        echo "Artifacts: ${HTTP_ROOT}/builds/${RSYNC_DEST_DIR}/${NAME}"
+        echo ""
 
         local BUILDLOG=$BUILD/00-wrbuild.log
         if [ -f "$BUILDLOG" ]; then
@@ -327,19 +329,21 @@ function generate_failmail
         fi
         echo "Failed step: $STEP in file: $PKG_LOG"
         echo ""
-        if [ "$REASON" == "KILLED" ]; then
-            local SETUPLOG=$BUILD/00-wrsetup.log
-            if [ -f "$SETUPLOG" ]; then
-                echo Here is some context from 00-wrsetup.log
-                echo " --------------------------------------------------"
-                if [ `cat $SETUPLOG | wc -m` -lt 4000 ]; then
-                    cat $SETUPLOG | fold -b -w 500
-                else
-                    tail -n "$LOGLINES" | fold -b -w 500
-                fi
-                cat "$SETUPLOG"
-                echo ""
+
+        local SETUPLOG=$BUILD/00-wrsetup.log
+        if [ "$PKG" = 'configure' ] && [ -f "$SETUPLOG" ]; then
+            echo Here is some context from 00-wrsetup.log
+            echo " --------------------------------------------------"
+            if [ `cat $SETUPLOG | wc -m` -lt 4000 ]; then
+                cat $SETUPLOG | fold -b -w 500
+            else
+                tail -n "$LOGLINES" | fold -b -w 500
             fi
+            cat "$SETUPLOG"
+            echo ""
+        fi
+
+        if [ "$REASON" == "KILLED" ]; then
             local DOCKERLOG=$BUILD/00-DOCKER.log
             if [ -f "$DOCKERLOG" ]; then
                 echo Here is some context from 00-DOCKER.log
@@ -388,20 +392,6 @@ function generate_failmail
             echo " --------------------------------------------------"
         fi
 
-        if [ -n "$PUSH_HOST" ]; then
-            local FAIL_BRANCH=$BUILD_NAME-$PKG-$(date +'%F-%H%M%S')
-            local LOGLINK="http://$PUSH_HOST/cgit/$FAIL_REPO/.git/log/?h=${FAIL_BRANCH//%/%25}"
-            echo " --------------------------------------"
-            echo " "
-            echo This file, and more detailed log info can be found at:
-            echo "$LOGLINK"
-            echo "To reproduce this failure with a local docker instance, see wraxl docs:"
-            echo "  http://ala-lxgit.wrs.com/cgi-bin/cgit.cgi/lpd-ops/wr-buildscripts.git/tree/README.md"
-            sed -i '/FailBranch:/d' "$STATFILE"
-            echo "FailBranch: $FAIL_BRANCH" >> "$STATFILE"
-            sed -i '/LogLink:/d' "$STATFILE"
-            echo "LogLink: $LOGLINK" >> "$STATFILE"
-        fi
     } > "$MFILE"
 
 }
