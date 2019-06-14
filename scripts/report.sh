@@ -93,7 +93,7 @@ report() {
     echo "Reporting to $REPORT_SERVER"
     current_date=$(date +%Y.%m.%d)
     # report to elasticsearch server
-    curl -XPOST "${REPORT_SERVER}/wrigel-${current_date}/logs" -d @"$REPORT_STATFILE"
+    curl -XPOST "${REPORT_SERVER}/wrigel-${current_date}/logs" -H "Content-Type: application/json" -d @"$REPORT_STATFILE"
 }
 
 report "$@"
