@@ -83,10 +83,12 @@ node('!docker') {
     dir('ci-scripts') {
       git(url:params.CI_REPO, branch:params.CI_BRANCH)
 
+      def build_group_id = UUID.randomUUID().toString()
+
       Date now = new Date()
       def dateFormat = new SimpleDateFormat('yyyy-MM-dd')
       String today = dateFormat.format(now)
-      String dest_dir="builds/devbuild_${name}_${today}"
+      String dest_dir="builds/devbuild_${name}_${today}_${build_group_id}"
 
       String test_server='yow-lpdtest.wrs.com'
       String git_server='ala-lxgit.wrs.com'
@@ -107,8 +109,6 @@ node('!docker') {
       def default_images = ['wrlinux-graphics': 'wrlinux-image-glibc-std wrlinux-image-glibc-small wrlinux-image-glibc-core wrlinux-image-glibc-std-sato',
                             'wrlinux': 'wrlinux-image-glibc-std wrlinux-image-glibc-small wrlinux-image-glibc-core',
                             'wrlinux-small': 'wrlinux-image-glibc-small']
-
-      def build_group_id = UUID.randomUUID().toString()
 
       // mapping of bsp to test suite used
       def test_suite = ['qemux86': 'oeqa-auto-qemuall-test',

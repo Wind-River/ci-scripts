@@ -72,6 +72,8 @@ node('docker') {
   common_docker_params = add_env( common_docker_params, common_env_args )
   def BUILD_DIR="${WORKSPACE}/builds/builds-${BUILD_ID}"
 
+  // set the build display name
+  currentBuild.displayName = "#${BUILD_NUMBER}-${NAME}"
 
   stage('Docker Run Check') {
     dir('ci-scripts') {
