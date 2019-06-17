@@ -83,7 +83,8 @@ node('!docker') {
     dir('ci-scripts') {
       git(url:params.CI_REPO, branch:params.CI_BRANCH)
 
-      def build_group_id = UUID.randomUUID().toString()
+      // Each devbuild build id will be unique
+      def build_group_id = "${BUILD_ID}"
 
       Date now = new Date()
       def dateFormat = new SimpleDateFormat('yyyy-MM-dd')
@@ -215,7 +216,7 @@ node('!docker') {
       if ( devbuild.sdk == 'yes' ) {
         for ( machine in machines ) {
           def param = defaults
-          param['NAME'] = "devbuild_${name}_${distro}_${machine}_sdk_${build_group_id}"
+          param['NAME'] = "${name}_${distro}_${machine}_sdk"
           param['DISTRO'] = 'wrlinux-graphics'
           param['MACHINE'] = machine
           param['SDK_MACHINE'] = devbuild.sdk_machine
@@ -229,7 +230,7 @@ node('!docker') {
       if ( devbuild.sdk_ext == 'yes' ) {
         for ( machine in machines ) {
           def param = defaults
-          param['NAME'] = "devbuild_${name}_${distro}_${machine}_sdkext_${build_group_id}"
+          param['NAME'] = "${name}_${distro}_${machine}_sdkext"
           param['DISTRO'] = 'wrlinux-graphics'
           param['MACHINE'] = machine
           param['SDK_MACHINE'] = devbuild.sdk_machine
