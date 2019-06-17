@@ -42,7 +42,8 @@ if [ -n "${NGINX_MAX_UPLOAD_SIZE}" ]; then
   nginx_upload_size=${NGINX_MAX_UPLOAD_SIZE}
 fi
 
-cat >> ${NGINX_DIRECTORY}/nginx.conf <<_EOF_
+cat >> "${NGINX_DIRECTORY}/nginx.conf" <<_EOF_
+  client_body_buffer_size ${nginx_upload_size};
   client_max_body_size  ${nginx_upload_size};
 _EOF_
 
