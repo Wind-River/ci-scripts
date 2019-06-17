@@ -31,6 +31,12 @@ cleanup() {
     echo "Removing build directory $BUILD/$NAME"
     # fail if $BUILD is empty SC2115
     rm -rf "${BUILD:?}/$NAME"
+
+    echo "Removing old build directories"
+    find /home/jenkins/workspace/WRLinux_Build*/builds -maxdepth 1 -type d -name 'builds-*' -ctime +3 -exec rm -rf {} \;
+
+    echo "Removing sstate files that have not been accessed in three days"
+    find /home/jenkins/workspace/*_sstate_cache -atime +3 -delete
 }
 
 cleanup "$@"

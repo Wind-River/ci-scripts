@@ -177,10 +177,10 @@ node('!docker') {
       for ( distro in distros ) {
         for ( machine in machines ) {
           def param = defaults
-          param['NAME'] = "devbuild_${name}_${distro}_${machine}_${build_group_id}"
+          param['NAME'] = "${name}_${distro}_${machine}"
           param['DISTRO'] = distro
           param['MACHINE'] = machine
-          param['PREBUILD_CMD'] = 'build_configure.sh  --enable-bootimage=ext4'
+          param['PREBUILD_CMD'] = 'build_configure.sh  --enable-bootimage=ext4 --enable-shared-sstate=wr1019_sstate_cache'
 
           // override default images if images are defined
           String images = default_images[distro]
@@ -219,7 +219,7 @@ node('!docker') {
           param['DISTRO'] = 'wrlinux-graphics'
           param['MACHINE'] = machine
           param['SDK_MACHINE'] = devbuild.sdk_machine
-          param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=master_wr_sstate_cache'
+          param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=wr1019_sstate_cache'
           param['BUILD_CMD'] = "bitbake wrlinux-image-glibc-small wrlinux-image-glibc-std wrlinux-image-glibc-core wrlinux-image-glibc-std-sato -cpopulate_sdk"
 
           trigger_build param
@@ -233,7 +233,7 @@ node('!docker') {
           param['DISTRO'] = 'wrlinux-graphics'
           param['MACHINE'] = machine
           param['SDK_MACHINE'] = devbuild.sdk_machine
-          param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=master_wr_sstate_cache'
+          param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=wr1019_sstate_cache'
           param['BUILD_CMD'] = "bitbake wrlinux-image-glibc-small wrlinux-image-glibc-std wrlinux-image-glibc-core wrlinux-image-glibc-std-sato -cpopulate_sdk_ext"
 
           trigger_build param
