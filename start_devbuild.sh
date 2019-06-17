@@ -97,6 +97,10 @@ Development Options:
        Select the ci-scripts branch to be used.
        Default: master
 
+    --no-upstream-check
+
+       Do not check if the layers are up to date with upstream repositories.
+
     --dry-run
 
         Save the yaml file that would be sent to Jenkins to devbuild.yaml
@@ -189,6 +193,7 @@ main()
     local LOCALCONF=no
     local BUILD_IMAGE=
     local ARG=
+    local CHECK_UPSTREAM=yes
 
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -217,6 +222,7 @@ main()
             --localconf)              LOCALCONF=$2; shift ;;
             --build[-_]image=*)       BUILD_IMAGE=${1#*=} ;;
             --build[-_]image)         BUILD_IMAGE=$2; shift ;;
+            --no-upstream-check)      CHECK_UPSTREAM=no ;;
             -v|--verbose)             VERBOSE=1 ;;
             -h|--help)                usage; exit 0 ;;
             *)                        echo "Unrecognized arg $1."; usage; exit 1 ;;
@@ -299,8 +305,49 @@ main()
     fi
     echo "Using release $RELEASE"
 
-    echo "Searching layers in $TOP for local commits"
     local REPO=
+    if [ "$CHECK_UPSTREAM" == 'yes' ]; then
+        echo "Checking if layers are out of date"
+        local UPTODATE=yes
+        for REPO in $REPOS; do
+            cd "$REPO"
+
+            local ORIGINAL_BRANCH=
+            ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref m/master)
+            ORIGINAL_BRANCH="${ORIGINAL_BRANCH:5}"
+            local BASE_URL=
+            BASE_URL=$(git config remote.base.url)
+
+            if [ "${BASE_URL:0:6}" == "git://" ] || [ "${BASE_URL:0:6}" == "ssh://" ] || [ "${BASE_URL:0:4}" == 'git@' ]; then
+                local UPSTREAM_COMMIT=
+                UPSTREAM_COMMIT=$(git ls-remote "$BASE_URL" "$ORIGINAL_BRANCH" | cut -f 1)
+
+                # get the commit before local commits might have been added
+                local LAST_SYNC_COMMIT=
+                LAST_SYNC_COMMIT=$(git rev-parse m/master)
+
+                if [ "$LAST_SYNC_COMMIT" != "$UPSTREAM_COMMIT" ]; then
+                    echo "WARN: the repo $REPO is behind upstream. Upstream commit for $ORIGINAL_BRANCH is $UPSTREAM_COMMIT"
+                    local UPTODATE=no
+                fi
+            fi
+
+            cd "$CURRENT_DIR"
+        done
+        if [ "$UPTODATE" == 'no' ]; then
+            echo
+            echo "Detected repositories not up to date. It is recommended to sync the local buildarea"
+            echo "to avoid devbuild build failures. Do you wish to continue anyways? [N/y]"
+            read -r ans
+            if [ "x$ans" != "xy" ] && [ "x$ans" != "xY" ] ; then
+                exit 1
+            fi
+        fi
+    fi
+
+    exit 0
+
+    echo "Searching layers in $TOP for local commits"
     for REPO in $REPOS; do
         cd "$REPO"
         log "Checking $REPO for commits"
