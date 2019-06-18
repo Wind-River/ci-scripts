@@ -345,8 +345,6 @@ main()
         fi
     fi
 
-    exit 0
-
     echo "Searching layers in $TOP for local commits"
     for REPO in $REPOS; do
         cd "$REPO"
