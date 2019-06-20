@@ -73,6 +73,12 @@ Build Customization Options:
    --build_image=<image>
 
        Select the container image used for the build stage.
+       Images validated by Wraxl:
+        - wr-docker-registry:5000/fedora28_64_py3
+        - wr-docker-registry:5000/fedora29_64
+        - wr-docker-registry:5000/opensuse151_64
+        - wr-docker-registry:5000/ubuntu1604_64_py3
+        - wr-docker-registry:5000/ubuntu1804_64
        Default: windriver/ubuntu1604_64
 
 Development Options:
