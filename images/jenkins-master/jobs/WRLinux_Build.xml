@@ -184,7 +184,7 @@
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>SDK_MACHINE</name>
+          <name>SDKMACHINE</name>
           <description>Override default sdk machine</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>

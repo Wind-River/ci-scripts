@@ -64,7 +64,7 @@ node('!docker') {
       string( name: 'POST_TEST_IMAGE', value: param['POST_TEST_IMAGE'] ),
       string( name: 'DISTRO', value: param['DISTRO'] ),
       string( name: 'MACHINE', value: param['MACHINE'] ),
-      string( name: 'SDK_MACHINE', value: param['SDK_MACHINE'] ),
+      string( name: 'SDKMACHINE', value: param['SDKMACHINE'] ),
       text( name: 'DEVBUILD_ARGS', value: param['DEVBUILD_ARGS'] ),
       text( name: 'LOCALCONF', value: param['LOCALCONF'] ),
     ]
@@ -146,7 +146,7 @@ node('!docker') {
       defaults['BUILD_GROUP_ID'] = build_group_id
       defaults['DISTRO'] = 'wrlinux-graphics'
       defaults['MACHINE'] = ''
-      defaults['SDK_MACHINE'] = ''
+      defaults['SDKMACHINE'] = ''
       defaults['PREBUILD_CMD_FOR_TEST'] = ''
       defaults['BUILD_CMD_FOR_TEST'] = ''
 
@@ -177,7 +177,7 @@ node('!docker') {
 
       for ( distro in distros ) {
         for ( machine in machines ) {
-          def param = defaults
+          def param = defaults.clone()
           param['NAME'] = "${name}_${distro}_${machine}"
           param['DISTRO'] = distro
           param['MACHINE'] = machine
@@ -213,13 +213,14 @@ node('!docker') {
         }
       }
 
-      if ( devbuild.sdk == 'yes' ) {
+      if ( devbuild.sdk ) {
         for ( machine in machines ) {
-          def param = defaults
+          def param = defaults.clone()
+          def distro = 'wrlinux-graphics'
           param['NAME'] = "${name}_${distro}_${machine}_sdk"
-          param['DISTRO'] = 'wrlinux-graphics'
+          param['DISTRO'] = distro
           param['MACHINE'] = machine
-          param['SDK_MACHINE'] = devbuild.sdk_machine
+          param['SDKMACHINE'] = devbuild.sdkmachine
           param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=wr1019_sstate_cache'
           param['BUILD_CMD'] = "bitbake wrlinux-image-glibc-small wrlinux-image-glibc-std wrlinux-image-glibc-core wrlinux-image-glibc-std-sato -cpopulate_sdk"
 
@@ -227,13 +228,14 @@ node('!docker') {
         }
       }
 
-      if ( devbuild.sdk_ext == 'yes' ) {
+      if ( devbuild.sdk_ext ) {
         for ( machine in machines ) {
-          def param = defaults
+          def param = defaults.clone()
+          def distro = 'wrlinux-graphics'
           param['NAME'] = "${name}_${distro}_${machine}_sdkext"
-          param['DISTRO'] = 'wrlinux-graphics'
+          param['DISTRO'] = distro
           param['MACHINE'] = machine
-          param['SDK_MACHINE'] = devbuild.sdk_machine
+          param['SDKMACHINE'] = devbuild.sdkmachine
           param['PREBUILD_CMD'] = 'build_configure.sh --enable-shared-sstate=wr1019_sstate_cache'
           param['BUILD_CMD'] = "bitbake wrlinux-image-glibc-small wrlinux-image-glibc-std wrlinux-image-glibc-core wrlinux-image-glibc-std-sato -cpopulate_sdk_ext"
 

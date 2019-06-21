@@ -51,10 +51,10 @@ Build Customization Options:
        Select the recipes for each build. Note this overrides any
        images and disables runtime testing.
 
-   --sdk-machine=<machine>
+   --sdkmachine=<machine>
 
-       Select the machine type used for the SDK build.
-       Default: qemux86
+       Select the machine type used for the SDK build. Supports x86-64 or i686.
+       Default: x86-64
 
    --sdk
 
@@ -192,9 +192,9 @@ main()
     local DISTROS=()
     local MACHINES=()
     local IMAGES=()
-    local SDK=no
-    local SDK_MACHINE=i686-mingw32
-    local SDK_EXT=no
+    local SDK=false
+    local SDKMACHINE=x86_64
+    local SDK_EXT=false
     local RECIPES=()
     local LOCALCONF=no
     local BUILD_IMAGE=
@@ -220,10 +220,12 @@ main()
             --recipe=*|--recipes=*)   ARG=${1#*=}; RECIPES=(${ARG//,/ }) ;;
             --recipe|--recipes)       ARG=$2; RECIPES=(${ARG//,/ }); shift ;;
             --dry[-_]run)             DRY_RUN=yes ;;
-            --sdk)                    SDK=yes ;;
-            --sdk[-_]ext)             SDK_EXT=yes ;;
-            --sdk[-_]machine=*)       SDK_MACHINE=${1#*=} ;;
-            --sdk[-_]machine)         SDK_MACHINE=$2; shift ;;
+            --sdk)                    SDK=true ;;
+            --sdk[-_]ext)             SDK_EXT=true ;;
+            --sdk[-_]machine=*)       SDKMACHINE=${1#*=} ;;
+            --sdk[-_]machine)         SDKMACHINE=$2; shift ;;
+            --sdkmachine=*)           SDKMACHINE=${1#*=} ;;
+            --sdkmachine)             SDKMACHINE=$2; shift ;;
             --localconf=*)            LOCALCONF=${1#*=} ;;
             --localconf)              LOCALCONF=$2; shift ;;
             --build[-_]image=*)       BUILD_IMAGE=${1#*=} ;;
@@ -248,14 +250,21 @@ main()
         SERVER="https://$SERVER"
     fi
 
-    if [ "$SDK" == 'yes' ] && [ -z "$MACHINE" ]; then
-        echo "SDK selected without specifying machine so qemux86 selected as SDK_MACHINE"
-        MACHINE=qemux86
+    if [ "$SDK" == 'true' ] || [ "$SDK_EXT" == 'true' ]; then
+        if [ "$SDKMACHINE" != 'x86_64' ] && [ "$SDKMACHINE" != 'i686' ]; then
+            echo "ERROR: Invalid SDKMACHINE specified: $SDKMACHINE"
+            exit 1
+        fi
     fi
 
-    if [ "$SDK_EXT" == 'yes' ] && [ -z "$MACHINE" ]; then
-        echo "Extended SDK selected without specifying machine so qemux86 selected as SDK_MACHINE"
-        MACHINE=qemux86
+    if [ "$SDK" == 'true' ] && [ "${#MACHINES[@]}" -eq 0 ]; then
+        echo "SDK selected without specifying machine so qemux86-64 selected as MACHINE"
+        MACHINES=(qemux86-64)
+    fi
+
+    if [ "$SDK_EXT" == 'true' ] && [ "${#MACHINES[@}" -eq 0 ]; then
+        echo "Extended SDK selected without specifying machine so qemux86-64 selected as MACHINE"
+        MACHINES=(qemux86-64)
     fi
 
     if [ "$LOCALCONF" != 'no' ] && [ ! -f "$LOCALCONF" ]; then
@@ -424,12 +433,11 @@ main()
         done
         echo "sdk: $SDK"
         echo "sdk_ext: $SDK_EXT"
-        echo "sdk_machine: $SDK_MACHINE"
+        echo "sdkmachine: $SDKMACHINE"
         echo "build_image: $BUILD_IMAGE"
         echo "repos:"
     } >> "$DEVBUILD_ARGS"
 
-    local PULL_TOP=
     PULL_TOP=$(mktemp --tmpdir -d "pull-requests-${GITOLITE_USER}.XXXXXXXXXX")
     function finish2 {
         rm -rf "$PULL_TOP"
