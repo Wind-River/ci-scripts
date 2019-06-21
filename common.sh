@@ -318,8 +318,8 @@ function generate_failmail
             echo "    ${BUILD_CMD[*]}"
         fi
         echo ""
-        echo "Jenkins logs: ${JENKINS_URL}/job/WRLinux_Build/${BUILD_ID}/console"
-        echo "Artifacts: ${HTTP_ROOT}/builds/${RSYNC_DEST_DIR}/${NAME}"
+        echo "Jenkins logs: ${JENKINS_URL}job/WRLinux_Build/${BUILD_ID}/console"
+        echo "Artifacts: ${HTTP_ROOT}/${RSYNC_DEST_DIR}/${NAME}"
         echo ""
 
         local BUILDLOG=$BUILD/00-wrbuild.log
