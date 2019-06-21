@@ -250,6 +250,14 @@ main()
         SERVER="https://$SERVER"
     fi
 
+    for RECIPE in "${RECIPES[@]}"; do
+        if [ "${RECIPE:0:14}" == 'wrlinux-image-' ]; then
+            echo "Detected recipe $RECIPE which starts with wrlinux-image- and is an image type."
+            echo "Please rerun using the --images option instead"
+            exit 1
+        fi
+    done
+
     if [ "$SDK" == 'true' ] || [ "$SDK_EXT" == 'true' ]; then
         if [ "$SDKMACHINE" != 'x86_64' ] && [ "$SDKMACHINE" != 'i686' ]; then
             echo "ERROR: Invalid SDKMACHINE specified: $SDKMACHINE"
