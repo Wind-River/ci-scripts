@@ -94,7 +94,6 @@
   - IMAGE_INSTALL_append += "autoconf"
   - IMAGE_INSTALL_append += "rpm opkg"
   - IMAGE_INSTALL_append += "connman"
-  - IMAGE_INSTALL_append += "apt opkg"
   - IMAGE_CLASSES += "testimage testsdk"
   - IMAGE_INSTALL_append += "openssh-sshd openssh-scp"
   - WRTEMPLATE += "feature/dev-pkgs feature/target-toolchain"
