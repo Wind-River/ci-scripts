@@ -217,11 +217,11 @@ store_logs()
     if [ -f "$BUILD/buildstats.log" ]; then
         cp $BUILD/buildstats.log $GDIR
     fi
-    cp $BUILD/00-wrconfig.log $GDIR
+    cp $BUILD/00-wrsetup.log $GDIR
     cp $MFILE $GDIR
 
     for i in  \
-        00-wrbuild.log 00-wrconfig.log config.log buildstats.log \
+        00-wrbuild.log 00-wrsetup.log config.log buildstats.log \
         $(basename $MFILE) $PKG_LOG $COOKER bitbake_build/tmp/qa.log ; do
         if [ -f $i ]; then
             git add -f $i > /dev/null 2>&1
@@ -331,16 +331,20 @@ function generate_failmail
         echo ""
 
         local SETUPLOG=$BUILD/00-wrsetup.log
-        if [ "$PKG" = 'configure' ] && [ -f "$SETUPLOG" ]; then
+        if [ "$PKG" == 'configure' ] && [ -f "$SETUPLOG" ]; then
             echo Here is some context from 00-wrsetup.log
             echo " --------------------------------------------------"
-            if [ `cat $SETUPLOG | wc -m` -lt 4000 ]; then
-                cat $SETUPLOG | fold -b -w 500
-            else
-                tail -n "$LOGLINES" | fold -b -w 500
-            fi
-            cat "$SETUPLOG"
-            echo ""
+            # Remove unhelpful information from the setup logs
+            sed -e '/\[new branch\]/d' -e '/\[new tag\]/d' -e '/Checking out files/d' "$SETUPLOG"
+            echo " --------------------------------------------------"
+        fi
+
+        local PREBUILDLOG=$BUILD/00-prebuild.log
+        if [ "$PKG" == 'configure' ] && [ -f "$PREBUILDLOG" ]; then
+            echo Here is some context from 00-prebuild.log
+            echo " --------------------------------------------------"
+            cat "$PREBUILDLOG" | fold -b -w 500
+            echo " --------------------------------------------------"
         fi
 
         if [ "$REASON" == "KILLED" ]; then
@@ -353,21 +357,19 @@ function generate_failmail
                 echo ""
             fi
         fi
-        echo Here is some context from around the error:
-        echo " --------------------------------------------------"
 
         # Send email has a 998 char line length limit.
         if [ -f "$BUILDLOG" ]; then
+            echo Here is some context from around the error:
+            echo " --------------------------------------------------"
             # cat all the buildlogs if the log file < 4k
             if [ `cat $BUILDLOG | wc -m` -lt 4000 ]; then
                 cat $BUILDLOG | fold -b -w 500
             else
                 grep -C3 '^\[.*\] ERROR:' "$BUILDLOG" | tail -n "$LOGLINES" | fold -b -w 500
             fi
-        else
-            tail -n "$LOGLINES" "$BUILD/00-wrconfig.log" | fold -b -w 500
+            echo " --------------------------------------------------"
         fi
-        echo " --------------------------------------------------"
 
         if [ -f "$PKG_LOG" ]; then
             echo ""

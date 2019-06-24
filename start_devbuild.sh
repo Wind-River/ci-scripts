@@ -270,7 +270,7 @@ main()
         MACHINES=(qemux86-64)
     fi
 
-    if [ "$SDK_EXT" == 'true' ] && [ "${#MACHINES[@}" -eq 0 ]; then
+    if [ "$SDK_EXT" == 'true' ] && [ "${#MACHINES[@]}" -eq 0 ]; then
         echo "Extended SDK selected without specifying machine so qemux86-64 selected as MACHINE"
         MACHINES=(qemux86-64)
     fi

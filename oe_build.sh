@@ -165,33 +165,50 @@ else
     # Run prebuild command which may modify files like local.conf
     log "${PREBUILD_CMD[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
     $TIME bash -c "${PREBUILD_CMD[*]}" >> "$BUILD/00-prebuild.log" 2>&1
+    RET=$?
     log_stats "Prebuild" "$BUILD"
     echo "Prebuild: ${PREBUILD_CMD[*]}" >> "$STATFILE"
 
+    if [ "$RET" != 0 ]; then
+        log "Prebuild failed"
+    fi
+
     # Run prebuild command for test which may modify files like local.conf
-    if [ ${#PREBUILD_CMD_FOR_TEST[@]} -ne 0 ]; then
+    if [ "$RET" == 0 ] && [ ${#PREBUILD_CMD_FOR_TEST[@]} -ne 0 ]; then
+        echo "Prebuild_for_test: ${PREBUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
         log "${PREBUILD_CMD_FOR_TEST[*]}" 2>&1 | tee -a "$BUILD/00-prebuild.log"
         $TIME bash -c "$WORKSPACE/ci-scripts/${PREBUILD_CMD_FOR_TEST[*]}" >> "$BUILD/00-prebuild.log" 2>&1
+        RET=$?
         log_stats "Prebuild_for_test" "$BUILD"
-        echo "Prebuild_for_test: ${PREBUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
+        if [ "$RET" != 0 ]; then
+            log "Prebuild for Test Image failed"
+        fi
     fi
 
-    # Source toaster start script to prepare Toaster GUI
-    if [ "$TOASTER" == "enable" ]; then
-        source toaster start webport=0.0.0.0:8800 >> "$BUILD/00-prebuild.log" 2>&1
+    if [ "$RET" == 0 ]; then
+        # Source toaster start script to prepare Toaster GUI
+        if [ "$TOASTER" == "enable" ]; then
+            source toaster start webport=0.0.0.0:8800 >> "$BUILD/00-prebuild.log" 2>&1
+        fi
+
+        echo "Build: ${BUILD_CMD[*]}" >> "$STATFILE"
+        log "${BUILD_CMD[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
+        $TIME bash -c "${BUILD_CMD[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
+        RET=${PIPESTATUS[0]}
+        log_stats "Build" "$BUILD"
+        if [ "$RET" != 0 ]; then
+            log "Build failed"
+        fi
+    else
+        log "Skipping Build due to Prebuild failures"
     fi
-
-    echo "Build: ${BUILD_CMD[*]}" >> "$STATFILE"
-    log "${BUILD_CMD[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
-    $TIME bash -c "${BUILD_CMD[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
-
-    RET=${PIPESTATUS[0]}
 
     if [ "$RET" == 0 ] && [ ${#BUILD_CMD_FOR_TEST[@]} -ne 0 ]; then
         echo "Build for test: ${BUILD_CMD_FOR_TEST[*]}" >> "$STATFILE"
         log "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | tee --append "$BUILD/00-wrbuild.log"
         $TIME bash -c "${BUILD_CMD_FOR_TEST[*]}" 2>&1 | log_stdout >> "$BUILD/00-wrbuild.log"
         RET=${PIPESTATUS[0]}
+        log_stats "Build_for_test" "$BUILD"
 
         # If build failed but all images got generated, don't exit 1
         if [ "$RET" != 0 ]; then
@@ -205,16 +222,16 @@ else
                 log "Detect built images: Build failed but all images got generated"
                 RET=2 # used by Jenkins to mark build as UNSTABLE but continue to run tests
             fi
+        else
+            log "Build for Test failed"
         fi
     fi
 
     echo "FinishUTC: $(date +%s)" >> "$STATFILE"
-    log_stats "Build" "$BUILD"
 
     if [ "$RET" == 0 ]; then
         echo "Status: PASSED" >> "$STATFILE"
     elif [ "$RET" == 1 ]; then
-        log "Build failed"
         echo "Status: FAILED" >> "$STATFILE"
     else
         echo "Status: PASSED" >> "$STATFILE"
