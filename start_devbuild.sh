@@ -284,6 +284,16 @@ main()
         echo "Could not find valid local.conf at $LOCALCONF. Using project $LOCALCONF"
     fi
 
+    if [ -f "$LOCALCONF" ]; then
+        if grep -q 'TEST_IMAGE' "$LOCALCONF"; then
+            echo "Found TEST_IMAGE in $LOCALCONF. Wrigel devbuild uses testexport and does not support running tests using runqemu."
+            exit 1
+        fi
+        if grep -q 'TEST_SUITES_forcevariable' "$LOCALCONF"; then
+            echo "WARN: Found TEST_SUITES_forcevariable in $LOCALCONF. Wrigel devbuild uses testexport and some OEQA tests do not work using testexport."
+        fi
+    fi
+
     if [ -z "$USER_EMAIL" ]; then
         echo "Git config user.email is not set. Use --email to set email address to send results"
         echo "Since I don't know where to send results, dev build is cancelled."
