@@ -94,7 +94,7 @@ docker-compose up -d
 # hack to wait for db to come online
 echo
 echo "Waiting for database to come online"
-for i in $(seq 1 1 "${STARTUP_DELAY:-15}");do echo -n "$i." && sleep 1; done; echo
+for i in $(seq 1 1 "${STARTUP_DELAY:-30}");do echo -n "$i." && sleep 1; done; echo
 
 DOCKER_EXEC=(docker-compose exec -T)
 

@@ -1,0 +1,15 @@
+node(params.BUILDER) {
+    stage('Initialize Login') {
+        dir('ci-scripts') {
+            git(url:params.CI_REPO, branch:params.CI_BRANCH)
+        }
+        def hostname = "${NODE_NAME}"
+        hostname = hostname[0..-10]
+
+        // abuse docker again to get access to the ssh authorizedkeys file
+        def docker_params = "--rm --name login-${BUILD_ID} --hostname ${hostname} -i --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins -v /home/wrlbuild:/home/wrlbuild  -e 'LANG=en_US.UTF-8' -e 'WORKSPACE=${WORKSPACE}' -e 'NODE_NAME=${NODE_NAME}' -e 'BUILD_DIR=${BUILD_DIR}' -e 'PUBLIC_SSH_KEY=${PUBLIC_SSH_KEY}'"
+
+        echo "Setup login for build ${BUILD_DIR} on ${NODE_NAME}"
+        sh "docker run ${docker_params} windriver/ubuntu1604_64 ${WORKSPACE}/ci-scripts/setup_build_login.sh"
+    }
+}

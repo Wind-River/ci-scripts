@@ -23,7 +23,7 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>CI_REPO</name>
-          <description>Localtion of the ci-scripts repository</description>
+          <description>Location of the ci-scripts repository</description>
           <defaultValue>https://github.com/WindRiver-OpenSourceLabs/ci-scripts.git</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>

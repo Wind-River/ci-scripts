@@ -68,7 +68,7 @@ node('docker') {
   def hostname = "${NODE_NAME}"
   hostname = hostname[0..-10]
   def common_docker_params = "--rm --name build-${BUILD_ID} --hostname ${hostname} -i --tmpfs /tmp --tmpfs /var/tmp -v /etc/localtime:/etc/localtime:ro -u 1000 -v ci_jenkins_agent:/home/jenkins --ulimit nofile=1024:1024 "
-  common_env_args = ["LANG=en_US.UTF-8", "BUILD_ID=${BUILD_ID}", "WORKSPACE=${WORKSPACE}", "JENKINS_URL=${JENKINS_URL}", "BUILD_GROUP_ID=" + params.BUILD_GROUP_ID ]
+  common_env_args = ["LANG=en_US.UTF-8", "BUILD_ID=${BUILD_ID}", "WORKSPACE=${WORKSPACE}", "JENKINS_URL=${JENKINS_URL}", "BUILD_GROUP_ID=" + params.BUILD_GROUP_ID, "NODE_NAME=${NODE_NAME}" ]
   common_docker_params = add_env( common_docker_params, common_env_args )
   def BUILD_DIR="${WORKSPACE}/builds/builds-${BUILD_ID}"
 
@@ -153,13 +153,9 @@ node('docker') {
 
       def docker_params = common_docker_params
       def env_args = ["MESOS_TASK_ID=${BUILD_ID}", "BASE=${WORKSPACE}", "REMOTE=${REMOTE}"]
-      if (params.TOASTER == "enable") {
-        docker_params = docker_params + ' --expose=8800 -P '
-        env_args = env_args + ["SERVICE_NAME=toaster", "SERVICE_CHECK_HTTP=/health"]
-      }
 
       env_args = env_args + ["NAME=${NAME}", "BRANCH=${BRANCH}"]
-      env_args = env_args + ["NODE_NAME=${NODE_NAME}", "SETUP_ARGS=\'${SETUP_ARGS}\'"]
+      env_args = env_args + ["SETUP_ARGS=\'${SETUP_ARGS}\'"]
       env_args = env_args + ["PREBUILD_CMD=\'${PREBUILD_CMD}\'", "PREBUILD_CMD_FOR_TEST=\'${PREBUILD_CMD_FOR_TEST}\'"]
       env_args = env_args + ["TEST=${TEST}", "TEST_CONFIGS_FILE=${TEST_CONFIGS_FILE}"]
       env_args = env_args + ["BUILD_CMD=\'${BUILD_CMD}\'", "TOASTER=${TOASTER}"]
@@ -170,19 +166,32 @@ node('docker') {
       if (params.DISTRO != "") {
         env_args = env_args + ["DISTRO=\'${DISTRO}\'"]
       }
+
+      String image = "${REGISTRY}/${IMAGE}"
+      if ( params.IMAGE.contains('/') ) {
+        image = params.IMAGE
+      }
+
+      // Capture login params without toaster args
+      def login_params = docker_params
+      login_params = login_params + " --entrypoint /bin/bash -w=${BUILD_DIR} "
+      login_params = add_env( login_params, env_args)
+
+      sh "mkdir -p ${BUILD_DIR}"
+      writeFile file: "${BUILD_DIR}/login.sh", text: "docker run -it --init ${login_params} ${image}"
+
+      if (params.TOASTER == "enable") {
+        docker_params = docker_params + ' --expose=8800 -P '
+        env_args = env_args + ["SERVICE_NAME=toaster", "SERVICE_CHECK_HTTP=/health"]
+      }
       docker_params = add_env( docker_params, env_args )
       def cmd="${WORKSPACE}/ci-scripts/jenkins_build.sh"
 
       if (params.LOCALCONF != "") {
-        sh "mkdir -p ${BUILD_DIR}"
         writeFile file: "${BUILD_DIR}/local.conf", text: params.LOCALCONF
       }
 
       try {
-        String image = "${REGISTRY}/${IMAGE}"
-        if ( params.IMAGE.contains('/') ) {
-          image = params.IMAGE
-        }
         docker_run("${docker_params}", "${image}", "${cmd}")
       } catch (err) {
         def err_message = err.getMessage()

@@ -22,15 +22,20 @@
 
 cleanup() {
     local BUILD="$1"
+    local TOP="$2"
 
     if [ -z "$NAME" ]; then
         echo "Error: Build NAME is not defined!"
         exit 1
     fi
 
-    echo "Removing build directory $BUILD/$NAME"
-    # fail if $BUILD is empty SC2115
-    rm -rf "${BUILD:?}/$NAME"
+    source "$TOP/common.sh"
+    local BUILD_STATUS=$(get_stat 'Status')
+    if [ "$BUILD_STATUS" == "PASSED" ]; then
+        echo "Removing build directory $BUILD/$NAME"
+        # fail if $BUILD is empty SC2115
+        rm -rf "${BUILD:?}/$NAME"
+    fi
 
     echo "Removing old build directories"
     find /home/jenkins/workspace/WRLinux_Build*/builds -maxdepth 1 -type d -name 'builds-*' -ctime +3 -exec rm -rf {} \;
