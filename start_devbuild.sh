@@ -81,6 +81,11 @@ Build Customization Options:
         - wr-docker-registry:5000/ubuntu1804_64
        Default: windriver/ubuntu1604_64
 
+   --disable-test
+
+       By default runtime testing is enabled for any bsp and image
+       with support. This flag disables the runtime tests.
+
 Development Options:
 
     --email=<email>
@@ -199,6 +204,7 @@ main()
     local LOCALCONF=no
     local BUILD_IMAGE=
     local ARG=
+    local TEST=enable
     local CHECK_UPSTREAM=yes
 
     while [ $# -gt 0 ]; do
@@ -231,6 +237,7 @@ main()
             --build[-_]image=*)       BUILD_IMAGE=${1#*=} ;;
             --build[-_]image)         BUILD_IMAGE=$2; shift ;;
             --no-upstream-check)      CHECK_UPSTREAM=no ;;
+            --disable[-_]test)        TEST="disable"; shift ;;
             -v|--verbose)             VERBOSE=1 ;;
             -h|--help)                usage; exit 0 ;;
             *)                        echo "Unrecognized arg $1."; usage; exit 1 ;;
@@ -453,6 +460,7 @@ main()
         echo "sdk_ext: $SDK_EXT"
         echo "sdkmachine: $SDKMACHINE"
         echo "build_image: $BUILD_IMAGE"
+        echo "test: $TEST"
         echo "repos:"
     } >> "$DEVBUILD_ARGS"
 

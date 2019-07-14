@@ -94,6 +94,15 @@ node('!docker') {
       String test_server='yow-lpdtest.wrs.com'
       String git_server='ala-lxgit.wrs.com'
 
+      // override the git server if the master is running in Ottawa or Beijing
+      String location = sh(returnStdout: true, script: '/usr/bin/curl -s ifconfig.co').trim()
+      if (location == '128.224.252.2') {
+        git_server='yow-git.wrs.com'
+      }
+      if (location == '60.247.85.92') {
+        git_server='pek-git.wrs.com'
+      }
+
       String setup_args = '--all-layers --dl-layers --accept-eula=yes'
       String[] distros = ['wrlinux-graphics']
       if ( devbuild.distros ) {
@@ -197,13 +206,11 @@ node('!docker') {
 
           // only do the test export if bitbake is actually building an image
           String test_image = images.split(' ')[0]
-          if ( test_image.startsWith('wrlinux-') ) {
+
+          // only enable the tests if the machine is qemu and the build has an wrlinux image
+          if ( devbuild.test == 'enable' && test_params.containsKey(machine) && test_image.startsWith('wrlinux-image-') ) {
             param['BUILD_CMD_FOR_TEST'] = "bitbake ${test_image} -c testexport"
             param['PREBUILD_CMD_FOR_TEST'] = 'test_configure.py'
-          }
-
-          // only enable the tests if the machine is qemu and the build has an image
-          if ( test_params.containsKey(machine) && test_image.startsWith('wrlinux-') ) {
             param['TEST'] = test_suite[machine]
             param['TEST_ARGS'] = test_params[machine]['params']
             param['RUNTIME_TEST_CMD'] = 'run_tests.sh git://ala-lxgit.wrs.com/lpd-ops/lava-test.git ' + test_params[machine]['template'] + ' ' + test_params[machine]['timeout']
