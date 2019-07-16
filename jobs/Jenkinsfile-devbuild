@@ -190,7 +190,7 @@ node('!docker') {
           param['NAME'] = "${name}_${distro}_${machine}"
           param['DISTRO'] = distro
           param['MACHINE'] = machine
-          param['PREBUILD_CMD'] = 'build_configure.sh  --enable-bootimage=ext4 --enable-shared-sstate=wr1019_sstate_cache'
+          param['PREBUILD_CMD'] = 'build_configure.sh  --enable-bootimage=ext4 --enable-shared-sstate=wrl1019_sstate_cache'
 
           // override default images if images are defined
           String images = default_images[distro]
