@@ -51,8 +51,8 @@ main()
     echo "Adding key for $BUILD_DIR to authorized keys"
     echo "command=\"touch ${LOGIN_STAMP}; $CMD; /bin/rm -f ${LOGIN_STAMP}; /bin/sed -i '\\#${BUILD_DIR}#d' $AUTH_KEYS\" ssh-rsa $PUBLIC_SSH_KEY $BUILD_DIR" >> "$AUTH_KEYS"
 
-    # allow two minutes for a login. If it doesn't happen, abort and remove the key
-    local TIMEOUT=120 # 2 * 60
+    # allow a minute for a login. If it doesn't happen, abort and remove the key
+    local TIMEOUT=60
     local COUNTER=0
     local LOGIN_DETECTED=0
     while [ "$COUNTER" -lt "$TIMEOUT" ]; do
@@ -62,8 +62,8 @@ main()
             break
         else
             echo "Waiting for login on $BUILD_DIR"
-            COUNTER=$((COUNTER + 10))
-            sleep 10
+            COUNTER=$((COUNTER + 2))
+            sleep 2
         fi
     done
 
