@@ -154,7 +154,7 @@ main()
     do
         sleep 5
         echo "Checking if queued Login Setup Job has been scheduled"
-        JOB=$(curl --insecure --silent --show-error "${QUEUE}api/xml?tree=executable[url]" || true)
+        JOB=$(curl --insecure --silent --show-error "${QUEUE}api/xml?tree=executable\[url\]" || true)
         if [[ "$JOB" =~ "job/Login/" ]]; then
             break
         fi
