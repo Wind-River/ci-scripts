@@ -238,6 +238,8 @@ main()
             --build[-_]image)         BUILD_IMAGE=$2; shift ;;
             --no-upstream-check)      CHECK_UPSTREAM=no ;;
             --disable[-_]test)        TEST="disable"; shift ;;
+            --wrlinux-x=*)            WRLINUX_X=${1#*=} ;;
+            --wrlinux-x)              WRLINUX_X=$2; shift ;;
             -v|--verbose)             VERBOSE=1 ;;
             -h|--help)                usage; exit 0 ;;
             *)                        echo "Unrecognized arg $1."; usage; exit 1 ;;
@@ -337,11 +339,15 @@ main()
     TOP=$(readlink -f "${BITBAKE_PATH}/../../../../")
 
     if [ "${RELEASE:-unset}" == 'unset' ]; then
-        if [ ! -d "$TOP/wrlinux-x" ]; then
+        if [ -d "$WRLINUX_X" ]; then
+            RELEASE=$(cut -d'/' -f 3 < $WRLINUX_X/.git/HEAD)
+        elif [ -d "$TOP/wrlinux-x" ]; then
+            echo "--wrlinux-x is not specified, trying $TOP/wrlinux-x."
+            RELEASE=$(cut -d'/' -f 3 < "$TOP"/wrlinux-x/.git/HEAD)
+        else
             echo "Unable to find wrlinux-x repo and could not determine release. Please set $RELEASE env variable"
             exit 1
         fi
-        RELEASE=$(cut -d'/' -f 3 < "$TOP"/wrlinux-x/.git/HEAD)
     fi
     echo "Using release $RELEASE"
 
