@@ -107,6 +107,9 @@
   genericx86_device:
     job_template: lava-test/jobs/templates/wrlinux-10/genericx86_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
+  genericx86-64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/genericx86-64_job_oeqa-auto-qemuall-test_template.yaml
+    timeout: 2100
   intel_skylake_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_64_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
