@@ -97,8 +97,9 @@
   - IMAGE_CLASSES += "testimage testsdk"
   - IMAGE_INSTALL_append += "openssh-sshd openssh-scp"
   - WRTEMPLATE += "feature/dev-pkgs feature/target-toolchain"
-  - IMAGE_INSTALL_append += "intltool"
+  - IMAGE_INSTALL_append += "intltool gtk+3"
   - PNWHITELIST_meta-python += "python3-pkgconfig"
+  - DISTRO_FEATURES_append = " x11"
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   purley_simics:
     job_template: lava-test/jobs/templates/wrlinux-10/purley_simics_job_oeqa-auto-qemuall-test_template.yaml
