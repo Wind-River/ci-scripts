@@ -161,6 +161,8 @@
   qemu-arm64:
     job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
+  xilinx_zynqmp_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_oeqa-auto-qemuall-test_template.yaml
 
 - name: oeqa-ptest
   prebuild_cmd_for_test:
