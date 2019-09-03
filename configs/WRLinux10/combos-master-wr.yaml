@@ -30,9 +30,10 @@
   name: intel-corei7-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --kernel-type=linux-yocto
+  - --kernel-type=linux-yocto-rt
+  - --target-supported-ktype=preempt-rt
   - --enable-bootimage=hddimg
-  - --whitelist-intel-package='linux-intel,thermald'
+  - --whitelist-intel-package='linux-intel,linux-intel-rt,thermald'
   - --enable-shared-sstate=wrl1019_sstate_cache
   - --no-network=0
   setup:
@@ -46,8 +47,9 @@
   name: intel-core2-32_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --kernel-type=linux-yocto
-  - --whitelist-intel-package='linux-intel,thermald,gma500-gfx-check'
+  - --kernel-type=linux-yocto-rt
+  - --target-supported-ktype=preempt-rt
+  - --whitelist-intel-package='linux-intel,linux-intel-rt,thermald,gma500-gfx-check'
   - --enable-shared-sstate=wrl1019_sstate_cache
   - --no-network=0
   - --enable-bootimage=ext4
@@ -80,7 +82,6 @@
   - --machine=genericx86-64
   - --dl-layers
   - --templates=feature/target-toolchain
-  - --templates=feature/ptest
 
 - branch: master-wr
   build:

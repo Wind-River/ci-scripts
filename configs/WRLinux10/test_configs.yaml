@@ -197,6 +197,7 @@
   - EXTRA_IMAGE_FEATURES += "ptest-pkgs"
   - CORE_IMAGE_EXTRA_INSTALL += "e2fsprogs-ptest zlib-ptest"
   - WRTEMPLATE = "feature/ptest"
+  - PREFERRED_PROVIDER_virtual/kernel = "linux-yocto-dev"
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   intel_skylake_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_skylake_64_job_ptest_template.yaml
