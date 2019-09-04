@@ -269,6 +269,31 @@
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_cgl-oeqa-default-test_template.yaml
     timeout: 1800
 
+- name: cgl-oeqa-auto-qemuall-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  - bitbake wrlinux-image-glibc-cgl -c testexport
+  build_options:
+  - INHERIT += "testexport"
+  - TEST_TARGET_IP = "localhost"
+  - TEST_SERVER_IP = "localhost"
+  - IMAGE_INSTALL_append += "python3-pip"
+  - IMAGE_INSTALL_append += "python3-multiprocessing"
+  - IMAGE_INSTALL_append += "python3-pygobject"
+  - IMAGE_INSTALL_append += "autoconf"
+  - IMAGE_INSTALL_append += "rpm opkg"
+  - IMAGE_INSTALL_append += "connman"
+  - IMAGE_CLASSES += "testimage testsdk"
+  - IMAGE_INSTALL_append += "openssh-sshd openssh-scp"
+  - WRTEMPLATE += "feature/dev-pkgs feature/target-toolchain feature/nfsd"
+  - IMAGE_INSTALL_append += "intltool gtk+3"
+  - DISTRO_FEATURES_append = " x11"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  mxe5400-qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_cgl-oeqa-auto-qemuall-test_template.yaml
+    timeout: 2100
+
 - name: cgl-vrf-test
   prebuild_cmd_for_test:
   - test_configure.py
