@@ -63,6 +63,7 @@
   name: genericx86_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
+  - --kernel-type=linux-yocto-dev
   - --enable-bootimage=hddimg
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
@@ -76,6 +77,7 @@
   name: genericx86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
+  - --kernel-type=linux-yocto-dev
   - --enable-bootimage=hddimg
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
