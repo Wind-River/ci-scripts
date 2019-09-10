@@ -292,7 +292,7 @@
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   mxe5400-qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_cgl-oeqa-auto-qemuall-test_template.yaml
-    timeout: 2100
+    timeout: 3600
 
 - name: cgl-vrf-test
   prebuild_cmd_for_test:
