@@ -423,10 +423,20 @@
   name: edgerouter_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-bootimage=ext4
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=edgerouter
   - --dl-layers
 
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-std'
+  name: ti-am335x_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=ti-am335x
+  - --dl-layers
