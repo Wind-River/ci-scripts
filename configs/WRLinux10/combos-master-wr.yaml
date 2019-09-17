@@ -149,7 +149,7 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-std'
+  - 'bitbake wrlinux-image-glibc-std'
   name: nxp-ls20xx_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
@@ -439,4 +439,52 @@
   setup:
   - --distro=wrlinux
   - --machine=ti-am335x
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: marvell-cn96xx_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=marvell-cn96xx
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: xilinx-zynq_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=xilinx-zynq
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: renesas-rcar-m3_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=renesas-rcar-m3
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: renesas-rcar-h3_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=renesas-rcar-h3
   - --dl-layers

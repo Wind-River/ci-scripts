@@ -79,6 +79,18 @@
   edgerouter_device:
     job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-default-test_template.yaml
     timeout: 600
+  marvell-cn96xx_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_oeqa-default-test_template.yaml
+    timeout: 600
+  xilinx-zc702_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_oeqa-default-test_template.yaml
+    timeout: 600
+  renesas-rcar-m3_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/renesas-rcar-m3_job_oeqa-default-test_template.yaml
+    timeout: 600
+  renesas-rcar-h3_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/renesas-rcar-h3_job_oeqa-default-test_template.yaml
+    timeout: 600
 
 - name: oeqa-auto-qemuall-test
   prebuild_cmd_for_test:
