@@ -377,7 +377,7 @@ def main():
 
                 next_build_number = server.get_job_info(opts.job)['nextBuildNumber']
 
-                prebuild_cmd_for_test = 'null'
+                prebuild_cmd_for_test = ''
                 build_cmd_for_test = ''
                 runtime_test_cmd = 'null'
                 if opts.test != 'disable' and opts.test != '' and opts.test is not None:
