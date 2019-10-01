@@ -116,7 +116,7 @@ echo "Initializing database"
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c 'cd /opt/layerindex; python3 manage.py migrate'
 
 # Ensure that /opt is writeable
-docker-compose exec -T -u 0 layerindex /bin/bash -c 'chown layers /opt'
+"${DOCKER_EXEC[@]}" -u 0 layerindex /bin/bash -c 'chown layers /opt'
 
 # clone repos that will be used to generate initial layerindex state
 "${DOCKER_EXEC[@]}" layerindex /bin/bash -c "cd /opt/; git clone --depth=1 --branch=master-wr --single-branch $REMOTE"

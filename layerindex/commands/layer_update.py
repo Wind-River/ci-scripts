@@ -23,6 +23,13 @@ class Command(BaseCommand):
         branch = Branch.objects.get(name=options['branch'])
 
         layerItem, created = LayerItem.objects.get_or_create(name=options['name'])
+        # if the layer is new, default it to published so that it can be accessed
+        if created:
+            layerItem.status = 'P'
+            layerItem.layer_type = 'A'
+            layerItem.summary = options['name']
+            layerItem.description = options['name']
+
         layerItem.vcs_url = options['vcs_url']
         layerItem.save()
 
