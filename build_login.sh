@@ -1,1 +1,1 @@
-devbuild_login.sh
+workspace_login.sh
