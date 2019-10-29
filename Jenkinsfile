@@ -178,7 +178,7 @@ node('docker') {
       login_params = add_env( login_params, env_args)
 
       sh "mkdir -p ${BUILD_DIR}"
-      writeFile file: "${BUILD_DIR}/login.sh", text: "docker run -it --init ${login_params} ${image}"
+      writeFile file: "${BUILD_DIR}/build_login.sh", text: "docker run -it --init ${login_params} ${image}"
 
       if (params.TOASTER == "enable") {
         docker_params = docker_params + ' --expose=8800 -P '
@@ -233,6 +233,14 @@ node('docker') {
         env_args = env_args + params.TEST_ARGS.tokenize(',')
         env_args = env_args + params.POSTPROCESS_ARGS.tokenize(',')
         docker_params = add_env( docker_params, env_args )
+
+        def login_params = docker_params
+        login_params = login_params + " --entrypoint /bin/bash -w=${BUILD_DIR} "
+        login_params = add_env( login_params, env_args)
+
+        sh "mkdir -p ${BUILD_DIR}"
+        writeFile file: "${BUILD_DIR}/test_login.sh", text: "docker run -it --init ${login_params} ${REGISTRY}/${TEST_IMAGE}"
+
         def cmd="${WORKSPACE}/ci-scripts/${RUNTIME_TEST_CMD}"
         docker_run("${docker_params}", "${REGISTRY}/${TEST_IMAGE}", "${cmd}")
       } else {

@@ -2,10 +2,15 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+TYPE='build'
+if [[ -z "$1" ]]; then
+    TYPE="$1"
+fi
+
 main()
 {
-    if [ -z "$BUILD_DIR" ] || [ ! -f "$BUILD_DIR/login.sh" ]; then
-        echo "ERROR: Require build dir with login.sh for the login"
+    if [ -z "$BUILD_DIR" ] || [ ! -f "$BUILD_DIR/${TYPE}_login.sh" ]; then
+        echo "ERROR: Require build dir with ${TYPE}_login.sh for the login"
         exit 1
     fi
 
@@ -46,7 +51,7 @@ main()
         rm -f "$LOGIN_STAMP"
     fi
 
-    CMD=$(cat "$BUILD_DIR/login.sh")
+    CMD=$(cat "$BUILD_DIR/${TYPE}_login.sh")
 
     echo "Adding key for $BUILD_DIR to authorized keys"
     echo "command=\"touch ${LOGIN_STAMP}; $CMD; /bin/rm -f ${LOGIN_STAMP}; /bin/sed -i '\\#${BUILD_DIR}#d' $AUTH_KEYS\" ssh-rsa $PUBLIC_SSH_KEY $BUILD_DIR" >> "$AUTH_KEYS"

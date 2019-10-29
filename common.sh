@@ -320,7 +320,7 @@ function generate_failmail
         echo ""
         echo "Jenkins logs: ${JENKINS_URL}job/WRLinux_Build/${BUILD_ID}/console"
         echo "Artifacts: ${HTTP_ROOT}/${RSYNC_DEST_DIR}/${NAME}"
-        echo "Login: build_login.sh --server=${JENKINS_URL:0:(-8)} --builder=$NODE_NAME --build-dir=$BUILD"
+        echo "Login: workspace_login.sh --server=${JENKINS_URL:0:(-8)} --builder=$NODE_NAME --build-dir=$BUILD"
         echo ""
 
         local BUILDLOG=$BUILD/00-wrbuild.log
@@ -422,7 +422,7 @@ function generate_successmail() {
             head -n 60 "$BUILDLOG" | sed -n '/Build Configuration:/,/^$/p'
         fi
 
-        echo "Login: build_login.sh --server=${JENKINS_URL:0:(-8)} --builder=$NODE_NAME --build-dir=$BUILD"
+        echo "Login: workspace_login.sh --server=${JENKINS_URL:0:(-8)} --builder=$NODE_NAME --build-dir=$BUILD"
     } > "$MFILE"
 }
 
