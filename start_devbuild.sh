@@ -171,18 +171,53 @@ get_layer_repos()
 # From inside a git repo, retrieve the repo path on the git server
 get_remote_repo_path()
 {
-    local REMOTE=
-    REMOTE=$(git remote | tail -n 1)
     local URL=
-    URL=$(git remote get-url "$REMOTE")
+
+    URL=$(git remote -v | grep push | awk '{printf "%s", substr($2,0)}')
     if [ "${URL:0:6}" == 'git://' ]; then
         echo "${URL#git://*/}"
     elif [ "${URL:0:6}" == 'ssh://' ]; then
-        echo "${URL#git://*/}"
+        echo "${URL#ssh://*/}"
     elif [ "${URL:0:4}" == 'git@' ]; then
         echo "${URL#*:}"
     fi
 }
+
+send_email()
+{
+    # check if git send-email has been installed
+    git send-email --help >/dev/null 2>&1
+    if [ $? != 0 ]; then
+        echo "git-email is not installed!"
+        echo "You can use 'apt-get install git-email' command to install it."
+        exit 1
+    fi
+
+    local USER_EMAIL=$1
+    local MAIL_BODY=$2
+    local SMTPSERVER=prod-webmail.windriver.com
+
+    # Build up set of --to addresses as bash array because it properly passes
+    # sets of args to another program
+    local ADDRESS=
+    set -f; IFS=,
+    for ADDRESS in $USER_EMAIL ; do
+        TO_STR=("${TO_STR[@]}" --to "$ADDRESS")
+    done
+    set +f; unset IFS
+
+    # git send-email requires .gitconfig at writable location and perl requires that
+    # LANG is a valid locale. The postbuild image meets these requirements
+    git config --global user.email "ci-scripts@windriver.com"
+    git config --global user.name "CI"
+    git send-email --from=ci-scripts@windriver.com --quiet --confirm=never \
+        "${TO_STR[@]}" "--smtp-server=$SMTPSERVER" "$MAIL_BODY"
+    if [ $? != 0 ]; then
+        echo "git send fail email failed"
+        exit 1
+    fi
+}
+
 
 main()
 {
@@ -340,7 +375,7 @@ main()
 
     if [ "${RELEASE:-unset}" == 'unset' ]; then
         if [ -d "$WRLINUX_X" ]; then
-            RELEASE=$(cut -d'/' -f 3 < $WRLINUX_X/.git/HEAD)
+            RELEASE=$(cut -d'/' -f 3 < "$WRLINUX_X"/.git/HEAD)
         elif [ -d "$TOP/wrlinux-x" ]; then
             echo "--wrlinux-x is not specified, trying $TOP/wrlinux-x."
             RELEASE=$(cut -d'/' -f 3 < "$TOP"/wrlinux-x/.git/HEAD)
@@ -499,19 +534,13 @@ main()
 
             git push git@ala-lxgit.wrs.com:wrpush/"$GITOLITE_USER/${PUSH_LAYER##*/}" "$PUSH_RANGE"
 
-            local UPSTREAM=
             local RANGE=
             if [ "$BRANCH" == "HEAD" ]; then
-                UPSTREAM=m/master
                 RANGE=m/master..HEAD
             else
-                UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}')
                 RANGE=$(git status -sb | cut -d' ' -f 2)
             fi
             local PR_REPO=git://ala-lxgit.wrs.com/wrpush/"$GITOLITE_USER/${PUSH_LAYER##*/}"
-
-            git request-pull "$UPSTREAM" "$PR_REPO" \
-                    "$PUSH_RANGE" > "$PULL_REQ_FILE"
 
             # if the git repo contains multiple layers then _all_ the layers in that repo
             # need to be updated on the layerindex
@@ -565,11 +594,184 @@ main()
 
         local PARAMS="token=devbuild&CI_REPO=$CI_REPO&CI_BRANCH=$CI_BRANCH"
 
-        echo "Starting devbuild on $SERVER/jenkins"
-        curl -X POST -k -H "$CRUMB" --user "$APITOKEN" \
+        KEYS=$(mktemp --tmpdir -d devbuild-keys-XXXXXXXXX)
+        function finish {
+            rm -rf "$KEYS"
+        }
+        trap finish EXIT
+
+        # submit devbuild job
+        curl --dump-header "$KEYS/headers" -X POST -k -H "$CRUMB" --user "$APITOKEN" \
              --data-urlencode DEVBUILD_ARGS@"$DEVBUILD_ARGS" \
              --data-urlencode "$LOCALCONF_UPLOAD" \
              "$SERVER/jenkins/job/devbuilds/job/devbuild/buildWithParameters?$PARAMS"
+
+        local QUEUE=
+        # the headers have a line feed character embedded in it
+        QUEUE=$(grep Location: "$KEYS/headers" | awk '{print $2}' | tr -d '\r')
+
+        echo "Waiting for submiting devbuild job to complete"
+        local JOB=
+        while :
+        do
+            sleep 5
+            echo "Checking if queued devbuild Job has been scheduled"
+            JOB=$(curl --insecure --silent --show-error "${QUEUE}api/xml?tree=executable\[url\]" || true)
+            if [[ "$JOB" == *"job/devbuilds/"* ]]; then
+                break
+            fi
+        done
+
+        # extract job url from queue status and then strip tags
+        JOB=$(echo "$JOB" | grep -o '<url>.*</url>' )
+        JOB="${JOB:5:(-6)}"
+
+        # get new DevBuild Id
+        local DEVBUILD_ID=
+        local DEVBUILD_JSON=
+        local DEVBUILD_CONSOLE_LOG=
+
+        DEVBUILD_ID=$(wget --no-check-certificate -qO- "${JOB}/buildNumber")
+
+        for i in {1..12}
+        do
+            DEVBUILD_JSON=$(wget --no-check-certificate -qO- "${JOB}/api/xml?tree=result")
+            if [[ "$DEVBUILD_JSON" == *"SUCCESS"* ]]; then
+                echo "New DevBuild job created: $JOB"
+                DEVBUILD_CONSOLE_LOG=$(wget --no-check-certificate -qO- "${JOB}/consoleText")
+                break
+            elif [[ "$i" == 12 ]]; then
+                echo "DevBuild job was not created or failed!"
+                exit -1
+            else
+                echo "Submitting build jobs have not been done, wait for 10 seconds ..."
+                sleep 10
+            fi
+        done
+
+        if [ ! -z "$DEVBUILD_CONSOLE_LOG" ]; then
+            # DevBuild job(s) have been launched
+            local START_SECOND=$(date '+%s')
+            local START_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+            local MATCHES=
+            local POSTPROCESS_ARGS=()
+            local ARGS=()
+            local ARG=
+
+            # get POSTPROCESS_ARGS from DevBuild console log, such as HTTP_ROOT, RSYNC_DEST_DIR
+            MATCHES=$(echo "$DEVBUILD_CONSOLE_LOG" | grep "POSTPROCESS_ARGS: " | sed "s/POSTPROCESS_ARGS: //g")
+            POSTPROCESS_ARGS=($MATCHES[0])
+            ARGS=(${POSTPROCESS_ARGS//,/ })
+            for ARG in "${ARGS[@]}"
+            do
+                if [[ "$ARG" == *"HTTP_ROOT"* ]] || [[ "$ARG" == *"RSYNC_DEST_DIR"* ]]; then
+                    eval "$ARG"
+                fi
+            done
+
+            # get build names within this DevBuild
+            MATCHES=$(echo "$DEVBUILD_CONSOLE_LOG" | grep "NAME: " | sed "s/NAME: //g")
+            local NAMES=($MATCHES)
+            local NUMBER_OF_BUILDS=${#NAMES[@]}
+
+            # get WRLinux_Build id of each build name
+            local LAST_BUILD_ID=$(wget --no-check-certificate -qO- "${SERVER}/jenkins/job/WRLinux_Build/lastBuild/buildNumber")
+            local BUILD_ID=
+            local BUILD_NAME=
+            local BUILD_IDS=()
+            local BUILD_JSON=()
+            MATCHES=0
+            # try to check more builds in Jenkins in case other builds are launched at the same time
+            for x in $(seq 0 $((NUMBER_OF_BUILDS+50)))
+            do
+                BUILD_ID=$((LAST_BUILD_ID - x))
+                BUILD_JSON[$x]=$(wget --no-check-certificate -qO- "${SERVER}/jenkins/job/WRLinux_Build/${BUILD_ID}/api/json")
+                for y in $(seq 0 $((NUMBER_OF_BUILDS-1)))
+                do
+                    BUILD_NAME="${NAMES[$y]}"
+                    if [[ "${BUILD_JSON[$x]}" =~ "$BUILD_NAME"'"}' ]]; then
+                        BUILD_NAMES[$x]="$BUILD_NAME"
+                        BUILD_IDS[$x]="$BUILD_ID"
+                        MATCHES=$((MATCHES+ 1))
+                        break
+                    fi
+                done
+                if [[ "$MATCHES" == "$NUMBER_OF_BUILDS" ]]; then
+                    break
+                fi
+            done
+
+            # track all builds, show progress of each build
+            local CURRENT_TIME=
+            local END_SECOND=
+            local END_TIME=
+            local FINISHED=
+            local CONSOLE_LOG=
+            local LAST_LINE=
+            local RESULTS=()
+            while true
+            do
+                clear
+                CURRENT_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+                echo "Tracking progress - $CURRENT_TIME"
+                FINISHED=0
+                for x in $(seq 0 $((NUMBER_OF_BUILDS-1)))
+                do
+                    CONSOLE_LOG=$(wget --no-check-certificate -qO- "${SERVER}/jenkins/job/WRLinux_Build/${BUILD_IDS[$x]}/consoleText")
+                    LAST_LINE=${CONSOLE_LOG##*$'\n'}
+                    if [[ "$LAST_LINE" == 'Finished: SUCCESS' ]] ||
+                       [[ "$LAST_LINE" == 'Finished: FAILURE' ]] ||
+                       [[ "$LAST_LINE" == 'Finished: ABORTED' ]]; then
+                        FINISHED=$((FINISHED + 1))
+                        RESULTS[$x]=${LAST_LINE//Finished: /}
+                    fi
+                    echo "$x: "
+                    echo -e " - Build Name  : ${BUILD_NAMES[$x]}"
+                    echo -e " - Jenkins Job : ${SERVER}/jenkins/job/WRLinux_Build/${BUILD_IDS[$x]}"
+                    echo -e " - Tail of log : ${LAST_LINE}"
+                    echo ""
+                done
+                if [[ "$FINISHED" == "$NUMBER_OF_BUILDS" ]]; then
+                    END_SECOND=$(date '+%s')
+                    END_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+                    break
+                fi
+                sleep 30
+            done
+
+            # generate summary and send report email
+            local DEVBUILD_SUMMARY=devbuild_summary.log
+            {
+                echo "Subject: Devbuild #${DEVBUILD_ID} Finished"
+                echo ""
+                echo "Information:"
+                echo " - Jenkins job : ${SERVER}/jenkins/job/devbuilds/job/devbuild/${DEVBUILD_ID}"
+                echo " - Artifacts   : ${HTTP_ROOT}/${RSYNC_DEST_DIR}"
+                echo " - Start time  : $START_TIME ($START_SECOND)"
+                echo " - Finish time : $END_TIME ($END_SECOND)"
+                echo " - Spent (sec) : $((END_SECOND - START_SECOND))"
+                echo ""
+                echo "Details:"
+                for x in $(seq 0 $((NUMBER_OF_BUILDS-1)))
+                do
+                    echo "$x: "
+                    echo -e " - Build Name  : ${BUILD_NAMES[$x]}"
+                    echo -e " - Jenkins Job : ${SERVER}/jenkins/job/WRLinux_Build/${BUILD_IDS[$x]}"
+                    echo -e " - Test Result : ${RESULTS[$x]}"
+                    echo ""
+                done
+            } > "$DEVBUILD_SUMMARY"
+
+            pwd
+            cat "$DEVBUILD_SUMMARY"
+
+            send_email "$USER_EMAIL" "$DEVBUILD_SUMMARY"
+
+        else
+            echo "DevBuild job is empty, something is wrong!"
+            exit 1
+        fi
+
     else
         echo "Dry run: copying devbuild config to devbuild.yaml"
         cp -f "$DEVBUILD_ARGS" devbuild.yaml
