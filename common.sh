@@ -654,3 +654,25 @@ function detect_built_images() {
         done
     fi
 }
+
+function convert_to_json() {
+    local KEY=
+    local VAL=
+    local ARR=();
+    local FILE=$1
+    while read -r LINE
+    do
+        # key is before : and value is after colon. Trim the value of a leading space
+        KEY="${LINE%%:*}"
+        VAL="${LINE#*:}"
+        ARR+=( "$KEY" "${VAL# }" )
+    done < "$FILE"
+
+    local LEN=${#ARR[@]}
+    echo "{"
+    for (( i=0; i<LEN; i+=2 ))
+    do
+        printf '  "%s": "%s",\n' "${ARR[i]}" "${ARR[i+1]}"
+    done
+    printf '  "eof": ""\n}\n'
+}

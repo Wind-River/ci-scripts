@@ -94,6 +94,12 @@ post_rsync() {
     # "Copy" all 00-* log files to rsync dir
     find "$BUILD" -type f -name "00-*" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
+    # "Copy" buildstats_${BUILD_ID}.json, default.xml files to rsync dir
+    local JSON=$(convert_to_json "${BUILD}/buildstats.log" | tr -d '\\' )
+    echo "$JSON" > "${BUILD}/buildstats.json"
+    find "$BUILD" -type f -name "buildstats.json" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    find "$BUILD" -type f -name "default.xml" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+
     if [[ "$TEST" == *"oeqa"* ]]; then
         # Get rpm package for OE test
         local DEPLOY_DIR=

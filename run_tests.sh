@@ -72,7 +72,8 @@ function quit_test () {
         printf '}'
     } >> "$TEST_STATFILE"
 
-    rsync -avL "$TEST_STATFILE" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
+    # store the teststats file into the project folder
+    rsync -avL "$TEST_STATFILE" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/${NAME}"
 
     # Get LAVA job log
     LAVA_JOB_PLAIN_LOG="http://${LAVA_SERVER}/scheduler/job/${job_id}/log_file/plain"
@@ -185,7 +186,7 @@ if [ -d "$repo_folder" ]; then
     echo "[LAVA-CMD] lava-tool auth-list |grep ${LAVA_SERVER}"
     lava-tool auth-list |grep "$LAVA_SERVER"
     if [ $? != 0 ]; then
-        printf '    "ERROR": "LAVA Server $LAVA_SERVER is in unhealthy status.",\n' >> "$TEST_STATFILE"
+        printf '    "ERROR": "LAVA Server is in unhealthy status.",\n' >> "$TEST_STATFILE"
         echo "LAVA Server $LAVA_SERVER is in unhealthy status, exit!"
         quit_test -1
     fi
@@ -199,20 +200,24 @@ pushd "$BUILD/rsync/$NAME"
 if [ "$TEST_DEVICE" == "mxe5400-qemu-ppc" ] ||
    [[ "$TEST_DEVICE" == *"mxe5400-qemu-mips"* ]] ||
    [[ "$TEST_DEVICE" == *"edgerouter"* ]]; then
-    KERNEL_FILE=$(ls ./vmlinux)
+    KERNEL_FILE=$(ls vmlinux)
 else
-    KERNEL_FILE=$(ls ./*Image)
+    KERNEL_FILE=$(ls *Image)
 fi
 echo "KERNEL_FILE = $KERNEL_FILE"
 
 # Find image name
 pushd "$BUILD/rsync/$NAME"
-IMAGE_FULL_NAME=$(ls ./*.tar.bz2)
+IMAGE_FULL_NAME=$(ls *.tar.bz2)
 IMAGE_NAME="${IMAGE_FULL_NAME%.tar.bz2}"
 echo "IMAGE_NAME = $IMAGE_NAME"
 
 # Find dtb file
-DTB_FILE=$(ls ./*.dtb | tail -1)
+if [ -z "$DTB_FILENAME" ]; then
+    DTB_FILE=$(ls *.dtb | tail -1)
+else
+    DTB_FILE=$(ls "$DTB_FILENAME")
+fi
 echo "DTB_FILE = $DTB_FILE"
 
 # Find rpm-doc file name
