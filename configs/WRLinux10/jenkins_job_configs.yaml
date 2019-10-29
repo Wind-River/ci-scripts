@@ -186,6 +186,7 @@ test_config:
     # NFS_ROOT is used to get target images (kernel and rootfs) for testing
     NFS_ROOT: /net/yow-lpdtest/var/lib/tftpboot
     TEST_DEVICE: simics
+    DTB_FILENAME:
     RETRY: 1
 
 post_test:

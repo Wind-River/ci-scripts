@@ -1,4 +1,4 @@
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-x86-64_wrlinux-image-glibc-std
@@ -11,7 +11,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-x86-32_wrlinux-image-glibc-std
@@ -24,7 +24,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-corei7-64_wrlinux-image-glibc-std
@@ -41,7 +41,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-core2-32_wrlinux-image-glibc-std
@@ -57,13 +57,12 @@
   - --machine=intel-core2-32
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: genericx86_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --kernel-type=linux-yocto-dev
   - --enable-bootimage=hddimg
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
@@ -71,13 +70,12 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: genericx86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --kernel-type=linux-yocto-dev
   - --enable-bootimage=hddimg
   - --enable-shared-sstate=wrl1019_sstate_cache
   setup:
@@ -85,7 +83,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-haswell-64_wrlinux-image-glibc-std
@@ -97,7 +95,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-skylake-64_wrlinux-image-glibc-std
@@ -110,7 +108,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-skylake-avx512-32_wrlinux-image-glibc-std
@@ -122,7 +120,7 @@
   - --machine=intel-skylake-avx512-32
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: intel-skylake-avx512-64_wrlinux-image-glibc-std
@@ -134,7 +132,7 @@
   - --machine=intel-skylake-avx512-64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: nxp-imx7_wrlinux-image-glibc-std
@@ -147,7 +145,7 @@
   - --machine=nxp-imx7
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
   name: nxp-ls20xx_wrlinux-image-glibc-std
@@ -159,7 +157,7 @@
   - --machine=nxp-ls20xx
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: nxp-ls10xx_wrlinux-image-glibc-std
@@ -172,7 +170,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: xilinx-zynqmp_wrlinux-image-glibc-std
@@ -185,7 +183,7 @@
   - --machine=xilinx-zynqmp
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemuarma9_wrlinux-image-glibc-std
@@ -197,7 +195,7 @@
   - --machine=qemuarma9
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemuarm64_wrlinux-image-glibc-std
@@ -209,7 +207,7 @@
   - --machine=qemuarm64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemuarm_wrlinux-image-glibc-std
@@ -221,7 +219,7 @@
   - --machine=qemuarm
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemuarmv5_wrlinux-image-glibc-std
@@ -233,7 +231,7 @@
   - --machine=qemuarmv5
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemux86_wrlinux-image-glibc-std
@@ -246,7 +244,7 @@
   - --machine=qemux86
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemux86-64_wrlinux-image-glibc-std
@@ -259,7 +257,7 @@
   - --machine=qemux86-64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std-sato'
   name: qemux86-64_wrlinux-graphics-image-glibc-std-sato
@@ -272,7 +270,7 @@
   - --machine=qemux86-64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std-sato'
   name: qemux86_wrlinux-graphics-image-glibc-std-sato
@@ -285,7 +283,7 @@
   - --machine=qemux86
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std-sato'
   name: qemuarm_wrlinux-graphics-image-glibc-std-sato
@@ -298,7 +296,7 @@
   - --machine=qemuarm
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std-sato'
   name: qemuarm64_wrlinux-graphics-image-glibc-std-sato
@@ -311,7 +309,7 @@
   - --machine=qemuarm64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std-sato'
   name: qemuppc_wrlinux-graphics-image-glibc-std-sato
@@ -324,7 +322,7 @@
   - --machine=qemuppc
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std-sato'
   name: qemumips64_wrlinux-graphics-image-glibc-std-sato
@@ -337,7 +335,7 @@
   - --machine=qemumips64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-glibc-cgl'
   name: qemux86-64_wrlinux-image-glibc-cgl
@@ -351,7 +349,7 @@
   - --machine=qemux86-64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemuppc_wrlinux-image-glibc-std
@@ -364,7 +362,7 @@
   - --machine=qemuppc
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemumips64_wrlinux-image-glibc-std
@@ -377,7 +375,7 @@
   - --machine=qemumips64
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: qemumips_wrlinux-image-glibc-std
@@ -390,7 +388,7 @@
   - --machine=qemumips
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: mpc8315e-rdb_wrlinux-image-glibc-std
@@ -403,7 +401,7 @@
   - --machine=mpc8315e-rdb
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: beaglebone-yocto_wrlinux-image-glibc-std
@@ -417,7 +415,7 @@
   - --dl-layers
   - --templates=feature/target-toolchain
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: edgerouter_wrlinux-image-glibc-std
@@ -429,7 +427,7 @@
   - --machine=edgerouter
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: ti-am335x_wrlinux-image-glibc-std
@@ -441,7 +439,7 @@
   - --machine=ti-am335x
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
   name: marvell-cn96xx_wrlinux-image-glibc-std
@@ -453,7 +451,7 @@
   - --machine=marvell-cn96xx
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
   name: xilinx-zynq_wrlinux-image-glibc-std
@@ -465,7 +463,7 @@
   - --machine=xilinx-zynq
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
   name: renesas-rcar-m3_wrlinux-image-glibc-std
@@ -479,7 +477,7 @@
   - --machine=renesas-rcar-m3
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-glibc-std'
   name: renesas-rcar-h3_wrlinux-image-glibc-std
@@ -491,7 +489,7 @@
   - --machine=renesas-rcar-h3
   - --dl-layers
 
-- branch: master-wr
+- branch: WRLINUX_10_19_BASE
   build:
   - 'bitbake wrlinux-image-std'
   name: bcm-2xxx-rpi4_wrlinux-image-glibc-std
