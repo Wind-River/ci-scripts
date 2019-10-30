@@ -91,10 +91,25 @@ fi
 # create and start the layerindex and mariadb containers
 docker-compose up -d
 
-# hack to wait for db to come online
+# Wait until health check passed for MariaDB
 echo
-echo "Waiting for database to come online"
-for i in $(seq 1 1 "${STARTUP_DELAY:-30}");do echo -n "$i." && sleep 1; done; echo
+echo "Waiting for database to come online..."
+HEALTH_STATUS=""
+CONTAINER_NAME=layerindex_mariadb_1
+
+while [[ $HEALTH_STATUS != "healthy" ]]; do
+    HEALTH_STATUS=$( (docker inspect --format="{{.State.Health.Status}}" ${CONTAINER_NAME}) 2>/dev/null)
+
+    if [[ $HEALTH_STATUS != "starting" && $HEALTH_STATUS != "healthy" ]]; then
+        echo "Database is in $HEALTH_STATUS. Without database there is nothing to do. Shutting down"
+        ./layerindex_stop.sh
+        exit 1
+    fi
+    echo "Current status is $HEALTH_STATUS. Waiting..."
+    sleep 2
+done
+
+echo "Database online"
 
 DOCKER_EXEC=(docker-compose exec -T)
 

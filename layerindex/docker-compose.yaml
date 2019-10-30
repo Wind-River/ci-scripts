@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-version: '3.1'
+version: '3.4'
 services:
   layerindex:
     hostname: layerindex
@@ -57,6 +57,12 @@ services:
       LANG: 'en_US.UTF-8'
     tmpfs:
       - /tmp:exec
+    healthcheck:
+      test: ["CMD", "mysql", '--user=oelayer', '--password=oelayer', "-e", "show databases;"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+      start_period: 2m
 
   rabbit:
     hostname: rabbit
