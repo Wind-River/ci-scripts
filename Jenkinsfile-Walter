@@ -1,0 +1,37 @@
+#!/usr/bin/env groovy
+// -*- mode: groovy; tab-width: 2; groovy-indent-offset: 2 -*-
+
+node('docker') {
+
+  stage('Docker Run Check') {
+    dir('ci-scripts') {
+      git(url:params.CI_REPO, branch:params.CI_BRANCH)
+    }
+    sh "${WORKSPACE}/ci-scripts/docker_run_check.sh"
+  }
+
+  def pipeline
+
+  stage('Generate Config') {
+      writeFile file: "${WORKSPACE}/pipeline.yaml", text: params.YAML
+      pipeline = readYaml text: params.YAML
+  }
+
+  stage('Fetch Walter') {
+    echo "Fetching Walter..."
+    def bin = params.WALTER_BINARY
+    sh "curl ${bin} -o ${WORKSPACE}/walter"
+    sh "chmod +x ${WORKSPACE}/walter"
+  }
+
+  for (curStage in pipeline.stages) {
+    String STAGE_NAME = curStage.name
+    stage("${STAGE_NAME}") {
+      sh "${WORKSPACE}/walter -config ${WORKSPACE}/pipeline.yaml -stage \"${STAGE_NAME}\""
+    }
+  }
+
+  stage('Post Process') {
+    sh "rm -f ${WORKSPACE}/pipeline.yaml"
+  }
+}

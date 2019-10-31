@@ -41,6 +41,9 @@ COPY jobs/devbuild.xml /usr/share/jenkins/ref/jobs/devbuilds/jobs/devbuild/confi
 # Install initial job to build WRLinux
 COPY jobs/WRLinux_Build.xml /usr/share/jenkins/ref/jobs/WRLinux_Build/config.xml
 
+# Install initial job to start Walter
+COPY jobs/Walter.xml /usr/share/jenkins/ref/jobs/Walter/config.xml
+
 # Install initial job for build logins
 COPY jobs/Login.xml /usr/share/jenkins/ref/jobs/Login/config.xml
 
