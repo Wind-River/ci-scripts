@@ -87,6 +87,8 @@ post_rsync() {
     # Get images for ARM boards
     find "$EXPORT_DIR" -name "*.dtb" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
     find "$EXPORT_DIR" -name "u-boot*.bin" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    # Get bios image for qemuriscv64
+    find "$EXPORT_DIR" -name "fw_jump.elf" -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
     # "Copy" all conf files to rsync dir
     ln -sfrL "${BUILD}/${NAME}/conf" "$RSYNC_SOURCE_DIR/conf"
