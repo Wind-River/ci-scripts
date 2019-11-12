@@ -201,6 +201,8 @@ if [ "$TEST_DEVICE" == "mxe5400-qemu-ppc" ] ||
    [[ "$TEST_DEVICE" == *"mxe5400-qemu-mips"* ]] ||
    [[ "$TEST_DEVICE" == *"edgerouter"* ]]; then
     KERNEL_FILE=$(ls vmlinux)
+elif [ "$TEST_DEVICE" == "qemu-riscv64" ]; then
+    KERNEL_FILE=$(ls Image)
 else
     KERNEL_FILE=$(ls *Image)
 fi
