@@ -250,6 +250,7 @@ elif [[ "$TEST_DEVICE" == "qemu-x86_64" ]]; then
             s@HDD_IMG@${FILE_LINK}\/${IMAGE_NAME}.hddimg@g; \
             s@INITRD_IMG@${FILE_LINK}\/${INITRAMFS_NAME}@g" "$TEST_JOB"
 elif [[ "$TEST_DEVICE" == *"qemu-arm"* ]] || \
+     [ "$TEST_DEVICE" == "qemu-riscv64" ] || \
      [ "$TEST_DEVICE" == "mxe5400-qemu-x86_64" ] || \
      [ "$TEST_DEVICE" == "mxe5400-qemu-ppc" ] || \
      [[ "$TEST_DEVICE" == *"mxe5400-qemu-mips"* ]]; then

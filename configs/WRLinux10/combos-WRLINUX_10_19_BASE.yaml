@@ -502,3 +502,15 @@
   - --distro=wrlinux
   - --machine=bcm-2xxx-rpi4
   - --dl-layers
+
+- branch: WRLINUX_10_19_BASE
+  build:
+  - 'bitbake wrlinux-image-std'
+  name: qemuriscv64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --machine=qemuriscv64
+  - --dl-layers
