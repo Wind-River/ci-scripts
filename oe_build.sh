@@ -99,6 +99,12 @@ CACHE_BASE="${TOP}/../wrlinux-${SOURCE_LAYOUT}-${BRANCH}"
 # Use reference clone support in repo to speed up setup.sh
 export REPO_MIRROR_LOCATION="$CACHE_BASE"
 
+# if setup_args does not contain --accept-eula=yes, add it
+# https://stackoverflow.com/questions/14366390/check-if-an-element-is-present-in-a-bash-array/14367368#14367368
+if [[ " ${SETUP_ARGS[*]} " != *" --accept-eula=yes "* ]]; then
+    SETUP_ARGS+=('--accept-eula=yes')
+fi
+
 # if setup_args starts with -- add the setup command
 if [ "${SETUP_ARGS[0]:0:2}" == '--' ]; then
     if [ -z "$WRLINUX" ]; then
