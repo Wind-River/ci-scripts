@@ -132,8 +132,17 @@ services:
         target: /tmp
 
   registrator:
-    image: gliderlabs/registrator:latest
-    command: -ip=$HOSTIP consul://consul:8500
+    image: gliderlabs/registrator:master
+    entrypoint:
+      - sh
+      - -c
+      # Registrator requires the host machine IP be passed to it to allow consul perform a successful healthcheck.
+      # Currently there is no simple way to obtain host IP from within a docker container running in Linux so nslookup
+      # is used instead to obtain the host IP by DNS query.
+      # Docker automatically injects ndots:0 to /etc/resolv.conf, this prevented the resolver from searching domains
+      # of format *.wrs.com and nslooup cannot function. So first ndots:0 is replaced with ndots:15 in /etc/resolv.conf
+      # file. Then nslookup is used to extract IP address of host machine and feed it to registrator
+      - sed 's/ndots:0/ndots:15/' /etc/resolv.conf > /etc/resolv.conf.tmp && cat /etc/resolv.conf.tmp > /etc/resolv.conf && rm /etc/resolv.conf.tmp && cat /etc/hostname | xargs nslookup 2>/dev/null | tail -n 1 | cut -d ' ' -f 3 | xargs -I {} registrator -ip {} consul://consul:8500
     deploy:
       mode: global
       placement:
