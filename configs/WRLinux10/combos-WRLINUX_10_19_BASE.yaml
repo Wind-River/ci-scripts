@@ -514,3 +514,16 @@
   setup:
   - --machine=qemuriscv64
   - --dl-layers
+
+- branch: WRLINUX_10_19_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: intel-socfpga-64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-socfpga-64
+  - --dl-layers
+
