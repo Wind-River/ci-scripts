@@ -4,7 +4,7 @@
   name: intel-x86-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=intel-x86-64
@@ -17,7 +17,7 @@
   name: intel-x86-32_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=intel-x86-32
@@ -34,7 +34,7 @@
   - --target-supported-ktype=preempt-rt
   - --enable-bootimage=hddimg
   - --whitelist-intel-package='linux-intel,linux-intel-rt,thermald'
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   - --no-network=0
   setup:
   - --machine=intel-corei7-64
@@ -50,7 +50,7 @@
   - --kernel-type=linux-yocto-rt
   - --target-supported-ktype=preempt-rt
   - --whitelist-intel-package='linux-intel,linux-intel-rt,thermald,gma500-gfx-check'
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   - --no-network=0
   - --enable-bootimage=ext4
   setup:
@@ -65,7 +65,7 @@
   - build_configure.sh
   - --kernel-type=linux-yocto-dev
   - --enable-bootimage=hddimg
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --machine=genericx86
   - --dl-layers
@@ -79,7 +79,7 @@
   - build_configure.sh
   - --kernel-type=linux-yocto-dev
   - --enable-bootimage=hddimg
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --machine=genericx86-64
   - --dl-layers
@@ -91,7 +91,7 @@
   name: intel-haswell-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --machine=intel-haswell-64
   - --dl-layers
@@ -103,7 +103,7 @@
   name: intel-skylake-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=intel-skylake-64
@@ -116,7 +116,7 @@
   name: intel-skylake-avx512-32_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=intel-skylake-avx512-32
@@ -128,7 +128,7 @@
   name: intel-skylake-avx512-64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=intel-skylake-avx512-64
@@ -141,7 +141,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=nxp-imx7
@@ -153,7 +153,7 @@
   name: nxp-ls20xx_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=nxp-ls20xx
@@ -165,7 +165,7 @@
   name: nxp-ls10xx_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=nxp-ls10xx
@@ -179,7 +179,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=xilinx-zynqmp
@@ -191,7 +191,7 @@
   name: qemuarma9_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemuarma9
@@ -203,7 +203,7 @@
   name: qemuarm64_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemuarm64
@@ -215,7 +215,7 @@
   name: qemuarm_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemuarm
@@ -227,7 +227,7 @@
   name: qemuarmv5_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemuarmv5
@@ -240,7 +240,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemux86
@@ -253,7 +253,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemux86-64
@@ -266,7 +266,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux-graphics
   - --machine=qemux86-64
@@ -279,7 +279,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux-graphics
   - --machine=qemux86
@@ -292,7 +292,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux-graphics
   - --machine=qemuarm
@@ -305,7 +305,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux-graphics
   - --machine=qemuarm64
@@ -318,7 +318,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux-graphics
   - --machine=qemuppc
@@ -331,7 +331,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux-graphics
   - --machine=qemumips64
@@ -344,7 +344,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   - --no-network=0
   setup:
   - --distro=wrlinux-cgl
@@ -358,7 +358,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemuppc
@@ -371,7 +371,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemumips64
@@ -384,7 +384,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=qemumips
@@ -397,7 +397,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=mpc8315e-rdb
@@ -410,7 +410,7 @@
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=beaglebone-yocto
@@ -423,7 +423,7 @@
   name: edgerouter_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=edgerouter
@@ -435,7 +435,7 @@
   name: ti-am335x_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=ti-am335x
@@ -447,7 +447,7 @@
   name: marvell-cn96xx_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=marvell-cn96xx
@@ -459,7 +459,7 @@
   name: xilinx-zynq_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=xilinx-zynq
@@ -471,7 +471,7 @@
   name: renesas-rcar-m3_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   - --enable-bootimage=ext4
   setup:
   setup:
@@ -485,7 +485,7 @@
   name: renesas-rcar-h3_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   setup:
   - --distro=wrlinux
   - --machine=renesas-rcar-h3
@@ -497,10 +497,23 @@
   name: bcm-2xxx-rpi4_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh
-  - --enable-shared-sstate=wrl1019_sstate_cache
+  - --enable-shared-sstate=wrl1020_sstate_cache
   - --enable-bootimage=ext4
   setup:
   setup:
   - --distro=wrlinux
   - --machine=bcm-2xxx-rpi4
   - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-std'
+  name: qemuriscv64_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-bootimage=ext4
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --machine=qemuriscv64
+  - --dl-layers
+
