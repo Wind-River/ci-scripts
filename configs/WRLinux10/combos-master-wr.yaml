@@ -517,3 +517,15 @@
   - --machine=qemuriscv64
   - --dl-layers
 
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-std'
+  name: ti-am65x_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=ti-am65x
+  - --dl-layers
+
