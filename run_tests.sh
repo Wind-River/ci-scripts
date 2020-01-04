@@ -247,9 +247,11 @@ cp -f "$JOB_TEMPLATE" "$TEST_JOB"
 
 if [[ "$TEST_DEVICE" == *"simics"* ]]; then
     sed -i "s@HDD_IMG@${SIMICS_IMG_ROOT}\/${RSYNC_DEST_DIR}\/${NAME}\/${IMAGE_NAME}.hddimg@g" "$TEST_JOB"
-elif [[ "$TEST_DEVICE" == "qemu-x86_64" ]]; then
+elif [[ "$TEST_DEVICE" == "qemu-x86_64" ]] || [[ "$TEST_DEVICE" == *"novlm"* ]]; then
     sed -i "s@KERNEL_IMG@${FILE_LINK}\/${KERNEL_FILE}@g; \
             s@HDD_IMG@${FILE_LINK}\/${IMAGE_NAME}.hddimg@g; \
+            s@ROOTFS@${FILE_LINK}\/${IMAGE_NAME}.tar.bz2@g; \
+            s@DTB_FILE@${FILE_LINK}\/${DTB_FILE}@g; \
             s@INITRD_IMG@${FILE_LINK}\/${INITRAMFS_NAME}@g" "$TEST_JOB"
 elif [[ "$TEST_DEVICE" == *"qemu-arm"* ]] || \
      [ "$TEST_DEVICE" == "qemu-riscv64" ] || \
