@@ -182,6 +182,9 @@
   qemu-riscv64:
     job_template: lava-test/jobs/templates/wrlinux-10/riscv64_qemu_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
+  ti-am65x_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/ti-am65x_job_oeqa-auto-qemuall-test_template.yaml
+    timeout: 2100
 
 - name: oeqa-ptest
   prebuild_cmd_for_test:
