@@ -95,7 +95,7 @@ docker-compose up -d
 echo
 echo "Waiting for database to come online..."
 HEALTH_STATUS=""
-CONTAINER_NAME=layerindex_mariadb_1
+CONTAINER_NAME="${COMPOSE_PROJECT_NAME}"_mariadb_1
 
 while [[ $HEALTH_STATUS != "healthy" ]]; do
     HEALTH_STATUS=$( (docker inspect --format="{{.State.Health.Status}}" ${CONTAINER_NAME}) 2>/dev/null)
