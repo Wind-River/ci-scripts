@@ -70,8 +70,8 @@
   mxe5400-qemu-mips64:
     job_template: lava-test/jobs/templates/wrlinux-10/mips64_qemu_job_oeqa-default-test_template.yaml
     timeout: 420
-  nxp_ls10xxardb_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls10xxardb_job_oeqa-default-test_template.yaml
+  nxp_ls10xxardb_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls10xxardb_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   xilinx_zynqmp_device:
     job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_oeqa-default-test_template.yaml
