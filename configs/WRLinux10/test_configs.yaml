@@ -134,8 +134,8 @@
   intel_haswell_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_haswell_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
-  mpc8315_rdb_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/mpc8315_rdb_job_oeqa-auto-qemuall-test_template.yaml
+  mpc8315_rdb_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/mpc8315_rdb_job_oeqa-auto-qemuall-novlm_test_template.yaml
     timeout: 3600
   beaglebone_device:
     job_template: lava-test/jobs/templates/wrlinux-10/beaglebone_job_oeqa-auto-qemuall-test_template.yaml
