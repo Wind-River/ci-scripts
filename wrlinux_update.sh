@@ -36,7 +36,7 @@ call_setup_with_timeout()
     local CREDENTIAL_CONTENT=
     local USER=
     local PASSWORD=
-    local SETUP_ARGS=(--all-layers --dl-layers --mirror "--accept-eula=yes")
+    local SETUP_ARGS=(--all-layers --dl-layers --mirror "--accept-eula=yes" --repo-verbose --repo-force-sync)
 
     if [ -z "$TIMEOUT" ]; then
         TIMEOUT=20m
