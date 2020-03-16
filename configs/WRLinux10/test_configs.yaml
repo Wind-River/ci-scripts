@@ -186,6 +186,21 @@
     job_template: lava-test/jobs/templates/wrlinux-10/ti-am65x_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
 
+- name: ltp-basic-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "autoconf automake libtool git"
+  - EXTRA_IMAGE_FEATURES += "tools-sdk tools-debug"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  x86_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_ltp-basic-test_template.yaml
+    timeout: 600
+  xilinx_zynqmp_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_ltp-basic-test_template.yaml
+    timeout: 600
+
 - name: oeqa-ptest
   prebuild_cmd_for_test:
   - test_configure.py

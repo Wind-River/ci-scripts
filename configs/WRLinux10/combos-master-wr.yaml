@@ -187,6 +187,36 @@
 
 - branch: master-wr
   build:
+  - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
+  - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'bitbake wrlinux-image-std'
+  name: intel-x86-64_ltp_wrlinux-image-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=intel-x86-64
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
+  - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'bitbake wrlinux-image-std'
+  name: xilinx-zynqmp_ltp_wrlinux-image-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=xilinx-zynqmp
+  - --dl-layers
+
+- branch: master-wr
+  build:
   - 'bitbake wrlinux-image-std'
   name: qemuarma9_wrlinux-image-glibc-std
   prebuild:
