@@ -221,6 +221,21 @@
   - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
   - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
+  name: xilinx-zynq_ltp_wrlinux-image-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=xilinx-zynq
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
+  - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'bitbake wrlinux-image-std'
   name: bcm-2xxx-rpi4_ltp_wrlinux-image-glibc-std
   prebuild:
   - build_configure.sh

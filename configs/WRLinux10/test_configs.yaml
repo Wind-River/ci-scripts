@@ -203,6 +203,9 @@
   qemu-arm64:
     job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_ltp-basic-test_template.yaml
     timeout: 600
+  xilinx-zc702_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_ltp-basic-test_template.yaml
+    timeout: 600
 
 - name: oeqa-ptest
   prebuild_cmd_for_test:
