@@ -228,8 +228,6 @@ else
                 log "Detect built images: Build failed but all images got generated"
                 RET=2 # used by Jenkins to mark build as UNSTABLE but continue to run tests
             fi
-        else
-            log "Build for Test failed"
         fi
     fi
 
