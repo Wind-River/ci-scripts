@@ -223,7 +223,7 @@ fi
 echo "DTB_FILE = $DTB_FILE"
 
 # Find rpm-doc file name
-if [[ "$WRL_VER" = "10.19" ]]; then
+if [[ "$WRL_VER" = "10.19" ]] || [[ "$WRL_VER" = "10.20" ]]; then
     RPM_NAME=$(ls base-passwd-doc*)
 else
     RPM_NAME=$(ls rpm-doc*)
