@@ -591,6 +591,10 @@ create_report_statfile() {
     sstate_reuse_setscene=$(echo "${array[6]}" | sed 's/reuse(//g')
     #sstate_reuse_scratch="${array[8]}"
 
+    # Catch build elapsed time
+    build_elapsed_time=$(cat "$BUILD"/buildstats.json | grep 'Build Elapsed Seconds')
+    build_elapsed_sec=$(echo $build_elapsed_time | sed 's/[^0-9]*//g')
+
     {
         echo "{"
         echo "  \"build_info\": {"
@@ -604,6 +608,7 @@ create_report_statfile() {
             echo "    \"build_group_id\": \"$BUILD_GROUP_ID\","
             echo "    \"sysroot_sstate_reuse_percent\": \"$sstate_reuse_percent\","
             echo "    \"sysroot_sstate_reuse_setscene\": \"$sstate_reuse_setscene\","
+            echo "    \"build_elapsed_seconds\": \"$build_elapsed_sec\","
             if [ -z "$JOB_BASE_NAME" ]; then
                 JOB_BASE_NAME='WRLinux_Build'
             fi
