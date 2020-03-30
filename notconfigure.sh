@@ -52,6 +52,8 @@ PREMIRROR_PATH=
 DL_DIR=
 MACHINE=
 SHARED_SSTATE_DIR=
+WRTEMPLATE=
+IMAGE_FEATURES=
 
 for i in "$@"
 do
@@ -82,6 +84,8 @@ do
         --dl_dir=*)             DL_DIR="${i#*=}" ;;
         --machine=*)            MACHINE="${i#*=}" ;;
         --enable-shared-sstate=*) SHARED_SSTATE_DIR="${i#*=}" ;;
+        --wrtemplate=*)         WRTEMPLATE="${i#*=}" ;;
+        --image_features=*)     IMAGE_FEATURES="${i#*=}" ;;
         *)                      ;;
     esac
     shift
@@ -179,6 +183,15 @@ process_whitelist_intel(){
     local packages=$1
     for i in ${packages//,/ } ; do
         echo "PNWHITELIST_intel += \"$i\""
+    done
+}
+
+process_comma_sep_list(){
+    local LIST=$1
+    local CONFIG=$2
+    local i=
+    for i in ${LIST//,/ } ; do
+        echo "$CONFIG += \"$i\""
     done
 }
 
@@ -300,6 +313,14 @@ process_whitelist_intel(){
 
     if [ -n "$SHARED_SSTATE_DIR" ]; then
         echo "SSTATE_DIR = \"$WORKSPACE/../$SHARED_SSTATE_DIR/\""
+    fi
+
+    if [ -n "$WRTEMPLATE" ]; then
+        process_comma_sep_list "$WRTEMPLATE" WRTEMPLATE
+    fi
+
+    if [ -n "$IMAGE_FEATURES" ]; then
+        process_comma_sep_list "$IMAGE_FEATURES" IMAGE_FEATURES
     fi
 } >> "$LOCALCONF"
 

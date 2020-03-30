@@ -125,6 +125,11 @@ post_rsync() {
              -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
     fi
 
+    if [ "$RSYNC_OSTREE" == "yes" ]; then
+        find "$NAME/${TMP_DIR}/deploy/images/" -type d \
+             -name 'ostree_repo' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    fi
+
     # Initial rsync copies symlinks to destination
     echo "Rsyncing objects to rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
     rsync -azvL "$RSYNC_SOURCE_DIR" "rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
