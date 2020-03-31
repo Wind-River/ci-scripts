@@ -102,7 +102,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'reversion.middleware.RevisionMiddleware',
+    'layerindex.middleware.NonAtomicRevisionMiddleware',
 )
 
 # We allow CORS calls from everybody
@@ -146,19 +146,46 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'layerindex',
-    'registration',
+    'django_registration',
     'reversion',
     'reversion_compare',
     'captcha',
+    'axes',
     'rest_framework',
     'corsheaders',
-    'django_nvd3'
+    'bootstrap_pagination',
 )
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'password_validation.ComplexityValidator',
+    },
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -236,6 +263,22 @@ RABBIT_BACKEND = 'rpc://'
 
 # Used for fetching repo
 PARALLEL_JOBS = "4"
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'axes_cache': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+AXES_CACHE = "axes_cache"
+AXES_LOCKOUT_TEMPLATE = "registration/account_lockout.html"
+AXES_FAILURE_LIMIT = 4
+AXES_COOLOFF_TIME = 1
+
+# Full path to directory to store logs for dynamically executed tasks
+TASK_LOG_DIR = "/tmp/layerindex-task-logs"
 
 # Full path to directory where rrs tools stores logs
 TOOLS_LOG_DIR = ""

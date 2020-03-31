@@ -34,6 +34,8 @@ services:
       CELERY_NUM_WORKERS: 1
       STARTUP_DELAY: 5
       SECRET_KEY: "${SECRET_KEY:-1234}"
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "mypass"
     depends_on:
       - mariadb
       - rabbit
@@ -68,5 +70,5 @@ services:
     hostname: rabbit
     image: rabbitmq:3.6-alpine
     environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=mypass
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "mypass"

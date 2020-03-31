@@ -57,8 +57,6 @@ if [ -z "$REMOTE" ]; then
     REMOTE=https://github.com/WindRiver-Labs/wrlinux-9
 fi
 
-SETUPTOOLS=$(basename $REMOTE)
-
 echo "Command: $0"
 for i in "$@"
 do
@@ -68,6 +66,7 @@ do
         --branch=*) BRANCH=${i#*=} ;;
         --output=*) OUTPUT=${i#*=} ;;
         --source=*) SOURCE=${i#*=} ;;
+        --remote=*) REMOTE=${i#*=} ;;
         --base_url=*) BASE_URL=${i#*=} ;;
         *)          ;;
     esac
@@ -87,6 +86,8 @@ if [ "$TYPE" == 'restapi-files' ] && [ -z "$BASE_URL" ]; then
     echo "When using input type restapi-files a base url must be defined"
     exit 1
 fi
+
+SETUPTOOLS=$(basename $REMOTE)
 
 # create and start the layerindex and mariadb containers
 docker-compose up -d

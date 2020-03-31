@@ -241,6 +241,7 @@ main()
     local ARG=
     local TEST=enable
     local CHECK_UPSTREAM=yes
+    local WRLINUX_X=
 
     while [ $# -gt 0 ]; do
         case "$1" in
