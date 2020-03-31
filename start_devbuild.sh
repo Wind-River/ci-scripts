@@ -337,6 +337,7 @@ main()
         if grep -q 'TEST_SUITES_forcevariable' "$LOCALCONF"; then
             echo "WARN: Found TEST_SUITES_forcevariable in $LOCALCONF. Wrigel devbuild uses testexport and some OEQA tests do not work using testexport."
         fi
+        echo "Using local.conf $LOCALCONF"
     fi
 
     if [ -z "$USER_EMAIL" ]; then
@@ -548,7 +549,7 @@ main()
             local LAYERS=()
 
             # look for more layer.conf files in subdirectory and use the base as the layer name
-            LAYERS=($(find . -maxdepth 3 -path './*/conf/layer.conf' -printf '%P ' | sed 's#/conf/layer.conf##g'))
+            LAYERS=($(find . -maxdepth 3 -path './*/conf/layer.conf' -printf '%P ' | sed -e 's#meta/conf/layer.conf##g' -e 's#/conf/layer.conf##g'))
 
             # if there is a conf/layer.conf file, then the current dir is a layer
             if [ -f 'conf/layer.conf' ]; then
