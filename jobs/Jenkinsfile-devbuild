@@ -121,29 +121,32 @@ node('!docker') {
                             'wrlinux-small': 'wrlinux-image-glibc-small']
 
       // mapping of bsp to test suite used
-      def test_suite = ['qemux86': 'oeqa-auto-qemuall-test',
-                        'qemux86-64': 'oeqa-auto-qemuall-test',
-                        'qemuarm64': 'oeqa-auto-qemuall-test',
+      def test_suite = ['qemux86': 'oeqa-default-test',
+                        'intel-x86-64': 'oeqa-default-test',
+                        'qemux86-64': 'oeqa-default-test',
+                        'qemuarm64': 'oeqa-default-test',
                         'qemuarm': 'oeqa-qemuarm-test',
-                        'qemuppc': 'oeqa-auto-qemuall-test',
-                        'qemumips64': 'oeqa-auto-qemuall-test']
+                        'qemuppc': 'oeqa-default-test',
+                        'qemumips64': 'oeqa-default-test']
 
       String lava_server='yow-lab-simics16.wrs.com'
       String report_server='yow-lab-simics16.wrs.com'
       String common_test_params = "LAVA_SERVER=${lava_server}:8080,LAVA_USER=lpdtest,RETRY=1,NFS_ROOT=/net/yow-lpdtest/var/lib/tftpboot,TEST_DEVICE="
       String template_path = 'lava-test/jobs/templates/wrlinux-10/'
       def test_params = [
-        'qemux86': [ template: template_path + 'mxe5400-x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+        'qemux86': [ template: template_path + 'mxe5400-x86_64_qemu_job_oeqa-default-test_template.yaml',
                     params: common_test_params + 'mxe5400-qemu-x86_64', timeout: '1200'],
-        'qemux86-64': [ template: template_path + 'mxe5400-x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+        'qemux86-64': [ template: template_path + 'mxe5400-x86_64_qemu_job_oeqa-default-test_template.yaml',
                        params: common_test_params + 'mxe5400-qemu-x86_64', timeout: '1200' ],
-        'qemuarm64': [ template: template_path + 'arm64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+        'intel-x86-64': [ template: template_path + 'x86-x58-ich10_simics_job_oeqa-default-test_template.yaml',
+                       params: common_test_params + 'x86-x58-ich10_simics', timeout: '1200' ],
+        'qemuarm64': [ template: template_path + 'arm64_qemu_job_oeqa-default-test_template.yaml',
                       params: common_test_params + 'qemu-arm64', timeout: '1200' ],
-        'qemuarm': [ template: template_path + 'arma15_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+        'qemuarm': [ template: template_path + 'arma15_qemu_job_oeqa-default-test_template.yaml',
                     params: common_test_params + 'qemu-arma15', timeout: '1200' ],
-        'qemuppc': [ template: template_path + 'ppc_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+        'qemuppc': [ template: template_path + 'ppc_qemu_job_oeqa-default-test_template.yaml',
                     params: common_test_params + 'mxe5400-qemu-ppc', timeout: '1200' ],
-        'qemumips64': [ template: template_path + 'mips64_qemu_job_oeqa-auto-qemuall-test_template.yaml',
+        'qemumips64': [ template: template_path + 'mips64_qemu_job_oeqa-default-test_template.yaml',
                        params: common_test_params + 'mxe5400-qemu-mips64', timeout: '1200' ],
       ]
 
