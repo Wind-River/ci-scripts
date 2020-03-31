@@ -99,6 +99,9 @@ CACHE_BASE="${TOP}/../wrlinux-${SOURCE_LAYOUT}-${BRANCH}"
 # Use reference clone support in repo to speed up setup.sh
 export REPO_MIRROR_LOCATION="$CACHE_BASE"
 
+# use short gpg path
+export GPG_PATH=$(mktemp --tmpdir -d gpg-XXXXXXXXX)
+
 # if setup_args does not contain --accept-eula=yes, add it
 # https://stackoverflow.com/questions/14366390/check-if-an-element-is-present-in-a-bash-array/14367368#14367368
 if [[ " ${SETUP_ARGS[*]} " != *" --accept-eula=yes "* ]]; then
@@ -241,6 +244,8 @@ else
         echo "Status: PASSED" >> "$STATFILE"
     fi
 fi
+
+rm -rf "$GPG_PATH"
 
 trigger_postprocess "$STATFILE"
 
