@@ -129,8 +129,8 @@ post_rsync() {
 
     if [ -d "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" ]; then
         echo "Rsyncing RPi4 ostree objects to rsync://${RSYNC_SERVER}/rpi4/"
-        rsync -azv --exclude summary "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" "rsync://${RSYNC_SERVER}/rpi4/"
-        rsync -azv "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo/summary" "rsync://${RSYNC_SERVER}/rpi4/ostree_repo/"
+        rsync -azv --exclude summary "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" "rsync://${RSYNC_SERVER}/builds/rpi4/"
+        rsync -azv "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo/summary" "rsync://${RSYNC_SERVER}/builds/rpi4/ostree_repo/"
     fi
 
     # Initial rsync copies symlinks to destination
