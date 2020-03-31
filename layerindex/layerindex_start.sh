@@ -117,6 +117,9 @@ DOCKER_EXEC=(docker-compose exec -T)
 # override settings.py and tell gunicorn to reload
 docker cp settings.py "${COMPOSE_PROJECT_NAME}_layerindex_1":/opt/layerindex/
 
+# workaround changes to bitbake tinfoil not yet updated in layerindex
+"${DOCKER_EXEC[@]}" layerindex /bin/bash -c "sed -i \"s/, config_data=data//\" /opt/layerindex/layerindex/update_layer.py"
+
 # replace BITBAKE_REPO_URL in settings.py if it's been set
 if [ -n "$BITBAKE_REPO_URL" ]; then
     replace_line="BITBAKE_REPO_URL = \'$BITBAKE_REPO_URL\'"
