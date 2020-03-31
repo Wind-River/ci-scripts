@@ -58,6 +58,9 @@ post_rsync() {
     local EXPORT_DIR=
     EXPORT_DIR=$(readlink -f "${BUILD}/${NAME}/${TMP_DIR}/deploy/images")
 
+    local MACHINE=
+    MACHINE=$(find "$EXPORT_DIR" -maxdepth 1 -type d -printf '%P')
+
     local TEST_EXPORT_DIR=
     TEST_EXPORT_DIR=$(readlink -f "${BUILD}/${NAME}/${TMP_DIR}/testexport")
 
@@ -66,7 +69,6 @@ post_rsync() {
 
     if [ -d "$TEST_EXPORT_DIR" ]; then
         # only upload image that matches the image with the testexport file
-        MACHINE=$(find "$EXPORT_DIR" -maxdepth 1 -type d -printf '%P')
         IMAGE_NAMES=( "$(find "$TEST_EXPORT_DIR" -maxdepth 1 -type d -printf '%P')-$MACHINE" )
     else
         # all images but runtime test only supports a single image so upload all if tests aren't enabled
@@ -125,10 +127,9 @@ post_rsync() {
              -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
     fi
 
-    if [ "$RSYNC_OSTREE" == "yes" ]; then
-        find "$NAME/${TMP_DIR}/deploy/images/" -type d \
-             -name 'ostree_repo' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
-    fi
+    # if there is an ostree repo, then copy it over
+    find "$NAME/${TMP_DIR}/deploy/images/" -type d \
+         -name 'ostree_repo' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
 
     # Initial rsync copies symlinks to destination
     echo "Rsyncing objects to rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
