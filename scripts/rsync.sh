@@ -127,9 +127,11 @@ post_rsync() {
              -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
     fi
 
-    # if there is an ostree repo, then copy it over
-    find "$NAME/${TMP_DIR}/deploy/images/" -type d \
-         -name 'ostree_repo' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/." \;
+    if [ -d "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" ]; then
+        echo "Rsyncing RPi4 ostree objects to rsync://${RSYNC_SERVER}/rpi4/"
+        rsync -azv --exclude summary "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" "rsync://${RSYNC_SERVER}/rpi4/"
+        rsync -azv "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo/summary" "rsync://${RSYNC_SERVER}/rpi4/ostree_repo/"
+    fi
 
     # Initial rsync copies symlinks to destination
     echo "Rsyncing objects to rsync://${RSYNC_SERVER}/${RSYNC_DEST_DIR}/"
