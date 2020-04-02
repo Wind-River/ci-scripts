@@ -186,16 +186,18 @@ get_remote_repo_path()
 send_email()
 {
     # check if git send-email has been installed
+    set +e
     git send-email --help >/dev/null 2>&1
     if [ $? != 0 ]; then
         echo "git-email is not installed!"
         echo "You can use 'apt-get install git-email' command to install it."
         exit 1
     fi
+    set -e
 
     local USER_EMAIL=$1
     local MAIL_BODY=$2
-    local SMTPSERVER=prod-webmail.windriver.com
+    local SMTPSERVER=prod-webmail.wrs.com
 
     # Build up set of --to addresses as bash array because it properly passes
     # sets of args to another program
@@ -208,8 +210,6 @@ send_email()
 
     # git send-email requires .gitconfig at writable location and perl requires that
     # LANG is a valid locale. The postbuild image meets these requirements
-    git config --global user.email "ci-scripts@windriver.com"
-    git config --global user.name "CI"
     git send-email --from=ci-scripts@windriver.com --quiet --confirm=never \
         "${TO_STR[@]}" "--smtp-server=$SMTPSERVER" "$MAIL_BODY"
     if [ $? != 0 ]; then
