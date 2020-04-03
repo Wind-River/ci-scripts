@@ -189,7 +189,7 @@
   build:
   - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
   - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
-  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: intel-x86-64_ltp_wrlinux-image-std
   prebuild:
@@ -204,7 +204,7 @@
   build:
   - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
   - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
-  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: xilinx-zynqmp_ltp_wrlinux-image-std
   prebuild:
@@ -219,7 +219,7 @@
   build:
   - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
   - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
-  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: xilinx-zynq_ltp_wrlinux-image-std
   prebuild:
@@ -234,7 +234,7 @@
   build:
   - 'git clone git://ala-lxgit.wrs.com/wrlinux-testing/testcases.git;'
   - 'bitbake-layers add-layer testcases/wr-testing/kts-dev;'
-  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb feature/linux-yocto-dev\"" >> conf/local.conf;'
+  - 'echo "WRTEMPLATE_append = \" feature/ltp feature/test feature/gdb\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: bcm-2xxx-rpi4_ltp_wrlinux-image-glibc-std
   prebuild:
