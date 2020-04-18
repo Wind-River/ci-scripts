@@ -98,6 +98,18 @@ function quit_test () {
     exit "$RET"
 }
 
+function get_job_status () {
+    LAVA_SERVER=$1
+    JOB_ID=$2
+    API_VER='v0.2'
+
+    job_status=$(curl -sL "${LAVA_SERVER}/api/${API_VER}/jobs/${JOB_ID}/" | grep -Po '"state":.*?[^\\]",' | sed 's/"state":"\(.*\)\",/\1/')
+
+    if [[ "$job_status" == "Finished" ]]; then
+        job_status=$(curl -sL "${LAVA_SERVER}/api/${API_VER}/jobs/${JOB_ID}/" | grep -Po '"health":.*?[^\\]",' | sed 's/"health":"\(.*\)\",/\1/')
+    fi
+}
+
 # Check if lava-tool exists
 command -v lava-tool >/dev/null 2>&1 || { echo >&2 "lava-tool required. Aborting."; exit 0; }
 
@@ -310,8 +322,9 @@ do
     TEST_LOOPS=$((LAVA_JOB_TIMEOUT / 10))
     for (( c=1; c<="$TEST_LOOPS"; c++ ))
     do
-       ret=$(lava-tool job-status "http://${LAVA_USER}@${LAVA_SERVER}" "${job_id}" |grep 'Job Status: ')
-       job_status=${ret//Job Status: /}
+       #ret=$(lava-tool job-status "http://${LAVA_USER}@${LAVA_SERVER}" "${job_id}" |grep 'Job Status: ')
+       #job_status=${ret//Job Status: /}
+       get_job_status "$LAVA_SERVER" "$job_id"
        echo "$c. Job Status: $job_status"
        if [ "$job_status" == 'Complete' ]; then
            printf '    "test_job_status": "Completed",\n' >> "$TEST_STATFILE"
