@@ -187,6 +187,9 @@
 
 - branch: master-wr
   build:
+  - 'echo "ENABLE_KERNEL_DEV = \"1\"" >> conf/local.conf;'
+  - 'bitbake-layers add-layer ../layers/wrlinux/wrlinux-kernel-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/kernel-dev\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: intel-x86-64_ltp_wrlinux-image-std
   prebuild:
@@ -199,6 +202,9 @@
 
 - branch: master-wr
   build:
+  - 'echo "ENABLE_KERNEL_DEV = \"1\"" >> conf/local.conf;'
+  - 'bitbake-layers add-layer ../layers/wrlinux/wrlinux-kernel-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/kernel-dev\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: xilinx-zynqmp_ltp_wrlinux-image-std
   prebuild:
@@ -211,6 +217,9 @@
 
 - branch: master-wr
   build:
+  - 'echo "ENABLE_KERNEL_DEV = \"1\"" >> conf/local.conf;'
+  - 'bitbake-layers add-layer ../layers/wrlinux/wrlinux-kernel-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/kernel-dev\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: xilinx-zynq_ltp_wrlinux-image-std
   prebuild:
@@ -223,6 +232,9 @@
 
 - branch: master-wr
   build:
+  - 'echo "ENABLE_KERNEL_DEV = \"1\"" >> conf/local.conf;'
+  - 'bitbake-layers add-layer ../layers/wrlinux/wrlinux-kernel-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/kernel-dev\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
   name: bcm-2xxx-rpi4_ltp_wrlinux-image-glibc-std
   prebuild:
