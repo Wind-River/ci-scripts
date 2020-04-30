@@ -517,6 +517,24 @@
 
 - branch: master-wr
   build:
+  - 'echo KERNEL_FEATURES_append = \" features/usb/serial-all.scc\" >> conf/local.conf;'
+  - 'echo "KERNEL_VERSION_SANITY_SKIP = \"1\"" >> conf/local.conf;'
+  - 'bitbake-layers add-layer ../layers/wrlinux/wrlinux-kernel-dev;'
+  - 'echo "WRTEMPLATE_append = \" feature/kernel-dev\"" >> conf/local.conf;'
+  - 'echo "ENABLE_KERNEL_DEV = \"1\"" >> conf/local.conf;'
+  - 'bitbake wrlinux-image-std'
+  name: marvell-cn96xx_wrlinux-rt-ltp-image-std
+  prebuild:
+  - build_configure.sh
+  - --kernel-type=linux-yocto-rt
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=marvell-cn96xx
+  - --dl-layers
+
+- branch: master-wr
+  build:
   - 'bitbake wrlinux-image-glibc-std'
   name: xilinx-zynq_wrlinux-image-glibc-std
   prebuild:

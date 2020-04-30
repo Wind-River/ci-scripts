@@ -207,6 +207,9 @@
   xilinx-zc702_device:
     job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_ltp-basic-test_template.yaml
     timeout: 3600
+  marvell-cn96xx_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_ltp-basic-test_template.yaml
+    timeout: 3600
 
 - name: oeqa-ptest
   prebuild_cmd_for_test:
