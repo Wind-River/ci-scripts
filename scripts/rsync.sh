@@ -127,10 +127,11 @@ post_rsync() {
              -name '[a-z0-9][a-z0-9]' -exec ln -sfrL {} "$RSYNC_SOURCE_DIR/sstate/." \;
     fi
 
-    if [ -d "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" ]; then
-        echo "Rsyncing RPi4 ostree objects to rsync://${RSYNC_SERVER}/rpi4/"
-        rsync -azv --exclude summary "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo" "rsync://${RSYNC_SERVER}/builds/rpi4/"
-        rsync -azv "$NAME/${TMP_DIR}/deploy/images/bcm-2xxx-rpi4/ostree_repo/summary" "rsync://${RSYNC_SERVER}/builds/rpi4/ostree_repo/"
+    # if there are ostree objects rsync them to the server
+    if [ -d "$NAME/${TMP_DIR}/deploy/images/$MACHINE/ostree_repo" ]; then
+        echo "Rsyncing $MACHINE ostree objects to rsync://${RSYNC_SERVER}/ostree/$MACHINE"
+        rsync -azv --exclude summary "$NAME/${TMP_DIR}/deploy/images/$MACHINE/ostree_repo" "rsync://${RSYNC_SERVER}/builds/ostree/$MACHINE/"
+        rsync -azv "$NAME/${TMP_DIR}/deploy/images/$MACHINE/ostree_repo/summary" "rsync://${RSYNC_SERVER}/builds/ostree/$MACHINE/ostree_repo/"
     fi
 
     # Initial rsync copies symlinks to destination
