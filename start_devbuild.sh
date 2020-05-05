@@ -462,11 +462,11 @@ main()
     done
 
     if [ "${#PUSH_LAYERS[@]}" -eq 0 ]; then
-        echo "No local commits on $TOP found."
-        exit 0
+        echo -n "No local commits on $TOP found. Start devbuild anyways? [N/y]"
+    else
+        echo -n "Stage the above commits on lxgit and start devbuilds? [N/y] "
     fi
 
-    echo -n "Stage the above commits on lxgit and start devbuilds? [N/y] "
     read -r ans
     if [ "x$ans" != "xy" ] && [ "x$ans" != "xY" ] ; then
         exit 1
