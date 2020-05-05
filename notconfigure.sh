@@ -46,7 +46,7 @@ DEBUGINFO_SPLIT=
 ALLOW_BSP_PKGS=
 TEST_IMAGE=no
 OE_TEST=no
-TEST_SUITES=
+OE_TEST_SUITES=
 BB_NO_NETWORK=
 PREMIRROR_PATH=
 DL_DIR=
@@ -54,6 +54,7 @@ MACHINE=
 SHARED_SSTATE_DIR=
 WRTEMPLATE=
 IMAGE_FEATURES=
+GPG_PATH='/tmp/gnupg'
 
 for i in "$@"
 do
@@ -86,6 +87,7 @@ do
         --enable-shared-sstate=*) SHARED_SSTATE_DIR="${i#*=}" ;;
         --wrtemplate=*)         WRTEMPLATE="${i#*=}" ;;
         --image_features=*)     IMAGE_FEATURES="${i#*=}" ;;
+        --gpg_path=*)           GPG_PATH="${i#*=}" ;;
         *)                      ;;
     esac
     shift
@@ -321,6 +323,13 @@ process_comma_sep_list(){
 
     if [ -n "$IMAGE_FEATURES" ]; then
         process_comma_sep_list "$IMAGE_FEATURES" IMAGE_FEATURES
+    fi
+
+    # Force setting GPG_PATH to avoid GPG_PATH too long errors. Note
+    # that since each build is in a container with tmpfs mounted at
+    # /tmp there is no chance for multiple builds to conflict
+    if [ -n "$GPG_PATH" ]; then
+        echo "GPG_PATH = \"$GPG_PATH\""
     fi
 } >> "$LOCALCONF"
 
