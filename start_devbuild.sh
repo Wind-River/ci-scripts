@@ -608,6 +608,8 @@ main()
              --data-urlencode "$LOCALCONF_UPLOAD" \
              "$SERVER/jenkins/job/devbuilds/job/devbuild/buildWithParameters?$PARAMS"
 
+        # Console output is tricky and if it fails with -u then there isn't any output
+        set +u
         local QUEUE=
         # the headers have a line feed character embedded in it
         QUEUE=$(grep Location: "$KEYS/headers" | awk '{print $2}' | tr -d '\r')
@@ -644,7 +646,7 @@ main()
                 break
             elif [[ "$i" == 12 ]]; then
                 echo "DevBuild job was not created or failed!"
-                exit -1
+                exit 1
             else
                 echo "Submitting build jobs have not been done, wait for 10 seconds ..."
                 sleep 10
@@ -656,13 +658,12 @@ main()
             local START_SECOND=$(date '+%s')
             local START_TIME=$(date '+%Y-%m-%d %H:%M:%S')
             local MATCHES=
-            local POSTPROCESS_ARGS=()
+            local POSTPROCESS_ARGS=
             local ARGS=()
             local ARG=
 
             # get POSTPROCESS_ARGS from DevBuild console log, such as HTTP_ROOT, RSYNC_DEST_DIR
-            MATCHES=$(echo "$DEVBUILD_CONSOLE_LOG" | grep "POSTPROCESS_ARGS: " | sed "s/POSTPROCESS_ARGS: //g")
-            POSTPROCESS_ARGS=($MATCHES[0])
+            POSTPROCESS_ARGS=$(echo "$DEVBUILD_CONSOLE_LOG" | grep "POSTPROCESS_ARGS: " | sed "s/POSTPROCESS_ARGS: //g" | head -n1)
             ARGS=(${POSTPROCESS_ARGS//,/ })
             for ARG in "${ARGS[@]}"
             do
@@ -672,8 +673,7 @@ main()
             done
 
             # get build names within this DevBuild
-            MATCHES=$(echo "$DEVBUILD_CONSOLE_LOG" | grep "NAME: " | sed "s/NAME: //g")
-            local NAMES=($MATCHES)
+            local NAMES=( $(echo "$DEVBUILD_CONSOLE_LOG" | grep "NAME: " | sed "s/NAME: //g") )
             local NUMBER_OF_BUILDS=${#NAMES[@]}
 
             # get WRLinux_Build id of each build name

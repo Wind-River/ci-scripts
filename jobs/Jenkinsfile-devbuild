@@ -190,7 +190,7 @@ node('!docker') {
       for ( distro in distros ) {
         for ( machine in machines ) {
           def param = defaults.clone()
-          param['NAME'] = "${name}_${distro}_${machine}"
+          param['NAME'] = "${name}_${distro}_${machine}_${build_group_id}"
           param['DISTRO'] = distro
           param['MACHINE'] = machine
           param['PREBUILD_CMD'] = 'build_configure.sh  --enable-bootimage=ext4 --enable-shared-sstate=wrl1019_sstate_cache'
@@ -227,7 +227,7 @@ node('!docker') {
         for ( machine in machines ) {
           def param = defaults.clone()
           def distro = 'wrlinux-graphics'
-          param['NAME'] = "${name}_${distro}_${machine}_sdk"
+          param['NAME'] = "${name}_${distro}_${machine}_${build_group_id}_sdk"
           param['DISTRO'] = distro
           param['MACHINE'] = machine
           param['SDKMACHINE'] = devbuild.sdkmachine
@@ -242,7 +242,7 @@ node('!docker') {
         for ( machine in machines ) {
           def param = defaults.clone()
           def distro = 'wrlinux-graphics'
-          param['NAME'] = "${name}_${distro}_${machine}_sdkext"
+          param['NAME'] = "${name}_${distro}_${machine}_${build_group_id}_sdkext"
           param['DISTRO'] = distro
           param['MACHINE'] = machine
           param['SDKMACHINE'] = devbuild.sdkmachine
