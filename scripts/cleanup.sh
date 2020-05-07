@@ -38,10 +38,22 @@ cleanup() {
     fi
 
     echo "Removing old build directories"
-    find /home/jenkins/workspace/WRLinux_Build*/builds -maxdepth 1 -type d -name 'builds-*' -ctime +3 -exec rm -rf {} \;
 
-    echo "Removing sstate files that have not been accessed in three days"
-    find /home/jenkins/workspace/*_sstate_cache -atime +3 -delete
+    #default threshold: 200G df uses 1Kb blocks so 1024 * 1024 * 200
+    local DISK_THRESHOLD=209715200
+    local REMAINING_DISK=
+
+    local DAYS=
+    for DAYS in 3 2 1 0; do
+        REMAINING_DISK=$(get_remaining_disk_space /home/jenkins/workspace)
+        if [ "$REMAINING_DISK" -lt "$DISK_THRESHOLD" ]; then
+            echo "Removing build areas older than $DAYS days"
+            find /home/jenkins/workspace/WRLinux_Build*/builds -maxdepth 1 -type d -name 'builds-*' -ctime +"$DAYS" -exec rm -rf {} \;
+        fi
+
+        echo "Removing sstate files that have not been accessed in $DAYS days"
+        find /home/jenkins/workspace/*_sstate_cache -atime +"$DAYS" -delete
+    done
 }
 
 cleanup "$@"

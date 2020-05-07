@@ -683,3 +683,7 @@ function convert_to_json() {
     done
     printf '  "eof": ""\n}\n'
 }
+
+function get_remaining_disk_space() {
+    df -P "${1:-/}" | grep -v Filesystem | awk '{print $4}'
+}
