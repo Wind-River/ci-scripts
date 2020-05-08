@@ -79,7 +79,7 @@ Build Customization Options:
         - wr-docker-registry:5000/opensuse151_64
         - wr-docker-registry:5000/ubuntu1604_64_py3
         - wr-docker-registry:5000/ubuntu1804_64
-       Default: windriver/ubuntu1604_64
+       Default: windriver/ubuntu1804_64
 
    --disable-test
 

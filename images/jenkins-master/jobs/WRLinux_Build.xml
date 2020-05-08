@@ -59,7 +59,7 @@
         <hudson.model.StringParameterDefinition>
           <name>IMAGE</name>
           <description>The docker image to run the build inside</description>
-          <defaultValue>ubuntu1604_64</defaultValue>
+          <defaultValue>ubuntu1804_64</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>REGISTRY</name>

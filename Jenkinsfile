@@ -96,7 +96,7 @@ node('docker') {
     }
 
     String cmd="${WORKSPACE}/ci-scripts/wrlinux_update.sh ${BRANCH}"
-    docker_run("${docker_params}", "${REGISTRY}/ubuntu1604_64", "${cmd}")
+    docker_run("${docker_params}", "${REGISTRY}/ubuntu1804_64", "${cmd}")
 
     // cleanup credentials
     if (params.GIT_CREDENTIAL == "enable") {

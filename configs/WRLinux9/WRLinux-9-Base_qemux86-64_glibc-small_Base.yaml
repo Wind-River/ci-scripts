@@ -89,8 +89,8 @@ layerindex_overrides:
 
 build:
   # The Docker image used for the build.
-  # Default: ubuntu1604_64.
-  image: ubuntu1604_64
+  # Default: ubuntu1804_64.
+  image: ubuntu1804_64
   # Name of file that contains valid build configurations.
   build_configs_file: configs/WRLinux9/combos-WRLINUX_9_BASE.yaml
   # Override the branch defined in the combos file.

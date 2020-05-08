@@ -12,7 +12,7 @@ node(params.BUILDER) {
         // This docker image is only used to run the setup_workspace_login script
         // It only needs to have /home/wrlbuild with the same owner as host /home/wrlbuild
         // in order to get access to host /home/wrlbuild/.ssh/ directory
-        image = "windriver/ubuntu1604_64"
+        image = "windriver/ubuntu1804_64"
 
         echo "Setup login for build ${BUILD_DIR} on ${NODE_NAME}"
         sh "docker run ${docker_params} ${image} ${WORKSPACE}/ci-scripts/setup_workspace_login.sh ${IMAGE_TYPE}"

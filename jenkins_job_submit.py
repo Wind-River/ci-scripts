@@ -70,7 +70,7 @@ def create_parser():
                     help='Name of file that contains run-time test configurations.')
 
     op.add_argument("--image", dest="image", required=False,
-                    help="The Docker image used for the build. \nDefault: ubuntu1604_64.")
+                    help="The Docker image used for the build. \nDefault: ubuntu1804_64.")
 
     op.add_argument("--registry", dest="registry", required=False,
                     help="The Docker registry to pull images from. \nDefault: windriver.")

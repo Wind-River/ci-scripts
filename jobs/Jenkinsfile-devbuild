@@ -163,7 +163,7 @@ node('!docker') {
       defaults['BUILD_CMD_FOR_TEST'] = ''
 
       defaults['REGISTRY'] = 'windriver'
-      defaults['IMAGE'] = 'ubuntu1604_64'
+      defaults['IMAGE'] = 'ubuntu1804_64'
       if ( devbuild.build_image ) {
         defaults['IMAGE'] = devbuild.build_image
       }

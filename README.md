@@ -390,7 +390,7 @@ The CI prototype uses the following images:
 
 - windriver/jenkins-master
 - windriver/jenkins-swarm-client
-- windriver/ubuntu1604_64
+- windriver/ubuntu1804_64
 - windriver/toaster_aggregator
 - blacklabelops/nginx
 - gliderlabs/registrator

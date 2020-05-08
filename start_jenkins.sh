@@ -91,7 +91,7 @@ Usage $0 [--registry] [--file] [--rm] [--with-lava]
   --jenkins-master-num-executors: Number of executors to run on the Jenkins Master.
     Default: 0
 
-  --builder-tag: Set the tag for the ubuntu1604_64 builder image
+  --builder-tag: Set the tag for the ubuntu1804_64 builder image
     Defaults to latest
 
   --consul-tag: Set the tag for the consul image
@@ -182,7 +182,7 @@ if [ "$PULL_IMAGES" == '1' ]; then
     echo "Pull latest docker images from Docker Hub"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-master:${JENKINS_MASTER_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/jenkins-swarm-client:${JENKINS_AGENT_TAG}"
-    ${DOCKER_CMD[*]} pull "${REGISTRY}/ubuntu1604_64:${BUILDER_TAG}"
+    ${DOCKER_CMD[*]} pull "${REGISTRY}/ubuntu1804_64:${BUILDER_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/postbuild:${POSTBUILD_TAG}"
     ${DOCKER_CMD[*]} pull "${REGISTRY}/toaster_aggregator:${TOASTER_TAG}"
     ${DOCKER_CMD[*]} pull "consul:${CONSUL_TAG}"

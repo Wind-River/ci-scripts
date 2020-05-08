@@ -7,14 +7,13 @@ machines:
 images:
 - wrlinux-image-glibc-core
 recipes:
-sdk: no
-sdk_ext: no
-sdk_machine: x86_64
-build_image:
-test: enable
+sdk: true
+sdk_ext: false
+sdkmachine: x86_64
+build_image: 
 repos:
 - dir: layers/meta-virtualization
   repo: git://ala-lxgit.wrs.com/wrpush/kscherer/meta-virtualization
-  branch: pull-meta-virtualization-devbuild-20190531-1519-YVDt7oujhC
+  branch: pull-meta-virtualization-devbuild-20190620-1632-PeR9joi9DM
   layers:
     - meta-virtualization
