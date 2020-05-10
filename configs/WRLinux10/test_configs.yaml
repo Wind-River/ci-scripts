@@ -21,7 +21,7 @@
     timeout: 420
   x86-x58-ich10_simics:
     job_template: lava-test/jobs/templates/wrlinux-10/x86-x58-ich10_simics_job_oeqa-default-test_template.yaml
-    timeout: 600
+    timeout: 900
   purley_simics:
     job_template: lava-test/jobs/templates/wrlinux-10/purley_simics_job_oeqa-default-test_template.yaml
     timeout: 600
