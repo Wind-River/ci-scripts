@@ -1,7 +1,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-x86-64_wrlinux-image-glibc-std
+  name: intel-x86-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -14,7 +14,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-x86-32_wrlinux-image-glibc-std
+  name: intel-x86-32_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -27,7 +27,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-corei7-64_wrlinux-image-glibc-std
+  name: intel-corei7-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --kernel-type=linux-yocto-rt
@@ -44,7 +44,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-core2-32_wrlinux-image-glibc-std
+  name: intel-core2-32_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --kernel-type=linux-yocto-rt
@@ -60,7 +60,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: genericx86_wrlinux-image-glibc-std
+  name: genericx86_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --kernel-type=linux-yocto-dev
@@ -74,7 +74,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: genericx86-64_wrlinux-image-glibc-std
+  name: genericx86-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --kernel-type=linux-yocto-dev
@@ -88,7 +88,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-haswell-64_wrlinux-image-glibc-std
+  name: intel-haswell-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -100,7 +100,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-skylake-64_wrlinux-image-glibc-std
+  name: intel-skylake-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -113,7 +113,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-skylake-avx512-32_wrlinux-image-glibc-std
+  name: intel-skylake-avx512-32_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -125,7 +125,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: intel-skylake-avx512-64_wrlinux-image-glibc-std
+  name: intel-skylake-avx512-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -137,7 +137,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: nxp-imx7_wrlinux-image-glibc-std
+  name: nxp-imx7_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -149,8 +149,8 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-glibc-std'
-  name: nxp-ls20xx_wrlinux-image-glibc-std
+  - 'bitbake wrlinux-image-std'
+  name: nxp-ls20xx_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -162,7 +162,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: nxp-ls10xx_wrlinux-image-glibc-std
+  name: nxp-ls10xx_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -175,7 +175,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: xilinx-zynqmp_wrlinux-image-glibc-std
+  name: xilinx-zynqmp_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -236,7 +236,7 @@
   - 'bitbake-layers add-layer ../layers/wrlinux/wrlinux-kernel-dev;'
   - 'echo "WRTEMPLATE_append = \" feature/kernel-dev\"" >> conf/local.conf;'
   - 'bitbake wrlinux-image-std'
-  name: bcm-2xxx-rpi4_ltp_wrlinux-image-glibc-std
+  name: bcm-2xxx-rpi4_ltp_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -250,7 +250,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemuarma9_wrlinux-image-glibc-std
+  name: qemuarma9_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -262,7 +262,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemuarm64_wrlinux-image-glibc-std
+  name: qemuarm64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -274,7 +274,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemuarm_wrlinux-image-glibc-std
+  name: qemuarm_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -286,7 +286,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemuarmv5_wrlinux-image-glibc-std
+  name: qemuarmv5_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -298,7 +298,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemux86_wrlinux-image-glibc-std
+  name: qemux86_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -311,7 +311,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemux86-64_wrlinux-image-glibc-std
+  name: qemux86-64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -324,7 +324,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std-sato'
-  name: qemux86-64_wrlinux-graphics-image-glibc-std-sato
+  name: qemux86-64_wrlinux-graphics-image-std-sato
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -337,7 +337,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std-sato'
-  name: qemux86_wrlinux-graphics-image-glibc-std-sato
+  name: qemux86_wrlinux-graphics-image-std-sato
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -350,7 +350,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std-sato'
-  name: qemuarm_wrlinux-graphics-image-glibc-std-sato
+  name: qemuarm_wrlinux-graphics-image-std-sato
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -363,7 +363,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std-sato'
-  name: qemuarm64_wrlinux-graphics-image-glibc-std-sato
+  name: qemuarm64_wrlinux-graphics-image-std-sato
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -376,7 +376,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std-sato'
-  name: qemuppc_wrlinux-graphics-image-glibc-std-sato
+  name: qemuppc_wrlinux-graphics-image-std-sato
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -389,7 +389,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std-sato'
-  name: qemumips64_wrlinux-graphics-image-glibc-std-sato
+  name: qemumips64_wrlinux-graphics-image-std-sato
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -401,8 +401,8 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-glibc-cgl'
-  name: qemux86-64_wrlinux-image-glibc-cgl
+  - 'bitbake wrlinux-image-cgl'
+  name: qemux86-64_wrlinux-image-cgl
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -416,7 +416,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemuppc_wrlinux-image-glibc-std
+  name: qemuppc_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -429,7 +429,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemumips64_wrlinux-image-glibc-std
+  name: qemumips64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -442,7 +442,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemumips_wrlinux-image-glibc-std
+  name: qemumips_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -455,7 +455,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: mpc8315e-rdb_wrlinux-image-glibc-std
+  name: mpc8315e-rdb_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -468,7 +468,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: beaglebone-yocto_wrlinux-image-glibc-std
+  name: beaglebone-yocto_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -482,7 +482,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: edgerouter_wrlinux-image-glibc-std
+  name: edgerouter_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -494,7 +494,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: ti-am335x_wrlinux-image-glibc-std
+  name: ti-am335x_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -505,8 +505,8 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-glibc-std'
-  name: marvell-cn96xx_wrlinux-image-glibc-std
+  - 'bitbake wrlinux-image-std'
+  name: marvell-cn96xx_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -535,8 +535,8 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-glibc-std'
-  name: xilinx-zynq_wrlinux-image-glibc-std
+  - 'bitbake wrlinux-image-std'
+  name: xilinx-zynq_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -547,8 +547,8 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-glibc-std'
-  name: renesas-rcar-m3_wrlinux-image-glibc-std
+  - 'bitbake wrlinux-image-std'
+  name: renesas-rcar-m3_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -561,8 +561,8 @@
 
 - branch: master-wr
   build:
-  - 'bitbake wrlinux-image-glibc-std'
-  name: renesas-rcar-h3_wrlinux-image-glibc-std
+  - 'bitbake wrlinux-image-std'
+  name: renesas-rcar-h3_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -574,7 +574,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: bcm-2xxx-rpi4_wrlinux-image-glibc-std
+  name: bcm-2xxx-rpi4_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
@@ -588,7 +588,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: qemuriscv64_wrlinux-image-glibc-std
+  name: qemuriscv64_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-bootimage=ext4
@@ -600,7 +600,7 @@
 - branch: master-wr
   build:
   - 'bitbake wrlinux-image-std'
-  name: ti-am65x_wrlinux-image-glibc-std
+  name: ti-am65x_wrlinux-image-std
   prebuild:
   - build_configure.sh
   - --enable-shared-sstate=wrl1020_sstate_cache
