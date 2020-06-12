@@ -46,8 +46,8 @@
   nxp_ls2088ardb_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls2088ardb_job_oeqa-default-test_template.yaml
     timeout: 600
-  nxp_imx7_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_oeqa-default-test_template.yaml
+  nxp_imx7_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   mpc8315_rdb_device:
     job_template: lava-test/jobs/templates/wrlinux-10/mpc8315_rdb_job_oeqa-default-test_template.yaml
@@ -79,8 +79,8 @@
   edgerouter_device:
     job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-default-test_template.yaml
     timeout: 600
-  marvell-cn96xx_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_oeqa-default-test_template.yaml
+  marvell-cn96xx_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   xilinx-zc702_device:
     job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_oeqa-default-test_template.yaml
@@ -88,8 +88,8 @@
   renesas-rcar-m3_device:
     job_template: lava-test/jobs/templates/wrlinux-10/renesas-rcar-m3_job_oeqa-default-test_template.yaml
     timeout: 600
-  renesas-rcar-h3_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/renesas-rcar-h3_job_oeqa-default-test_template.yaml
+  renesas-rcar-h3_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/renesas-rcar-h3_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   intel-socfpga_novlm_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel-socfpga_job_oeqa-default-novlm_test_template.yaml
@@ -210,8 +210,8 @@
   xilinx-zc702_device:
     job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_ltp-basic-test_template.yaml
     timeout: 3600
-  marvell-cn96xx_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_ltp-basic-test_template.yaml
+  marvell-cn96xx_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_ltp-basic-novlm_test_template.yaml
     timeout: 3600
 
 - name: oeqa-ptest
