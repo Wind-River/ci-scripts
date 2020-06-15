@@ -43,8 +43,8 @@
   intel_haswell_device:
     job_template: lava-test/jobs/templates/wrlinux-10/intel_haswell_job_oeqa-default-test_template.yaml
     timeout: 600
-  nxp_ls2088ardb_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls2088ardb_job_oeqa-default-test_template.yaml
+  nxp_ls2088ardb_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_ls2088ardb_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   nxp_imx7_novlm_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_imx7_job_oeqa-default-novlm_test_template.yaml
@@ -76,14 +76,14 @@
   xilinx_zynqmp_device:
     job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_oeqa-default-test_template.yaml
     timeout: 600
-  edgerouter_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-default-test_template.yaml
+  edgerouter_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   marvell-cn96xx_novlm_device:
     job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
-  xilinx-zc702_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_oeqa-default-test_template.yaml
+  xilinx-zc702_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_oeqa-default-novlm_test_template.yaml
     timeout: 600
   renesas-rcar-m3_device:
     job_template: lava-test/jobs/templates/wrlinux-10/renesas-rcar-m3_job_oeqa-default-test_template.yaml
@@ -158,8 +158,8 @@
   mxe5400-qemu-mips64:
     job_template: lava-test/jobs/templates/wrlinux-10/mips64_qemu_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100
-  edgerouter_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-auto-qemuall-test_template.yaml
+  edgerouter_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/edgerouter_job_oeqa-auto-qemuall-novlm_test_template.yaml
     timeout: 2100
   qemu-arm:
     job_template: lava-test/jobs/templates/wrlinux-10/arm_qemu_job_oeqa-auto-qemuall-test_template.yaml
@@ -207,8 +207,8 @@
   qemu-arm64:
     job_template: lava-test/jobs/templates/wrlinux-10/arm64_qemu_job_ltp-basic-test_template.yaml
     timeout: 3600
-  xilinx-zc702_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_ltp-basic-test_template.yaml
+  xilinx-zc702_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx-zc702_job_ltp-basic-novlm_test_template.yaml
     timeout: 3600
   marvell-cn96xx_novlm_device:
     job_template: lava-test/jobs/templates/wrlinux-10/marvell-cn96xx_job_ltp-basic-novlm_test_template.yaml
