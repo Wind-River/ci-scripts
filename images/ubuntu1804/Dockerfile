@@ -43,7 +43,8 @@ RUN dpkg --add-architecture i386 && \
     chmod +x /bin/dumb-init
 
 # Add wrlbuild user and hack to bypass missing iptables program
-RUN useradd --home-dir /home/wrlbuild --uid 1000 --gid 100 --shell /bin/bash wrlbuild && \
+RUN useradd --home-dir /home/wrlbuild --uid 1000 --gid 100 --create-home --shell /bin/bash wrlbuild && \
+    && echo "wrlbuild ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
     echo '#!/bin/sh' > /tmp/iptables && echo 'exit 0' >> /tmp/iptables && chmod +x /tmp/iptables && \
     mv /tmp/iptables /sbin/iptables
 
