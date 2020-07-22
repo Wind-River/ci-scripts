@@ -54,6 +54,11 @@ RUN mkdir /license-report && \
     sh generate_report.sh > report && \
     rm /license-report/generate_report.sh
 
+# Install MinIO
+RUN wget https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/bin/mc && \
+    chmod +x /usr/bin/mc && \
+    /usr/bin/mc --help
+
 ENTRYPOINT ["/bin/dumb-init"]
 
 CMD ["/bin/bash"]
