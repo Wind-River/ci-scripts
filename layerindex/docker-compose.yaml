@@ -46,6 +46,7 @@ services:
       - /tmp:exec
     volumes:
       - layers_cache:/opt/layers
+      - /etc/timezone:/etc/timezone:ro
 
   mariadb:
     image: mariadb
@@ -65,6 +66,8 @@ services:
       timeout: 2s
       retries: 3
       start_period: 2m
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
 
   rabbit:
     hostname: rabbit
