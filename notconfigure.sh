@@ -198,6 +198,9 @@ process_comma_sep_list(){
 }
 
 {
+    # Fix the issue https://jira.wrs.com/browse/LINCD-3115
+    echo ""
+
     if [ -n "$KERNEL_TYPE" ]; then
         echo "PREFERRED_PROVIDER_virtual/kernel = \"$KERNEL_TYPE\""
     fi
