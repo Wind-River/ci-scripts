@@ -609,3 +609,28 @@
   - --machine=ti-am65x
   - --dl-layers
 
+- branch: master-wr
+  build:
+  - 'echo "PACKAGE_FEED_URIS = \"https://distro.windriver.com/release/wrlinux/linux-cd/base\"" >> conf/local.conf;'
+  - '../layers/wrlinux/scripts/gen-image/gen-image -m intel-x86-64;'
+  - '../layers/wrlinux/scripts/gen-image/gen-image -u rsync://ala-lpdfs01/builds/wrl_cd_bintest/'
+  name: intel-x86-64_binary_build
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --all-layers
+  - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'echo "PACKAGE_FEED_URIS = \"https://distro.windriver.com/release/wrlinux/linux-cd/base\"" >> conf/local.conf;'
+  - '../layers/wrlinux/scripts/gen-image/gen-image -m bcm-2xxx-rpi4;'
+  - '../layers/wrlinux/scripts/gen-image/gen-image -u rsync://ala-lpdfs01/builds/wrl_cd_bintest/'
+  name: bcm-2xxx-rpi4_binary_build
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --all-layers
+  - --dl-layers
