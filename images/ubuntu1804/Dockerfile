@@ -30,7 +30,8 @@ RUN dpkg --add-architecture i386 && \
     texinfo gawk gcc gcc-multilib help2man g++ git-core python-gtk2 bash cpio \
     python python3 python3-pip python3-pexpect debianutils iputils-ping locales \
     diffutils xz-utils make file screen sudo wget time patch openssh-client curl \
-    openssl ca-certificates iproute2 iputils-ping python3-yaml repo vim-nox && \
+    openssl ca-certificates iproute2 iputils-ping python3-yaml repo vim-nox \
+    uuid-runtime rsync && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/man && \
