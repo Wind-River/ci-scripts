@@ -352,6 +352,20 @@
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_cgl-vrf-test_template.yaml
     timeout: 1800
 
+- name: binary-image-test
+  prebuild_cmd_for_test:
+  - test_configure.py
+  build_cmd_for_test:
+  build_options:
+  - IMAGE_INSTALL_append += "expect"
+  lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
+  xilinx_zynqmp_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_binary-image-test_template.yaml
+    timeout: 3600
+  x86_64_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_ltp-binary-image-test_template.yaml
+    timeout: 3600
+
 - name: linaro-smoke-test
   prebuild_cmd_for_test:
   - test_configure.py
