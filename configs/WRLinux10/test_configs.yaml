@@ -359,11 +359,11 @@
   build_options:
   - IMAGE_INSTALL_append += "expect"
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
-  xilinx_zynqmp_device:
-    job_template: lava-test/jobs/templates/wrlinux-10/xilinx_zynqmp_job_binary-image-test_template.yaml
-    timeout: 1800
   mxe5400-qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_binary-image-test_template.yaml
+    timeout: 1800
+  qemu-arm64:
+    job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-arm64_qemu_job_binary-image-test_template.yaml
     timeout: 1800
 
 - name: linaro-smoke-test
