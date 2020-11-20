@@ -12,7 +12,7 @@ Create a WRLinux project. The example will be a WRL10 project:
 The recommended method of creating local patches is to use `repo
 start`. Here is an example when the repo contains a single layer:
 
-    > ./wrlinux-x/bin/repo start devbuild layers/meta-dpdk
+    > ./.repo/repo/repo start devbuild layers/meta-dpdk
     > cd layers/meta-dpdk
     > git branch
       * devbuild
