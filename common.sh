@@ -598,7 +598,7 @@ create_report_statfile() {
     {
         echo "{"
         echo "  \"build_info\": {"
-        echo "    \"local_date\": \"$(date +%Y-%m-%d)\","
+        echo "    \"local_date\": \"$(TZ='America/New_York' date +%Y-%m-%d)\","
         echo "    \"name\": \"$NAME\","
         if [ -n "$TOOLCHAIN_BRANCH" ]; then
             echo "    \"Toolchain Branch\": \"$TOOLCHAIN_BRANCH\","
