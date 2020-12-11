@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
     echo "This script requires bash version 4+"
