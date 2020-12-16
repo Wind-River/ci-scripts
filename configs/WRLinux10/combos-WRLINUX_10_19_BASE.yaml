@@ -527,3 +527,15 @@
   - --machine=intel-socfpga-64
   - --dl-layers
 
+- branch: WRLINUX_10_19_BASE
+  build:
+  - 'bitbake wrlinux-image-glibc-std'
+  name: nxp-imx8_wrlinux-image-glibc-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1019_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=nxp-imx8
+  - --dl-layers
+
