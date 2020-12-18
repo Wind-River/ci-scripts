@@ -47,12 +47,14 @@ cleanup() {
     for DAYS in 3 2 1 0; do
         REMAINING_DISK=$(get_remaining_disk_space /home/jenkins/workspace)
         if [ "$REMAINING_DISK" -lt "$DISK_THRESHOLD" ]; then
+            echo "Removing sstate files that have not been accessed in $DAYS days"
+            find /home/jenkins/workspace/*_sstate_cache -atime +"$DAYS" -delete
+
             echo "Removing build areas older than $DAYS days"
             find /home/jenkins/workspace/WRLinux_Build*/builds -maxdepth 1 -type d -name 'builds-*' -ctime +"$DAYS" -exec rm -rf {} \;
+        else
+            break
         fi
-
-        echo "Removing sstate files that have not been accessed in $DAYS days"
-        find /home/jenkins/workspace/*_sstate_cache -atime +"$DAYS" -delete
     done
 }
 
