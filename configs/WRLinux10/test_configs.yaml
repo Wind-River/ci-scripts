@@ -153,6 +153,9 @@
   bbb_novlm_device:
     job_template: lava-test/jobs/templates/wrlinux-10/beaglebone_job_oeqa-auto-qemuall-novlm_test_template.yaml
     timeout: 2100
+  qemu-x86_64:
+    job_template: lava-test/jobs/templates/wrlinux-10/x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml
+    timeout: 1800
   mxe5400-qemu-x86_64:
     job_template: lava-test/jobs/templates/wrlinux-10/mxe5400-x86_64_qemu_job_oeqa-auto-qemuall-test_template.yaml
     timeout: 2100

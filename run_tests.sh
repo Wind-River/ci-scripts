@@ -262,6 +262,7 @@ if [[ "$TEST_DEVICE" == *"simics"* ]]; then
 elif [[ "$TEST_DEVICE" == "qemu-x86_64" ]] || [[ "$TEST_DEVICE" == *"novlm"* ]]; then
     sed -i "s@KERNEL_IMG@${FILE_LINK}\/${KERNEL_FILE}@g; \
             s@HDD_IMG@${FILE_LINK}\/${IMAGE_NAME}.hddimg@g; \
+            s@EXT4_IMG@${FILE_LINK}\/${IMAGE_NAME}.ext4@g; \
             s@ROOTFS@${FILE_LINK}\/${IMAGE_NAME}.tar.bz2@g; \
             s@DTB_FILE@${FILE_LINK}\/${DTB_FILE}@g; \
             s@INITRD_IMG@${FILE_LINK}\/${INITRAMFS_NAME}@g" "$TEST_JOB"
