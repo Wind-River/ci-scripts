@@ -103,6 +103,9 @@
   nxp_s32g2xx_device:
     job_template: lava-test/jobs/templates/wrlinux-10/nxp_s32g2xx_job_oeqa-default-test_template.yaml
     timeout: 600
+  nxp_s32g2xx_novlm_device:
+    job_template: lava-test/jobs/templates/wrlinux-10/nxp_s32g2xx_job_oeqa-default-novlm_test_template.yaml
+    timeout: 600
 
 - name: oeqa-auto-qemuall-test
   prebuild_cmd_for_test:
