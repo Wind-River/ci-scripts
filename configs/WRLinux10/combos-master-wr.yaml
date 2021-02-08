@@ -660,3 +660,16 @@
   setup:
   - --all-layers
   - --dl-layers
+
+- branch: master-wr
+  build:
+  - 'bitbake wrlinux-image-std'
+  name: ti-j72xx_wrlinux-image-std
+  prebuild:
+  - build_configure.sh
+  - --enable-shared-sstate=wrl1020_sstate_cache
+  setup:
+  - --distro=wrlinux
+  - --machine=ti-j72xx
+  - --dl-layers
+
