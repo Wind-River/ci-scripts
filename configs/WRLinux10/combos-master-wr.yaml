@@ -637,7 +637,7 @@
   build:
   - 'echo "PACKAGE_FEED_URIS = \"https://distro.windriver.com/release/wrlinux/linux-cd/base\"" >> conf/local.conf;'
   - "sed -i '/SSTATE_DIR/d' ../layers/wrlinux/scripts/gen-image/gen-image;"
-  - '../layers/wrlinux/scripts/gen-image/gen-image -m intel-x86-64;'
+  - '../layers/wrlinux/scripts/gen-image/gen-image -m intel-x86-64 &&'
   - '../layers/wrlinux/scripts/gen-image/gen-image -u rsync://ala-lpdfs01/builds/wrl_cd_bintest/'
   name: intel-x86-64_binary_build
   prebuild:
@@ -651,7 +651,7 @@
   build:
   - 'echo "PACKAGE_FEED_URIS = \"https://distro.windriver.com/release/wrlinux/linux-cd/base\"" >> conf/local.conf;'
   - "sed -i '/SSTATE_DIR/d' ../layers/wrlinux/scripts/gen-image/gen-image;"
-  - '../layers/wrlinux/scripts/gen-image/gen-image -m bcm-2xxx-rpi4;'
+  - '../layers/wrlinux/scripts/gen-image/gen-image -m bcm-2xxx-rpi4 &&'
   - '../layers/wrlinux/scripts/gen-image/gen-image -u rsync://ala-lpdfs01/builds/wrl_cd_bintest/'
   name: bcm-2xxx-rpi4_binary_build
   prebuild:
