@@ -110,6 +110,13 @@ function get_job_status () {
     fi
 }
 
+function containsElement () {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
+
 # Check if lava-tool exists
 command -v lava-tool >/dev/null 2>&1 || { echo >&2 "lava-tool required. Aborting."; exit 0; }
 
@@ -321,6 +328,7 @@ do
 
     # Loop $LAVA_JOB_TIMEOUT seconds to wait test result
     TEST_LOOPS=$((LAVA_JOB_TIMEOUT / 10))
+    KEEP_RUNNING=("Scheduled" "Submitted" "Running")
     for (( c=1; c<="$TEST_LOOPS"; c++ ))
     do
        #ret=$(lava-tool job-status "http://${LAVA_USER}@${LAVA_SERVER}" "${job_id}" |grep 'Job Status: ')
@@ -346,7 +354,7 @@ do
        elif [ "$job_status" == 'Canceled' ]; then
            printf '    "test_job_status": "Canceled",\n' >> "$TEST_STATFILE"
            break;
-       elif [ "$job_status" == 'Submitted' ] || [ "$job_status" == 'Running' ]; then
+       elif containsElement "$job_status" "${KEEP_RUNNING[@]}"; then
            sleep 10
        fi
     done
