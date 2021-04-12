@@ -213,6 +213,7 @@
   - IMAGE_INSTALL_append += "autoconf automake libtool git ltp kernel-devsrc"
   - EXTRA_IMAGE_FEATURES += "tools-sdk tools-debug"
   - WRTEMPLATE_append = " feature/test feature/gdb"
+  - PNWHITELIST_meta-python2 += 'python'
   lava_test_repo: git://ala-lxgit.wrs.com/lpd-ops/lava-test.git
   x86_64_device:
     job_template: lava-test/jobs/templates/wrlinux-10/x86_64_job_ltp-basic-test_template.yaml
