@@ -635,6 +635,7 @@ function get_wrlinux_version() {
         wr-10.19*)         wrlinux_ver=10.19 ;;
         WRLINUX_10_20*)    wrlinux_ver=10.20 ;;
         wr-10.20*)         wrlinux_ver=10.20 ;;
+        wr-10.cd*)         wrlinux_ver=10.2x ;;
         *)                 ;;
     esac
 
